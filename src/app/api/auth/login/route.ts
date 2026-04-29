@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
   if (!res) {
     return NextResponse.json(
       {
-        error: "Cannot reach foodcity-back from this server.",
+        error: "Cannot reach zev-back from this server.",
         code: "API_UNREACHABLE",
         attemptedUrls: urls,
-        hint: "Set API_INTERNAL_URL=http://127.0.0.1:4000 (or your Docker service host) so admin can reach the API without hairpin NAT.",
+        hint: "Set API_INTERNAL_URL=http://127.0.0.1:5000 (or your Docker service host) so admin can reach the API without hairpin NAT.",
       },
       { status: 503 },
     );

@@ -16,12 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BukhBat Admin",
-  description: "Manage BukhBat catalog and orders",
-  icons: {
-    icon: [{ url: `${ADMIN_BASE_PATH}/fclogo.png`, type: "image/png" }],
-    apple: [{ url: `${ADMIN_BASE_PATH}/fclogo.png` }],
-  },
+  title: "Zevtabs Admin",
+  description: "Manage Zevtabs platform content, orders, and settings",
 };
 
 export const viewport = {

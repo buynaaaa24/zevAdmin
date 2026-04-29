@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -40,7 +39,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const { lang, t, toggle } = useAdminLanguage();
   const pathname = pathnameWithoutBase(usePathname());
   const params = useParams();
-  const siteId = (params?.siteId as string) || "zevtaps";
+  const siteId = (params?.siteId as string) || "zevtabs";
 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard, perm: "dashboard" },
@@ -63,14 +62,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   };
 
   const SITES = [
-    { id: "zevtaps", label: "Zevtabs" },
+    { id: "zevtabs", label: "Zevtabs" },
     { id: "parkease", label: "Parkease" },
     { id: "posease", label: "Posease" },
     { id: "amarhome", label: "Amarhome" },
     { id: "rently", label: "Rently" },
   ];
 
-  const title = titles[pathname] ?? "Food City Admin";
+  const title = titles[pathname] ?? "Zevtabs Admin";
   const [navOpen, setNavOpen] = useState(false);
   const [perms, setPerms] = useState<string[]>([]);
   const [who, setWho] = useState<string>("");
@@ -132,17 +131,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="relative flex min-h-17 items-center justify-center border-b border-zinc-200 px-12 py-3 dark:border-zinc-800 lg:px-3">
           <Link
             href="/dashboard"
-            className="flex max-w-full items-center justify-center rounded-md px-2 py-1 outline-offset-2 focus-visible:outline-2 focus-visible:outline-emerald-600"
+            className="flex max-w-full items-center justify-center gap-2.5 rounded-md px-2 py-1 outline-offset-2 focus-visible:outline-2 focus-visible:outline-blue-600"
             onClick={() => setNavOpen(false)}
           >
-            <Image
-              src={`${ADMIN_BASE_PATH}/fclogo.png`}
-              alt="Food City"
-              width={240}
-              height={84}
-              className="h-14 w-auto max-w-[min(100%,220px)] object-contain sm:h-16 sm:max-w-[min(100%,240px)]"
-              priority
-            />
+            <img src="/logo.png" alt="Zevtabs" className="w-8 h-8 object-contain shrink-0" />
+            <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Zevtabs Admin</span>
           </Link>
           <button
             type="button"

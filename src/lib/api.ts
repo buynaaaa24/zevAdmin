@@ -34,7 +34,7 @@ export function joinBackendRequestUrl(base: string, apiPath: string): string {
 }
 
 /**
- * Server-side only: optional direct URL to foodcity-back (Docker / loopback).
+ * Server-side only: optional direct URL to zev-back (Docker / loopback).
  * Does not read `API_URL` — that name is too generic on many hosts and breaks login.
  */
 export function getServerApiBaseUrl(): string {
@@ -47,30 +47,16 @@ export function getServerApiBaseUrl(): string {
 
 /**
  * URLs to try from the admin Node process (RSC / Route Handlers). Public hostname often
- * fails from the same machine (hairpin NAT); second entry hits foodcity-back on loopback.
+ * fails from the same machine (hairpin NAT); second entry hits zev-back on loopback.
  * `apiPath` must start with `/api/v1/...`.
  */
 export function getBackendUpstreamUrlCandidates(apiPath: string): string[] {
   const primary = joinBackendRequestUrl(getServerApiBaseUrl(), apiPath);
-  const urls: string[] = [primary];
-  const hasDedicated =
-    Boolean(process.env.API_INTERNAL_URL?.trim()) ||
-    Boolean(process.env.SERVER_API_URL?.trim());
-  if (hasDedicated) return urls;
-  try {
-    const u = new URL(primary);
-    if (u.hostname !== "127.0.0.1" && u.hostname !== "localhost") {
-      const port = (process.env.FOODCITY_API_PORT || "4000").trim();
-      urls.push(joinBackendRequestUrl(`http://127.0.0.1:${port}`, apiPath));
-    }
-  } catch {
-    /* ignore */
-  }
-  return urls;
+  return [primary];
 }
 
 /**
- * Public foodcity-front origin (no trailing slash). Used in admin for previews of
+ * Public zev-front origin (no trailing slash). Used in admin for previews of
  * site-relative paths like `/images/…` that are served by the front app, not this admin host.
  */
 export function getPublicFrontOrigin(): string {
@@ -79,7 +65,7 @@ export function getPublicFrontOrigin(): string {
     .replace(/\/$/, "");
 }
 
-/** See foodcity-front `getSocketBaseUrl` — Socket.io is not under `/api`. */
+/** See zev-front `getSocketBaseUrl` — Socket.io is not under `/api`. */
 export function getSocketBaseUrl(): string {
   let u = getApiBaseUrl();
   if (u.endsWith("/api")) {
