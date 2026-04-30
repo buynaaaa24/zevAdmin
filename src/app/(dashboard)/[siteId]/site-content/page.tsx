@@ -142,6 +142,14 @@ type AmarHomeState = {
   hardware: { title: string; items: { name: string; desc: string; label: string; image?: string }[] };
   pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
 };
+type RentlyState = {
+  hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
+  features: { title: string; desc: string; items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[] };
+  notifications: { title: string; desc: string };
+  penalties: { title: string; desc: string };
+  costs: { title: string; desc: string };
+  pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
+};
 
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
@@ -153,6 +161,14 @@ const EMPTY_AMARHOME: AmarHomeState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "" },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
+  pricing: { title: "", tiers: [] },
+};
+const EMPTY_RENTLY: RentlyState = {
+  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
+  features: { title: "", desc: "", items: [] },
+  notifications: { title: "", desc: "" },
+  penalties: { title: "", desc: "" },
+  costs: { title: "", desc: "" },
   pricing: { title: "", tiers: [] },
 };
 
@@ -360,6 +376,36 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
     },
   };
 }
+import { defaultRentlySections } from "@/lib/siteContentDefaults";
+
+function normalizeRently(val: Record<string, unknown>): RentlyState {
+  if (Object.keys(val).length === 0) {
+    return defaultRentlySections as RentlyState;
+  }
+  const hero = asRecord(val.hero);
+  const features = asRecord(val.features);
+  const notifications = asRecord(val.notifications);
+  const penalties = asRecord(val.penalties);
+  const costs = asRecord(val.costs);
+  const pricing = asRecord(val.pricing);
+
+  return {
+    hero: { ...EMPTY_RENTLY.hero, ...hero },
+    features: {
+      ...EMPTY_RENTLY.features,
+      ...features,
+      items: Array.isArray(features.items) ? (features.items as any) : [],
+    },
+    notifications: { ...EMPTY_RENTLY.notifications, ...notifications },
+    penalties: { ...EMPTY_RENTLY.penalties, ...penalties },
+    costs: { ...EMPTY_RENTLY.costs, ...costs },
+    pricing: {
+      ...EMPTY_RENTLY.pricing,
+      ...pricing,
+      tiers: Array.isArray(pricing.tiers) ? (pricing.tiers as any) : [],
+    },
+  };
+}
 
 async function fetchSections(pageId: string, lang: string, siteId: string): Promise<Record<string, unknown>> {
   const res = await fetch(
@@ -428,6 +474,12 @@ export function useTabs(siteId: string) {
       hint: "AmarHome бүтээгдэхүүний нүүр хуудасны агуулга",
       icon: Newspaper,
     },
+    {
+      id: "rently" as const,
+      label: "Rently",
+      hint: "Rently бүтээгдэхүүний нүүр хуудасны агуулга",
+      icon: Building2,
+    },
   ];
 
   if (siteId === "posease") {
@@ -436,17 +488,22 @@ export function useTabs(siteId: string) {
   if (siteId === "amarhome") {
     return tabs.filter((t) => t.id === "amarhome" || t.id === "footer");
   }
-  return tabs.filter((t) => t.id !== "posease" && t.id !== "amarhome");
+  if (siteId === "rently") {
+    return tabs.filter((t) => t.id === "rently" || t.id === "footer");
+  }
+  return tabs.filter((t) => t.id !== "posease" && t.id !== "amarhome" && t.id !== "rently");
 }
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease" | "amarhome";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease" | "amarhome" | "rently";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
   const params = useParams();
   const siteId = (params?.siteId as string) || "zevtaps";
   const TABS = useTabs(siteId);
-  const [tab, setTab] = useState<TabId>(siteId === "posease" ? "posease" : "home");
+  const [tab, setTab] = useState<TabId>(
+    siteId === "posease" ? "posease" : siteId === "amarhome" ? "amarhome" : siteId === "rently" ? "rently" : "home"
+  );
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -465,12 +522,13 @@ export default function SiteContentPage() {
   const [teamPage, setTeamPage] = useState<TeamPageState>(EMPTY_TEAM_PAGE);
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
   const [amarHome, setAmarHome] = useState<AmarHomeState>(EMPTY_AMARHOME);
+  const [rently, setRently] = useState<RentlyState>(EMPTY_RENTLY);
 
   const load = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pe, ah] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pe, ah, rl] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -482,6 +540,7 @@ export default function SiteContentPage() {
         fetchSections("footer", lang, siteId),
         fetchSections("posease", lang, siteId),
         fetchSections("amarhome", lang, siteId),
+        fetchSections("rently", lang, siteId),
       ]);
       setHome(normalizeHome(h));
       setAbout(normalizeAbout(a));
@@ -494,6 +553,7 @@ export default function SiteContentPage() {
       setFooter(normalizeFooter(f));
       setPosEase(normalizePosEase(pe));
       setAmarHome(normalizeAmarHome(ah));
+      setRently(normalizeRently(rl));
     } catch (e) {
       if (e instanceof Error && e.message === "FC_FORBIDDEN") {
         setError(t.siteContent.common.forbidden);
@@ -562,7 +622,9 @@ export default function SiteContentPage() {
                   ? posEase
                   : pageId === "amarhome"
                     ? amarHome
-                    : footer;
+                    : pageId === "rently"
+                      ? rently
+                      : footer;
     try {
       const res = await fetch(
         joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/site-pages/${pageId}?lang=${lang}&siteId=${siteId}`),
@@ -1826,157 +1888,157 @@ export default function SiteContentPage() {
                 >
                   <EditorSection id="pe-hero" title="Hero хэсэг">
                     <div className="grid gap-4 sm:grid-cols-2">
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
-                          <input className={scInput} value={posEase.hero.title} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, title: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
-                          <input className={scInput} value={posEase.hero.titleAccent} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, titleAccent: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч</label>
-                          <input className={scInput} value={posEase.hero.cta} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, cta: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Туслах товч</label>
-                          <input className={scInput} value={posEase.hero.secondary} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, secondary: e.target.value }})} />
-                       </div>
-                       <div className="sm:col-span-2">
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
-                          <textarea 
-                             className={scTextarea("min-h-[80px]")} 
-                             value={posEase.hero.desc} 
-                             onChange={e => setPosEase({...posEase, hero: {...posEase.hero, desc: e.target.value }})} 
-                          />
-                       </div>
-                       <div className="sm:col-span-2">
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
-                          <ImageUploadField 
-                             value={posEase.hero.image || ""} 
-                             onChange={next => setPosEase({...posEase, hero: {...posEase.hero, image: next }})}
-                          />
-                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={posEase.hero.title} onChange={e => setPosEase({ ...posEase, hero: { ...posEase.hero, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
+                        <input className={scInput} value={posEase.hero.titleAccent} onChange={e => setPosEase({ ...posEase, hero: { ...posEase.hero, titleAccent: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч</label>
+                        <input className={scInput} value={posEase.hero.cta} onChange={e => setPosEase({ ...posEase, hero: { ...posEase.hero, cta: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Туслах товч</label>
+                        <input className={scInput} value={posEase.hero.secondary} onChange={e => setPosEase({ ...posEase, hero: { ...posEase.hero, secondary: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea
+                          className={scTextarea("min-h-[80px]")}
+                          value={posEase.hero.desc}
+                          onChange={e => setPosEase({ ...posEase, hero: { ...posEase.hero, desc: e.target.value } })}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
+                        <ImageUploadField
+                          value={posEase.hero.image || ""}
+                          onChange={next => setPosEase({ ...posEase, hero: { ...posEase.hero, image: next } })}
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="pe-features" title="Боломжууд">
                     <div className="grid gap-4 mb-6">
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                          <input className={scInput} value={posEase.features.title} onChange={e => setPosEase({...posEase, features: {...posEase.features, title: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
-                          <textarea className={scTextarea("min-h-[60px]")} value={posEase.features.desc} onChange={e => setPosEase({...posEase, features: {...posEase.features, desc: e.target.value }})} />
-                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={posEase.features.title} onChange={e => setPosEase({ ...posEase, features: { ...posEase.features, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={posEase.features.desc} onChange={e => setPosEase({ ...posEase, features: { ...posEase.features, desc: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-4">
-                       {posEase.features.items.map((item, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
-                                   const items = [...posEase.features.items]; items[i].title = e.target.value;
-                                   setPosEase({...posEase, features: {...posEase.features, items }});
-                                }} />
-                                <select className={scInput} value={item.size} onChange={e => {
-                                   const items = [...posEase.features.items]; items[i].size = e.target.value as any;
-                                   setPosEase({...posEase, features: {...posEase.features, items }});
-                                }}>
-                                   <option value="small">Жижиг</option>
-                                   <option value="medium">Дунд</option>
-                                   <option value="large">Том</option>
-                                </select>
-                                <DangerMini onClick={() => {
-                                   const items = posEase.features.items.filter((_, j) => j !== i);
-                                   setPosEase({...posEase, features: {...posEase.features, items }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <ImageUploadField 
-                                value={item.image || ""} 
-                                onChange={next => {
-                                   const items = [...posEase.features.items]; items[i].image = next;
-                                   setPosEase({...posEase, features: {...posEase.features, items }});
-                                }}
-                             />
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
-                                const items = [...posEase.features.items]; items[i].desc = e.target.value;
-                                setPosEase({...posEase, features: {...posEase.features, items }});
-                             }} />
+                      {posEase.features.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
+                              const items = [...posEase.features.items]; items[i].title = e.target.value;
+                              setPosEase({ ...posEase, features: { ...posEase.features, items } });
+                            }} />
+                            <select className={scInput} value={item.size} onChange={e => {
+                              const items = [...posEase.features.items]; items[i].size = e.target.value as any;
+                              setPosEase({ ...posEase, features: { ...posEase.features, items } });
+                            }}>
+                              <option value="small">Жижиг</option>
+                              <option value="medium">Дунд</option>
+                              <option value="large">Том</option>
+                            </select>
+                            <DangerMini onClick={() => {
+                              const items = posEase.features.items.filter((_, j) => j !== i);
+                              setPosEase({ ...posEase, features: { ...posEase.features, items } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setPosEase({...posEase, features: {...posEase.features, items: [...posEase.features.items, { title: "", desc: "", size: "small" }] }})}>+ Боломж нэмэх</GhostButton>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={next => {
+                              const items = [...posEase.features.items]; items[i].image = next;
+                              setPosEase({ ...posEase, features: { ...posEase.features, items } });
+                            }}
+                          />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...posEase.features.items]; items[i].desc = e.target.value;
+                            setPosEase({ ...posEase, features: { ...posEase.features, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setPosEase({ ...posEase, features: { ...posEase.features, items: [...posEase.features.items, { title: "", desc: "", size: "small" }] } })}>+ Боломж нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="pe-hardware" title="Төхөөрөмжүүд">
                     <div className="mb-6">
-                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                       <input className={scInput} value={posEase.hardware.title} onChange={e => setPosEase({...posEase, hardware: {...posEase.hardware, title: e.target.value }})} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={posEase.hardware.title} onChange={e => setPosEase({ ...posEase, hardware: { ...posEase.hardware, title: e.target.value } })} />
                     </div>
                     <div className="space-y-4">
-                       {posEase.hardware.items.map((item, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Нэр" value={item.name} onChange={e => {
-                                   const items = [...posEase.hardware.items]; items[i].name = e.target.value;
-                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
-                                }} />
-                                <input className={scInput} placeholder="Төрөл (жишээ: Мобайл)" value={item.label} onChange={e => {
-                                   const items = [...posEase.hardware.items]; items[i].label = e.target.value;
-                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
-                                }} />
-                                <DangerMini onClick={() => {
-                                   const items = posEase.hardware.items.filter((_, j) => j !== i);
-                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <ImageUploadField 
-                                value={item.image || ""} 
-                                onChange={next => {
-                                   const items = [...posEase.hardware.items]; items[i].image = next;
-                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
-                                }}
-                             />
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
-                                const items = [...posEase.hardware.items]; items[i].desc = e.target.value;
-                                setPosEase({...posEase, hardware: {...posEase.hardware, items }});
-                             }} />
+                      {posEase.hardware.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Нэр" value={item.name} onChange={e => {
+                              const items = [...posEase.hardware.items]; items[i].name = e.target.value;
+                              setPosEase({ ...posEase, hardware: { ...posEase.hardware, items } });
+                            }} />
+                            <input className={scInput} placeholder="Төрөл (жишээ: Мобайл)" value={item.label} onChange={e => {
+                              const items = [...posEase.hardware.items]; items[i].label = e.target.value;
+                              setPosEase({ ...posEase, hardware: { ...posEase.hardware, items } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const items = posEase.hardware.items.filter((_, j) => j !== i);
+                              setPosEase({ ...posEase, hardware: { ...posEase.hardware, items } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setPosEase({...posEase, hardware: {...posEase.hardware, items: [...posEase.hardware.items, { name: "", desc: "", label: "" }] }})}>+ Төхөөрөмж нэмэх</GhostButton>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={next => {
+                              const items = [...posEase.hardware.items]; items[i].image = next;
+                              setPosEase({ ...posEase, hardware: { ...posEase.hardware, items } });
+                            }}
+                          />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...posEase.hardware.items]; items[i].desc = e.target.value;
+                            setPosEase({ ...posEase, hardware: { ...posEase.hardware, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setPosEase({ ...posEase, hardware: { ...posEase.hardware, items: [...posEase.hardware.items, { name: "", desc: "", label: "" }] } })}>+ Төхөөрөмж нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="pe-pricing" title="Үнэ тариф">
                     <div className="mb-6">
-                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                       <input className={scInput} value={posEase.pricing.title} onChange={e => setPosEase({...posEase, pricing: {...posEase.pricing, title: e.target.value }})} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={posEase.pricing.title} onChange={e => setPosEase({ ...posEase, pricing: { ...posEase.pricing, title: e.target.value } })} />
                     </div>
                     <div className="space-y-4">
-                       {posEase.pricing.tiers.map((tier, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
-                                   const tiers = [...posEase.pricing.tiers]; tiers[i].name = e.target.value;
-                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
-                                }} />
-                                <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
-                                   const tiers = [...posEase.pricing.tiers]; tiers[i].price = e.target.value;
-                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
-                                }} />
-                                <DangerMini onClick={() => {
-                                   const tiers = posEase.pricing.tiers.filter((_, j) => j !== i);
-                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
-                                const tiers = [...posEase.pricing.tiers]; tiers[i].desc = e.target.value;
-                                setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
-                             }} />
+                      {posEase.pricing.tiers.map((tier, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                              const tiers = [...posEase.pricing.tiers]; tiers[i].name = e.target.value;
+                              setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                            }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
+                              const tiers = [...posEase.pricing.tiers]; tiers[i].price = e.target.value;
+                              setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const tiers = posEase.pricing.tiers.filter((_, j) => j !== i);
+                              setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setPosEase({...posEase, pricing: {...posEase.pricing, tiers: [...posEase.pricing.tiers, { name: "", price: "", desc: "" }] }})}>+ Багц нэмэх</GhostButton>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
+                            const tiers = [...posEase.pricing.tiers]; tiers[i].desc = e.target.value;
+                            setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers: [...posEase.pricing.tiers, { name: "", price: "", desc: "" }] } })}>+ Багц нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
@@ -1999,153 +2061,153 @@ export default function SiteContentPage() {
                 >
                   <EditorSection id="ah-hero" title="Hero хэсэг">
                     <div className="grid gap-4 sm:grid-cols-2">
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
-                          <input className={scInput} value={amarHome.hero.title} onChange={e => setAmarHome({...amarHome, hero: {...amarHome.hero, title: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
-                          <input className={scInput} value={amarHome.hero.titleAccent} onChange={e => setAmarHome({...amarHome, hero: {...amarHome.hero, titleAccent: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товчны текст</label>
-                          <input className={scInput} value={amarHome.hero.cta} onChange={e => setAmarHome({...amarHome, hero: {...amarHome.hero, cta: e.target.value }})} />
-                       </div>
-                       <div className="sm:col-span-2">
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
-                          <textarea 
-                             className={scTextarea("min-h-[80px]")} 
-                             value={amarHome.hero.desc} 
-                             onChange={e => setAmarHome({...amarHome, hero: {...amarHome.hero, desc: e.target.value }})} 
-                          />
-                       </div>
-                       <div className="sm:col-span-2">
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
-                          <ImageUploadField 
-                             value={amarHome.hero.image || ""} 
-                             onChange={next => setAmarHome({...amarHome, hero: {...amarHome.hero, image: next }})}
-                          />
-                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={amarHome.hero.title} onChange={e => setAmarHome({ ...amarHome, hero: { ...amarHome.hero, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
+                        <input className={scInput} value={amarHome.hero.titleAccent} onChange={e => setAmarHome({ ...amarHome, hero: { ...amarHome.hero, titleAccent: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товчны текст</label>
+                        <input className={scInput} value={amarHome.hero.cta} onChange={e => setAmarHome({ ...amarHome, hero: { ...amarHome.hero, cta: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea
+                          className={scTextarea("min-h-[80px]")}
+                          value={amarHome.hero.desc}
+                          onChange={e => setAmarHome({ ...amarHome, hero: { ...amarHome.hero, desc: e.target.value } })}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
+                        <ImageUploadField
+                          value={amarHome.hero.image || ""}
+                          onChange={next => setAmarHome({ ...amarHome, hero: { ...amarHome.hero, image: next } })}
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="ah-features" title="Боломжууд">
                     <div className="grid gap-4 mb-6">
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                          <input className={scInput} value={amarHome.features.title} onChange={e => setAmarHome({...amarHome, features: {...amarHome.features, title: e.target.value }})} />
-                       </div>
-                       <div>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
-                          <textarea className={scTextarea("min-h-[60px]")} value={amarHome.features.desc} onChange={e => setAmarHome({...amarHome, features: {...amarHome.features, desc: e.target.value }})} />
-                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={amarHome.features.title} onChange={e => setAmarHome({ ...amarHome, features: { ...amarHome.features, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={amarHome.features.desc} onChange={e => setAmarHome({ ...amarHome, features: { ...amarHome.features, desc: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-4">
-                       {amarHome.features.items.map((item, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
-                                   const items = [...amarHome.features.items]; items[i].title = e.target.value;
-                                   setAmarHome({...amarHome, features: {...amarHome.features, items }});
-                                }} />
-                                <select className={scInput} value={item.size} onChange={e => {
-                                   const items = [...amarHome.features.items]; items[i].size = e.target.value as any;
-                                   setAmarHome({...amarHome, features: {...amarHome.features, items }});
-                                }}>
-                                   <option value="small">Жижиг</option>
-                                   <option value="medium">Дунд</option>
-                                   <option value="large">Том</option>
-                                </select>
-                                <DangerMini onClick={() => {
-                                   const items = amarHome.features.items.filter((_, j) => j !== i);
-                                   setAmarHome({...amarHome, features: {...amarHome.features, items }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <ImageUploadField 
-                                value={item.image || ""} 
-                                onChange={next => {
-                                   const items = [...amarHome.features.items]; items[i].image = next;
-                                   setAmarHome({...amarHome, features: {...amarHome.features, items }});
-                                }}
-                             />
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
-                                const items = [...amarHome.features.items]; items[i].desc = e.target.value;
-                                setAmarHome({...amarHome, features: {...amarHome.features, items }});
-                             }} />
+                      {amarHome.features.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
+                              const items = [...amarHome.features.items]; items[i].title = e.target.value;
+                              setAmarHome({ ...amarHome, features: { ...amarHome.features, items } });
+                            }} />
+                            <select className={scInput} value={item.size} onChange={e => {
+                              const items = [...amarHome.features.items]; items[i].size = e.target.value as any;
+                              setAmarHome({ ...amarHome, features: { ...amarHome.features, items } });
+                            }}>
+                              <option value="small">Жижиг</option>
+                              <option value="medium">Дунд</option>
+                              <option value="large">Том</option>
+                            </select>
+                            <DangerMini onClick={() => {
+                              const items = amarHome.features.items.filter((_, j) => j !== i);
+                              setAmarHome({ ...amarHome, features: { ...amarHome.features, items } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setAmarHome({...amarHome, features: {...amarHome.features, items: [...amarHome.features.items, { title: "", desc: "", size: "small" }] }})}>+ Боломж нэмэх</GhostButton>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={next => {
+                              const items = [...amarHome.features.items]; items[i].image = next;
+                              setAmarHome({ ...amarHome, features: { ...amarHome.features, items } });
+                            }}
+                          />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...amarHome.features.items]; items[i].desc = e.target.value;
+                            setAmarHome({ ...amarHome, features: { ...amarHome.features, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setAmarHome({ ...amarHome, features: { ...amarHome.features, items: [...amarHome.features.items, { title: "", desc: "", size: "small" }] } })}>+ Боломж нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="ah-hardware" title="Төхөөрөмжүүд">
                     <div className="mb-6">
-                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                       <input className={scInput} value={amarHome.hardware.title} onChange={e => setAmarHome({...amarHome, hardware: {...amarHome.hardware, title: e.target.value }})} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={amarHome.hardware.title} onChange={e => setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, title: e.target.value } })} />
                     </div>
                     <div className="space-y-4">
-                       {amarHome.hardware.items.map((item, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Нэр" value={item.name} onChange={e => {
-                                   const items = [...amarHome.hardware.items]; items[i].name = e.target.value;
-                                   setAmarHome({...amarHome, hardware: {...amarHome.hardware, items }});
-                                }} />
-                                <input className={scInput} placeholder="Төрөл (жишээ: Мэдрэгч)" value={item.label} onChange={e => {
-                                   const items = [...amarHome.hardware.items]; items[i].label = e.target.value;
-                                   setAmarHome({...amarHome, hardware: {...amarHome.hardware, items }});
-                                }} />
-                                <DangerMini onClick={() => {
-                                   const items = amarHome.hardware.items.filter((_, j) => j !== i);
-                                   setAmarHome({...amarHome, hardware: {...amarHome.hardware, items }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <ImageUploadField 
-                                value={item.image || ""} 
-                                onChange={next => {
-                                   const items = [...amarHome.hardware.items]; items[i].image = next;
-                                   setAmarHome({...amarHome, hardware: {...amarHome.hardware, items }});
-                                }}
-                             />
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
-                                const items = [...amarHome.hardware.items]; items[i].desc = e.target.value;
-                                setAmarHome({...amarHome, hardware: {...amarHome.hardware, items }});
-                             }} />
+                      {amarHome.hardware.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Нэр" value={item.name} onChange={e => {
+                              const items = [...amarHome.hardware.items]; items[i].name = e.target.value;
+                              setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items } });
+                            }} />
+                            <input className={scInput} placeholder="Төрөл (жишээ: Мэдрэгч)" value={item.label} onChange={e => {
+                              const items = [...amarHome.hardware.items]; items[i].label = e.target.value;
+                              setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const items = amarHome.hardware.items.filter((_, j) => j !== i);
+                              setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setAmarHome({...amarHome, hardware: {...amarHome.hardware, items: [...amarHome.hardware.items, { name: "", desc: "", label: "" }] }})}>+ Төхөөрөмж нэмэх</GhostButton>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={next => {
+                              const items = [...amarHome.hardware.items]; items[i].image = next;
+                              setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items } });
+                            }}
+                          />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...amarHome.hardware.items]; items[i].desc = e.target.value;
+                            setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setAmarHome({ ...amarHome, hardware: { ...amarHome.hardware, items: [...amarHome.hardware.items, { name: "", desc: "", label: "" }] } })}>+ Төхөөрөмж нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
                   <EditorSection id="ah-pricing" title="Үнэ тариф">
                     <div className="mb-6">
-                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                       <input className={scInput} value={amarHome.pricing.title} onChange={e => setAmarHome({...amarHome, pricing: {...amarHome.pricing, title: e.target.value }})} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={amarHome.pricing.title} onChange={e => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, title: e.target.value } })} />
                     </div>
                     <div className="space-y-4">
-                       {amarHome.pricing.tiers.map((tier, i) => (
-                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
-                             <div className="flex gap-4">
-                                <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
-                                   const tiers = [...amarHome.pricing.tiers]; tiers[i].name = e.target.value;
-                                   setAmarHome({...amarHome, pricing: {...amarHome.pricing, tiers }});
-                                }} />
-                                <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
-                                   const tiers = [...amarHome.pricing.tiers]; tiers[i].price = e.target.value;
-                                   setAmarHome({...amarHome, pricing: {...amarHome.pricing, tiers }});
-                                }} />
-                                <DangerMini onClick={() => {
-                                   const tiers = amarHome.pricing.tiers.filter((_, j) => j !== i);
-                                   setAmarHome({...amarHome, pricing: {...amarHome.pricing, tiers }});
-                                }}>Устгах</DangerMini>
-                             </div>
-                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
-                                const tiers = [...amarHome.pricing.tiers]; tiers[i].desc = e.target.value;
-                                setAmarHome({...amarHome, pricing: {...amarHome.pricing, tiers }});
-                             }} />
+                      {amarHome.pricing.tiers.map((tier, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                              const tiers = [...amarHome.pricing.tiers]; tiers[i].name = e.target.value;
+                              setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                            }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
+                              const tiers = [...amarHome.pricing.tiers]; tiers[i].price = e.target.value;
+                              setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const tiers = amarHome.pricing.tiers.filter((_, j) => j !== i);
+                              setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                            }}>Устгах</DangerMini>
                           </div>
-                       ))}
-                       <GhostButton onClick={() => setAmarHome({...amarHome, pricing: {...amarHome.pricing, tiers: [...amarHome.pricing.tiers, { name: "", price: "", desc: "" }] }})}>+ Багц нэмэх</GhostButton>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
+                            const tiers = [...amarHome.pricing.tiers]; tiers[i].desc = e.target.value;
+                            setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers: [...amarHome.pricing.tiers, { name: "", price: "", desc: "" }] } })}>+ Багц нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
@@ -2154,6 +2216,181 @@ export default function SiteContentPage() {
                     onClick={() => void save("amarhome")}
                   >
                     {saving ? t.common.saving : "Хадгалах (AmarHome)"}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "rently" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "rlt-hero", label: "Hero хэсэг" },
+                    { id: "rlt-features", label: "Боломжууд" },
+                    { id: "rlt-notifications", label: "Мэдэгдэл" },
+                    { id: "rlt-penalties", label: "Алданги" },
+                    { id: "rlt-costs", label: "Ашиглалтын зардал" },
+                    { id: "rlt-pricing", label: "Үнэ тариф" },
+                  ]}
+                >
+                  <EditorSection id="rlt-hero" title="Hero хэсэг">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.hero.title} onChange={e => setRently({ ...rently, hero: { ...rently.hero, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
+                        <input className={scInput} value={rently.hero.titleAccent} onChange={e => setRently({ ...rently, hero: { ...rently.hero, titleAccent: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товчны текст</label>
+                        <input className={scInput} value={rently.hero.cta} onChange={e => setRently({ ...rently, hero: { ...rently.hero, cta: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хоёрдогч товч</label>
+                        <input className={scInput} value={rently.hero.secondary} onChange={e => setRently({ ...rently, hero: { ...rently.hero, secondary: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea
+                          className={scTextarea("min-h-[80px]")}
+                          value={rently.hero.desc}
+                          onChange={e => setRently({ ...rently, hero: { ...rently.hero, desc: e.target.value } })}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
+                        <ImageUploadField
+                          value={rently.hero.image || ""}
+                          onChange={next => setRently({ ...rently, hero: { ...rently.hero, image: next } })}
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="rlt-features" title="Боломжууд">
+                    <div className="grid gap-4 mb-6">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={rently.features.title} onChange={e => setRently({ ...rently, features: { ...rently.features, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={rently.features.desc} onChange={e => setRently({ ...rently, features: { ...rently.features, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {rently.features.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
+                              const items = [...rently.features.items]; items[i].title = e.target.value;
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }} />
+                            <select className={scInput} value={item.size} onChange={e => {
+                              const items = [...rently.features.items]; items[i].size = e.target.value as any;
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }}>
+                              <option value="small">Жижиг</option>
+                              <option value="medium">Дунд</option>
+                              <option value="large">Том</option>
+                            </select>
+                            <DangerMini onClick={() => {
+                              const items = rently.features.items.filter((_, j) => j !== i);
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }}>Устгах</DangerMini>
+                          </div>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={next => {
+                              const items = [...rently.features.items]; items[i].image = next;
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }}
+                          />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...rently.features.items]; items[i].desc = e.target.value;
+                            setRently({ ...rently, features: { ...rently.features, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setRently({ ...rently, features: { ...rently.features, items: [...rently.features.items, { title: "", desc: "", size: "small" }] } })}>+ Боломж нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="rlt-notifications" title="Мэдэгдэл">
+                    <div className="grid gap-4 mb-6">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={rently.notifications.title} onChange={e => setRently({ ...rently, notifications: { ...rently.notifications, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={rently.notifications.desc} onChange={e => setRently({ ...rently, notifications: { ...rently.notifications, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="rlt-penalties" title="Алданги">
+                    <div className="grid gap-4 mb-6">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={rently.penalties.title} onChange={e => setRently({ ...rently, penalties: { ...rently.penalties, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={rently.penalties.desc} onChange={e => setRently({ ...rently, penalties: { ...rently.penalties, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="rlt-costs" title="Ашиглалтын зардал">
+                    <div className="grid gap-4 mb-6">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={rently.costs.title} onChange={e => setRently({ ...rently, costs: { ...rently.costs, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={rently.costs.desc} onChange={e => setRently({ ...rently, costs: { ...rently.costs, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="rlt-pricing" title="Үнэ тариф">
+                    <div className="mb-6">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={rently.pricing.title} onChange={e => setRently({ ...rently, pricing: { ...rently.pricing, title: e.target.value } })} />
+                    </div>
+                    <div className="space-y-4">
+                      {rently.pricing.tiers.map((tier, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                              const tiers = [...rently.pricing.tiers]; tiers[i].name = e.target.value;
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
+                              const tiers = [...rently.pricing.tiers]; tiers[i].price = e.target.value;
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const tiers = rently.pricing.tiers.filter((_, j) => j !== i);
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }}>Устгах</DangerMini>
+                          </div>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
+                            const tiers = [...rently.pricing.tiers]; tiers[i].desc = e.target.value;
+                            setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setRently({ ...rently, pricing: { ...rently.pricing, tiers: [...rently.pricing.tiers, { name: "", price: "", desc: "" }] } })}>+ Багц нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave
+                    disabled={saving}
+                    onClick={() => void save("rently")}
+                  >
+                    {saving ? t.common.saving : "Хадгалах (Rently)"}
                   </PrimarySave>
                 </EditorBody>
               ) : (
