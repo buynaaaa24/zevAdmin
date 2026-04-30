@@ -727,7 +727,6 @@ export default function SiteContentPage() {
                   sectionJumpKey={tab}
                   sectionItems={[
                     { id: "about-fields", label: t.siteContent.about.sections.fields },
-                    { id: "about-image", label: t.siteContent.about.sections.image },
                     { id: "about-copy", label: t.siteContent.about.sections.copy },
                     { id: "about-stats", label: t.siteContent.about.sections.stats },
                   ]}
@@ -767,24 +766,7 @@ export default function SiteContentPage() {
                       ))}
                     </div>
                   </EditorSection>
-                  <EditorSection
-                    id="about-image"
-                    title={t.siteContent.about.sections.image}
-                    subtitle={t.siteContent.home.fields.heroSubtitle}
-                  >
-                    <ImageUploadField
-                      value={
-                        about.main.imageUrl ?? "/images/baclground-image-1.jpg"
-                      }
-                      onChange={(path) =>
-                        setAbout({
-                          ...about,
-                          main: { ...about.main, imageUrl: path },
-                        })
-                      }
-                      previewFit="cover"
-                    />
-                  </EditorSection>
+
                   <EditorSection id="about-copy" title={t.siteContent.about.sections.copy}>
                     <div className="grid gap-4 lg:grid-cols-2">
                       <div>
@@ -1848,7 +1830,6 @@ export default function SiteContentPage() {
                   sectionJumpKey={tab}
                   sectionItems={[
                     { id: "footer-brand", label: "Брэнд" },
-                    { id: "footer-partners", label: "Түншүүд" },
                   ]}
                 >
                   <EditorSection
@@ -1856,26 +1837,8 @@ export default function SiteContentPage() {
                     title="Лого хэсэг & брэнд"
                     subtitle="Хөлийн түншүүдийн гарчиг болон брэндийн танилцуулга"
                   >
-                    <div className="grid gap-4 lg:grid-cols-2">
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          Лого хэсгийн гарчиг
-                        </label>
-                        <input
-                          className={scInput}
-                          value={footer.partners.partnersLabel}
-                          onChange={(e) =>
-                            setFooter({
-                              ...footer,
-                              partners: {
-                                ...footer.partners,
-                                partnersLabel: e.target.value,
-                              },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="lg:col-span-2">
+                    <div className="grid gap-4">
+                      <div className="w-full">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Танилцуулга (брэндийн текст)
                         </label>
@@ -1892,139 +1855,7 @@ export default function SiteContentPage() {
                       </div>
                     </div>
                   </EditorSection>
-                  <EditorSection
-                    id="footer-partners"
-                    title="Түншүүд (лого)"
-                    subtitle="Лого файлуудыг public/ доор байршуулж, энд зөвхөн замыг оруулна (ж: /logos/x.svg)."
-                    defaultOpen={false}
-                  >
-                    <div className="space-y-4">
-                      {footer.partners.items.map((row, i) => (
-                        <div
-                          key={i}
-                          className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700"
-                        >
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                Нэр
-                              </label>
-                              <input
-                                className={scInput}
-                                value={row.name}
-                                onChange={(e) => {
-                                  const items = [...footer.partners.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    name: e.target.value,
-                                  };
-                                  setFooter({
-                                    ...footer,
-                                    partners: { ...footer.partners, items },
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="sm:col-span-2">
-                              <ImageUploadField
-                                previewFit="contain"
-                                value={row.src}
-                                onChange={(next) => {
-                                  const items = [...footer.partners.items];
-                                  items[i] = { ...items[i], src: next };
-                                  setFooter({
-                                    ...footer,
-                                    partners: { ...footer.partners, items },
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                Өргөн
-                              </label>
-                              <input
-                                type="number"
-                                className={scInput}
-                                value={row.width}
-                                onChange={(e) => {
-                                  const items = [...footer.partners.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    width: Number(e.target.value) || 0,
-                                  };
-                                  setFooter({
-                                    ...footer,
-                                    partners: { ...footer.partners, items },
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                Өндөр
-                              </label>
-                              <input
-                                type="number"
-                                className={scInput}
-                                value={row.height}
-                                onChange={(e) => {
-                                  const items = [...footer.partners.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    height: Number(e.target.value) || 0,
-                                  };
-                                  setFooter({
-                                    ...footer,
-                                    partners: { ...footer.partners, items },
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="mt-2 flex justify-end">
-                            <button
-                              type="button"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 text-red-600 transition-colors hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/50"
-                              onClick={() => {
-                                const items = footer.partners.items.filter(
-                                  (_, j) => j !== i,
-                                );
-                                setFooter({
-                                  ...footer,
-                                  partners: { ...footer.partners, items },
-                                });
-                              }}
-                              aria-label="Түнш устгах"
-                            >
-                              <Trash2 className="h-4 w-4" aria-hidden />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                      <GhostButton
-                        onClick={() =>
-                          setFooter({
-                            ...footer,
-                            partners: {
-                              ...footer.partners,
-                              items: [
-                                ...footer.partners.items,
-                                {
-                                  name: "",
-                                  src: "/logos/ing.svg",
-                                  width: 100,
-                                  height: 36,
-                                },
-                              ],
-                            },
-                          })
-                        }
-                      >
-                        + Түнш нэмэх
-                      </GhostButton>
-                    </div>
-                  </EditorSection>
+
                   <PrimarySave
                     disabled={saving}
                     onClick={() => void save("footer")}

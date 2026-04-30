@@ -14,7 +14,7 @@ export async function POST() {
   const origin = (
     process.env.FRONT_ORIGIN ??
     process.env.NEXT_PUBLIC_FRONT_ORIGIN ??
-    "http://bukhbatllc.mn"
+    "http://103.236.194.106"
   ).replace(/\/$/, "");
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret) {
