@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-[400px]">
         {/* Logo mark */}
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="Zevtabs" className="w-14 h-14 object-contain mb-4 shadow-sm rounded-xl" />
+          <img src={`${ADMIN_BASE_PATH}/logo.png`} alt="Zevtabs" className="w-14 h-14 object-contain mb-4 shadow-sm rounded-xl" />
           <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
             Zevtabs Admin
           </h1>

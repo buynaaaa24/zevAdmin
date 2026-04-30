@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Zevtabs Admin",
   description: "Manage Zevtabs platform content, orders, and settings",
+  icons: {
+    icon: `${ADMIN_BASE_PATH}/logo.png`,
+  },
 };
 
 export const viewport = {

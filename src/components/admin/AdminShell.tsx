@@ -134,7 +134,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             className="flex max-w-full items-center justify-center gap-2.5 rounded-md px-2 py-1 outline-offset-2 focus-visible:outline-2 focus-visible:outline-blue-600"
             onClick={() => setNavOpen(false)}
           >
-            <img src="/logo.png" alt="Zevtabs" className="w-8 h-8 object-contain shrink-0" />
+            <img src={`${ADMIN_BASE_PATH}/logo.png`} alt="Zevtabs" className="w-8 h-8 object-contain shrink-0" />
             <span className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Zevtabs Admin</span>
           </Link>
           <button

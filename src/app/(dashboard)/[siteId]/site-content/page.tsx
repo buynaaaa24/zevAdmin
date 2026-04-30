@@ -116,6 +116,8 @@ type PropertiesPageState = {
     price: string;
     tag: string;
     description: string;
+    videoUrl?: string;
+    redirectUrl?: string;
   }[];
   cta: { href: string; label: string };
 };
@@ -1726,6 +1728,48 @@ export default function SiteContentPage() {
                                   items[i] = {
                                     ...items[i],
                                     description: e.target.value,
+                                  };
+                                  setPropertiesPage({
+                                    ...propertiesPage,
+                                    items,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="sm:col-span-3">
+                              <label className="text-xs text-zinc-500 font-semibold text-blue-600 dark:text-blue-400">
+                                Video URL (.mp4)
+                              </label>
+                              <input
+                                className={scInput}
+                                placeholder="https://example.com/video.mp4"
+                                value={item.videoUrl ?? ""}
+                                onChange={(e) => {
+                                  const items = [...propertiesPage.items];
+                                  items[i] = {
+                                    ...items[i],
+                                    videoUrl: e.target.value,
+                                  };
+                                  setPropertiesPage({
+                                    ...propertiesPage,
+                                    items,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div className="sm:col-span-3">
+                              <label className="text-xs text-zinc-500 font-semibold text-blue-600 dark:text-blue-400">
+                                Redirect URL (Next Arrow)
+                              </label>
+                              <input
+                                className={scInput}
+                                placeholder="https://example.com/details"
+                                value={item.redirectUrl ?? ""}
+                                onChange={(e) => {
+                                  const items = [...propertiesPage.items];
+                                  items[i] = {
+                                    ...items[i],
+                                    redirectUrl: e.target.value,
                                   };
                                   setPropertiesPage({
                                     ...propertiesPage,
