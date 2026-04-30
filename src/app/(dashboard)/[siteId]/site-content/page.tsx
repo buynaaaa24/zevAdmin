@@ -109,13 +109,6 @@ type PropertiesPageState = {
     name: string;
     image: string;
     category: string;
-    badge: string | null;
-    size: string;
-    floor: string;
-    parking: string;
-    price: string;
-    tag: string;
-    description: string;
     videoUrl?: string;
     redirectUrl?: string;
   }[];
@@ -1597,17 +1590,16 @@ export default function SiteContentPage() {
                             </div>
                             <div>
                               <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.itemBadge}
+                                {t.siteContent.propertiesPage.fields.category}
                               </label>
                               <input
                                 className={scInput}
-                                placeholder="Хоосон бол харуулахгүй"
-                                value={item.badge ?? ""}
+                                value={item.category}
                                 onChange={(e) => {
                                   const items = [...propertiesPage.items];
                                   items[i] = {
                                     ...items[i],
-                                    badge: e.target.value.trim() || null,
+                                    category: e.target.value,
                                   };
                                   setPropertiesPage({
                                     ...propertiesPage,
@@ -1616,126 +1608,8 @@ export default function SiteContentPage() {
                                 }}
                               />
                             </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.tag}
-                              </label>
-                              <input
-                                className={scInput}
-                                value={item.tag}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    tag: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.size}
-                              </label>
-                              <input
-                                className={scInput}
-                                value={item.size}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    size: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.floor}
-                              </label>
-                              <input
-                                className={scInput}
-                                value={item.floor}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    floor: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.parking}
-                              </label>
-                              <input
-                                className={scInput}
-                                value={item.parking}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    parking: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.price}
-                              </label>
-                              <input
-                                className={scInput}
-                                value={item.price}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    price: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="sm:col-span-2 lg:col-span-3">
-                              <label className="text-xs text-zinc-500">
-                                {t.siteContent.propertiesPage.fields.description}
-                              </label>
-                              <textarea
-                                className={scTextarea("min-h-[80px]")}
-                                value={item.description}
-                                onChange={(e) => {
-                                  const items = [...propertiesPage.items];
-                                  items[i] = {
-                                    ...items[i],
-                                    description: e.target.value,
-                                  };
-                                  setPropertiesPage({
-                                    ...propertiesPage,
-                                    items,
-                                  });
-                                }}
-                              />
-                            </div>
+                          </div>
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <div className="sm:col-span-3">
                               <label className="text-xs text-zinc-500 font-semibold text-blue-600 dark:text-blue-400">
                                 Video URL (.mp4)

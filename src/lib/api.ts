@@ -17,7 +17,15 @@ function normalizeApiBase(raw: string): string {
  * Callers that hit `/api/v1/...` should use {@link joinBackendRequestUrl} to avoid `/api/api/v1`.
  */
 export function getApiBaseUrl(): string {
-  return normalizeApiBase(process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API);
+  const env = process.env.NEXT_PUBLIC_API_URL;
+  if (env) return normalizeApiBase(env);
+
+  if (typeof window !== "undefined") {
+    // Use local proxy in browser to avoid CORS "Failed to fetch"
+    return "/admin/api-proxy/api";
+  }
+
+  return DEFAULT_API;
 }
 
 /**
