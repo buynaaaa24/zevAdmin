@@ -130,6 +130,18 @@ type TeamPageState = {
   }[];
   cta: { title: string; subtitle: string; buttonLabel: string; buttonHref: string };
 };
+const EMPTY_POSEASE: PosEaseState = {
+  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
+  features: { title: "", desc: "", items: [] },
+  hardware: { title: "", items: [] },
+  pricing: { title: "", tiers: [] },
+};
+type PosEaseState = {
+  hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
+  features: { title: string; desc: string; items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[] };
+  hardware: { title: string; items: { name: string; desc: string; label: string; image?: string }[] };
+  pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
+};
 
 const EMPTY_HOME: HomeState = {
   hero: {
@@ -293,6 +305,27 @@ function normalizeTeamPage(v: unknown): TeamPageState {
     cta: { ...EMPTY_TEAM_PAGE.cta, ...asRecord(root.cta) },
   };
 }
+function normalizePosEase(v: unknown): PosEaseState {
+  const root = asRecord(v);
+  return {
+    hero: { ...EMPTY_POSEASE.hero, ...asRecord(root.hero) },
+    features: {
+      ...EMPTY_POSEASE.features,
+      ...asRecord(root.features),
+      items: Array.isArray(asRecord(root.features).items) ? (asRecord(root.features).items as any) : [],
+    },
+    hardware: {
+      ...EMPTY_POSEASE.hardware,
+      ...asRecord(root.hardware),
+      items: Array.isArray(asRecord(root.hardware).items) ? (asRecord(root.hardware).items as any) : [],
+    },
+    pricing: {
+      ...EMPTY_POSEASE.pricing,
+      ...asRecord(root.pricing),
+      tiers: Array.isArray(asRecord(root.pricing).tiers) ? (asRecord(root.pricing).tiers as any) : [],
+    },
+  };
+}
 
 async function fetchSections(pageId: string, lang: string, siteId: string): Promise<Record<string, unknown>> {
   const res = await fetch(
@@ -310,9 +343,9 @@ async function fetchSections(pageId: string, lang: string, siteId: string): Prom
     : {};
 }
 
-export function useTabs() {
+export function useTabs(siteId: string) {
   const { t } = useAdminLanguage();
-  return [
+  const tabs = [
     {
       id: "home" as const,
       label: t.siteContent.tabs.home.label,
@@ -349,17 +382,28 @@ export function useTabs() {
       hint: t.siteContent.tabs.footer.hint,
       icon: LayoutGrid,
     },
+    {
+      id: "posease" as const,
+      label: "PosEase",
+      hint: "PosEase бүтээгдэхүүний нүүр хуудасны агуулга",
+      icon: Newspaper,
+    },
   ];
+
+  if (siteId === "posease") {
+    return tabs.filter((t) => t.id === "posease" || t.id === "footer");
+  }
+  return tabs.filter((t) => t.id !== "posease");
 }
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
   const params = useParams();
   const siteId = (params?.siteId as string) || "zevtaps";
-  const TABS = useTabs();
-  const [tab, setTab] = useState<TabId>("home");
+  const TABS = useTabs(siteId);
+  const [tab, setTab] = useState<TabId>(siteId === "posease" ? "posease" : "home");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -376,12 +420,13 @@ export default function SiteContentPage() {
   const [salesPage, setSalesPage] = useState<SalesPageState>(EMPTY_SALES_PAGE);
   const [jobsPage, setJobsPage] = useState<JobsPageState>(EMPTY_JOBS_PAGE);
   const [teamPage, setTeamPage] = useState<TeamPageState>(EMPTY_TEAM_PAGE);
+  const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
 
   const load = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pe] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -391,6 +436,7 @@ export default function SiteContentPage() {
         fetchSections("jobs-page", lang, siteId),
         fetchSections("team", lang, siteId),
         fetchSections("footer", lang, siteId),
+        fetchSections("posease", lang, siteId),
       ]);
       setHome(normalizeHome(h));
       setAbout(normalizeAbout(a));
@@ -401,6 +447,7 @@ export default function SiteContentPage() {
       setJobsPage(normalizeJobsPage(jp));
       setTeamPage(normalizeTeamPage(tm));
       setFooter(normalizeFooter(f));
+      setPosEase(normalizePosEase(pe));
     } catch (e) {
       if (e instanceof Error && e.message === "FC_FORBIDDEN") {
         setError(t.siteContent.common.forbidden);
@@ -465,7 +512,9 @@ export default function SiteContentPage() {
               ? contact
               : pageId === "properties-page"
                 ? propertiesPage
-                : footer;
+                : pageId === "posease"
+                  ? posEase
+                  : footer;
     try {
       const res = await fetch(
         joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/site-pages/${pageId}?lang=${lang}&siteId=${siteId}`),
@@ -1680,13 +1729,6 @@ export default function SiteContentPage() {
                                 name: "",
                                 image: "",
                                 category: "",
-                                badge: null,
-                                size: "",
-                                floor: "",
-                                parking: "",
-                                price: "",
-                                tag: "",
-                                description: "",
                               },
                             ],
                           })
@@ -1741,6 +1783,179 @@ export default function SiteContentPage() {
                     onClick={() => void save("properties-page")}
                   >
                     {saving ? t.common.saving : t.siteContent.common.saveTab(t.siteContent.tabs.propertiesPage.label)}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "posease" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "pe-hero", label: "Hero хэсэг" },
+                    { id: "pe-features", label: "Боломжууд" },
+                    { id: "pe-hardware", label: "Төхөөрөмжүүд" },
+                    { id: "pe-pricing", label: "Үнэ тариф" },
+                  ]}
+                >
+                  <EditorSection id="pe-hero" title="Hero хэсэг">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                          <input className={scInput} value={posEase.hero.title} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, title: e.target.value }})} />
+                       </div>
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
+                          <input className={scInput} value={posEase.hero.titleAccent} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, titleAccent: e.target.value }})} />
+                       </div>
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч</label>
+                          <input className={scInput} value={posEase.hero.cta} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, cta: e.target.value }})} />
+                       </div>
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Туслах товч</label>
+                          <input className={scInput} value={posEase.hero.secondary} onChange={e => setPosEase({...posEase, hero: {...posEase.hero, secondary: e.target.value }})} />
+                       </div>
+                       <div className="sm:col-span-2">
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                          <textarea 
+                             className={scTextarea("min-h-[80px]")} 
+                             value={posEase.hero.desc} 
+                             onChange={e => setPosEase({...posEase, hero: {...posEase.hero, desc: e.target.value }})} 
+                          />
+                       </div>
+                       <div className="sm:col-span-2">
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
+                          <ImageUploadField 
+                             value={posEase.hero.image || ""} 
+                             onChange={next => setPosEase({...posEase, hero: {...posEase.hero, image: next }})}
+                          />
+                       </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pe-features" title="Боломжууд">
+                    <div className="grid gap-4 mb-6">
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                          <input className={scInput} value={posEase.features.title} onChange={e => setPosEase({...posEase, features: {...posEase.features, title: e.target.value }})} />
+                       </div>
+                       <div>
+                          <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                          <textarea className={scTextarea("min-h-[60px]")} value={posEase.features.desc} onChange={e => setPosEase({...posEase, features: {...posEase.features, desc: e.target.value }})} />
+                       </div>
+                    </div>
+                    <div className="space-y-4">
+                       {posEase.features.items.map((item, i) => (
+                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                             <div className="flex gap-4">
+                                <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
+                                   const items = [...posEase.features.items]; items[i].title = e.target.value;
+                                   setPosEase({...posEase, features: {...posEase.features, items }});
+                                }} />
+                                <select className={scInput} value={item.size} onChange={e => {
+                                   const items = [...posEase.features.items]; items[i].size = e.target.value as any;
+                                   setPosEase({...posEase, features: {...posEase.features, items }});
+                                }}>
+                                   <option value="small">Жижиг</option>
+                                   <option value="medium">Дунд</option>
+                                   <option value="large">Том</option>
+                                </select>
+                                <DangerMini onClick={() => {
+                                   const items = posEase.features.items.filter((_, j) => j !== i);
+                                   setPosEase({...posEase, features: {...posEase.features, items }});
+                                }}>Устгах</DangerMini>
+                             </div>
+                             <ImageUploadField 
+                                value={item.image || ""} 
+                                onChange={next => {
+                                   const items = [...posEase.features.items]; items[i].image = next;
+                                   setPosEase({...posEase, features: {...posEase.features, items }});
+                                }}
+                             />
+                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                                const items = [...posEase.features.items]; items[i].desc = e.target.value;
+                                setPosEase({...posEase, features: {...posEase.features, items }});
+                             }} />
+                          </div>
+                       ))}
+                       <GhostButton onClick={() => setPosEase({...posEase, features: {...posEase.features, items: [...posEase.features.items, { title: "", desc: "", size: "small" }] }})}>+ Боломж нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pe-hardware" title="Төхөөрөмжүүд">
+                    <div className="mb-6">
+                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                       <input className={scInput} value={posEase.hardware.title} onChange={e => setPosEase({...posEase, hardware: {...posEase.hardware, title: e.target.value }})} />
+                    </div>
+                    <div className="space-y-4">
+                       {posEase.hardware.items.map((item, i) => (
+                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                             <div className="flex gap-4">
+                                <input className={scInput} placeholder="Нэр" value={item.name} onChange={e => {
+                                   const items = [...posEase.hardware.items]; items[i].name = e.target.value;
+                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
+                                }} />
+                                <input className={scInput} placeholder="Төрөл (жишээ: Мобайл)" value={item.label} onChange={e => {
+                                   const items = [...posEase.hardware.items]; items[i].label = e.target.value;
+                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
+                                }} />
+                                <DangerMini onClick={() => {
+                                   const items = posEase.hardware.items.filter((_, j) => j !== i);
+                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
+                                }}>Устгах</DangerMini>
+                             </div>
+                             <ImageUploadField 
+                                value={item.image || ""} 
+                                onChange={next => {
+                                   const items = [...posEase.hardware.items]; items[i].image = next;
+                                   setPosEase({...posEase, hardware: {...posEase.hardware, items }});
+                                }}
+                             />
+                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                                const items = [...posEase.hardware.items]; items[i].desc = e.target.value;
+                                setPosEase({...posEase, hardware: {...posEase.hardware, items }});
+                             }} />
+                          </div>
+                       ))}
+                       <GhostButton onClick={() => setPosEase({...posEase, hardware: {...posEase.hardware, items: [...posEase.hardware.items, { name: "", desc: "", label: "" }] }})}>+ Төхөөрөмж нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pe-pricing" title="Үнэ тариф">
+                    <div className="mb-6">
+                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                       <input className={scInput} value={posEase.pricing.title} onChange={e => setPosEase({...posEase, pricing: {...posEase.pricing, title: e.target.value }})} />
+                    </div>
+                    <div className="space-y-4">
+                       {posEase.pricing.tiers.map((tier, i) => (
+                          <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                             <div className="flex gap-4">
+                                <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                                   const tiers = [...posEase.pricing.tiers]; tiers[i].name = e.target.value;
+                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
+                                }} />
+                                <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
+                                   const tiers = [...posEase.pricing.tiers]; tiers[i].price = e.target.value;
+                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
+                                }} />
+                                <DangerMini onClick={() => {
+                                   const tiers = posEase.pricing.tiers.filter((_, j) => j !== i);
+                                   setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
+                                }}>Устгах</DangerMini>
+                             </div>
+                             <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
+                                const tiers = [...posEase.pricing.tiers]; tiers[i].desc = e.target.value;
+                                setPosEase({...posEase, pricing: {...posEase.pricing, tiers }});
+                             }} />
+                          </div>
+                       ))}
+                       <GhostButton onClick={() => setPosEase({...posEase, pricing: {...posEase.pricing, tiers: [...posEase.pricing.tiers, { name: "", price: "", desc: "" }] }})}>+ Багц нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave
+                    disabled={saving}
+                    onClick={() => void save("posease")}
+                  >
+                    {saving ? t.common.saving : "Хадгалах (PosEase)"}
                   </PrimarySave>
                 </EditorBody>
               ) : (
