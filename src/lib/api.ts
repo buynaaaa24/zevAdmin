@@ -1,5 +1,5 @@
 /** Default matches a backend served over plain HTTP (no TLS on API). */
-const DEFAULT_API = "http://103.236.194.106:5001/api";
+const DEFAULT_API = "http://103.236.194.106:5000/api";
 
 function normalizeApiBase(raw: string): string {
   let url = raw.trim().replace(/\/+$/, "");
@@ -60,7 +60,7 @@ export function getBackendUpstreamUrlCandidates(apiPath: string): string[] {
  * site-relative paths like `/images/…` that are served by the front app, not this admin host.
  */
 export function getPublicFrontOrigin(): string {
-  return (process.env.NEXT_PUBLIC_FRONT_ORIGIN ?? "http://localhost:3000")
+  return (process.env.NEXT_PUBLIC_FRONT_ORIGIN ?? "http://localhost:5002")
     .trim()
     .replace(/\/$/, "");
 }
