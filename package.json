@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "config": {
-    "port": "3001"
+    "port": "5001"
   },
   "scripts": {
-    "dev": "next dev --port 3001",
+    "dev": "next dev --port 5001",
     "build": "next build",
-    "start": "next start --port 3001",
+    "start": "next start --port 5001",
     "lint": "eslint"
   },
   "dependencies": {
