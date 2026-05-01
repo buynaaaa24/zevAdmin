@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Save, Smartphone, Globe, Instagram, Facebook, Layout } from "lucide-react";
+import { Save, Smartphone, Globe, Share2, Layout, FileEdit } from "lucide-react";
 import { ADMIN_BASE_PATH } from "@/lib/adminBasePath";
 import { readClientAdminToken } from "@/lib/adminClientAuth";
 
@@ -133,7 +133,7 @@ export default function QrContentPage() {
         {/* Social Media */}
         <section className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-4">
           <div className="flex items-center gap-2 mb-4 text-zinc-900 dark:text-white font-bold">
-            <Globe className="text-blue-500" size={20} />
+            <Share2 className="text-blue-500" size={20} />
             <h2>Social Handles</h2>
           </div>
           
@@ -265,4 +265,3 @@ export default function QrContentPage() {
   );
 }
 
-import { FileEdit } from "lucide-react";
