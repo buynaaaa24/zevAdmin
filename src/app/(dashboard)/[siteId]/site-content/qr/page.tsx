@@ -28,12 +28,22 @@ export default function QrContentPage() {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
-        const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?lang=mn&siteId=${siteId}`);
+        const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?lang=${lang}&siteId=${siteId}`);
         if (res.ok) {
           const json = await res.json();
           if (json.data?.sections) {
-            setFormData(prev => ({ ...prev, ...json.data.sections }));
+            const data = json.data.sections;
+            setFormData(prev => ({
+              ...prev,
+              ...data,
+              // If description comes as a string from API (language-filtered), 
+              // we map it to the current language in our local state
+              description: typeof data.description === 'string' 
+                ? { ...prev.description, [lang]: data.description }
+                : { ...prev.description, ...(data.description || {}) }
+            }));
           }
         }
       } catch (e) {
@@ -43,13 +53,20 @@ export default function QrContentPage() {
       }
     }
     if (siteId) fetchData();
-  }, [siteId]);
+  }, [siteId, lang]);
 
   async function handleSave() {
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?siteId=${siteId}`, {
+      // Prepare the payload: the backend expects the description as a string 
+      // for the specific language we are sending.
+      const payload = {
+        ...formData,
+        description: formData.description[lang]
+      };
+
+      const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?siteId=${siteId}&lang=${lang}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +75,8 @@ export default function QrContentPage() {
         body: JSON.stringify({
           pageId: "qr-portal",
           siteId: siteId,
-          sections: formData
+          lang: lang,
+          sections: payload
         })
       });
 
