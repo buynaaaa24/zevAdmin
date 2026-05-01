@@ -44,6 +44,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard, perm: "dashboard" },
     { href: "/site-content", label: t.nav.siteContent, icon: FileEdit, perm: "site-content" },
+    { href: "/site-content/qr", label: lang === 'mn' ? "QR Портал" : "QR Portal", icon: LayoutDashboard, perm: "site-content" },
     { href: "/orders", label: t.nav.orders, icon: ShoppingBag, perm: "orders" },
     { href: "/sales-ads", label: t.nav.salesAds, icon: Megaphone, perm: "sales-ads" },
     { href: "/jobs", label: t.nav.jobs, icon: Briefcase, perm: "jobs" },
