@@ -107,8 +107,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     };
   }, [navOpen]);
 
+  const [siteDropdownOpen, setSiteDropdownOpen] = useState(false);
+
   return (
     <div className="flex min-h-dvh flex-1 overflow-x-hidden bg-zinc-50 dark:bg-zinc-900">
+      {/* Overlay to close dropdown when clicking outside */}
+      {siteDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-[55]" 
+          onClick={() => setSiteDropdownOpen(false)} 
+        />
+      )}
       {navOpen && (
         <button
           type="button"
@@ -186,23 +195,35 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             
             <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-800" />
 
-            <div className="relative group">
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 hover:bg-emerald-50 hover:border-emerald-200 dark:hover:bg-emerald-950/30 transition-all duration-300">
+            <div className="relative">
+              <button 
+                onClick={() => setSiteDropdownOpen(!siteDropdownOpen)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 z-[60] relative ${
+                  siteDropdownOpen 
+                  ? "bg-emerald-50 border-emerald-500/50 shadow-lg shadow-emerald-500/10" 
+                  : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50 hover:bg-zinc-200"
+                }`}
+              >
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                   {SITES.find(s => s.id === siteId)?.label || "Select Project"}
                 </span>
-                <svg className="w-4 h-4 text-zinc-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${siteDropdownOpen ? 'rotate-180 text-emerald-500' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               
               {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-[60] overflow-hidden backdrop-blur-xl bg-white/90 dark:bg-zinc-900/90">
+              <div className={`absolute top-full left-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl transition-all duration-300 z-[60] overflow-hidden backdrop-blur-xl bg-white/90 dark:bg-zinc-900/90 ${
+                siteDropdownOpen 
+                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto" 
+                : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+              }`}>
                 {SITES.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => {
+                      setSiteDropdownOpen(false);
                       const base = pathname.replace(/^\/[^/]+/, "");
                       router.push(`/${s.id}${base || "/dashboard"}`);
                     }}
