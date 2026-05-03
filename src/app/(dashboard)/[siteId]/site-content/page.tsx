@@ -93,7 +93,12 @@ type ContactState = {
 };
 type ServicesState = {
   header: { badge: string; h2Line1: string; h2Accent: string; intro: string };
-  features: { title: string; desc: string }[];
+  features: { 
+    title: string; 
+    desc: string;
+    image?: string;
+    accent?: string;
+  }[];
   banner: { value: string; suffix: string; label: string }[];
 };
 type PropertiesPageState = {
@@ -299,7 +304,14 @@ function normalizeServices(v: unknown): ServicesState {
   const root = asRecord(v);
   return {
     header: { ...EMPTY_SERVICES.header, ...asRecord(root.header) },
-    features: Array.isArray(root.features) ? (root.features as { title: string; desc: string }[]) : [],
+    features: Array.isArray(root.features) 
+      ? (root.features as ServicesState["features"]).map(f => ({
+          title: f.title || "",
+          desc: f.desc || "",
+          image: f.image,
+          accent: f.accent
+        }))
+      : [],
     banner: Array.isArray(root.banner)
       ? (root.banner as { value: string; suffix: string; label: string }[])
       : [],
@@ -1203,6 +1215,34 @@ export default function SiteContentPage() {
                               setServices({ ...services, features });
                             }}
                           />
+                          <div className="mt-2 grid grid-cols-2 gap-3">
+                            <div>
+                               <label className="text-[10px] font-bold uppercase text-zinc-500">Accent Color (rgb/hex)</label>
+                               <input
+                                className={scInput}
+                                placeholder="rgb(99, 102, 241)"
+                                value={f.accent || ""}
+                                onChange={(e) => {
+                                  const features = [...services.features];
+                                  features[i] = { ...features[i], accent: e.target.value };
+                                  setServices({ ...services, features });
+                                }}
+                               />
+                            </div>
+                            <div className="flex items-end">
+                               <div className="w-full h-9 rounded-lg border border-slate-200" style={{ backgroundColor: f.accent || "transparent" }} />
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                             <ImageUploadField
+                                value={f.image || ""}
+                                onChange={(next) => {
+                                  const features = [...services.features];
+                                  features[i] = { ...features[i], image: next };
+                                  setServices({ ...services, features });
+                                }}
+                             />
+                          </div>
                           <textarea
                             className={`mt-2 ${scTextarea("min-h-[72px]")}`}
                             placeholder={t.siteContent.common.description}
