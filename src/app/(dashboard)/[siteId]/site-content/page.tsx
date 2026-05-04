@@ -93,7 +93,7 @@ type ContactState = {
 };
 type ServicesState = {
   header: { badge: string; h2Line1: string; h2Accent: string; intro: string };
-  features: { title: string; desc: string }[];
+  features: { title: string; desc: string; image?: string; accent?: string }[];
   banner: { value: string; suffix: string; label: string }[];
 };
 type PropertiesPageState = {
@@ -142,6 +142,20 @@ type AmarHomeState = {
   hardware: { title: string; items: { name: string; desc: string; label: string; image?: string }[] };
   pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
 };
+type AjluudState = {
+  header: { badge: string; titleLine1: string; titleAccent: string };
+  items: {
+    id: number;
+    title: string;
+    category: string;
+    image: string;
+    mobileImage?: string;
+    showMobile?: boolean;
+    videoUrl?: string;
+    description?: string;
+    link?: string;
+  }[];
+};
 
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
@@ -154,6 +168,10 @@ const EMPTY_AMARHOME: AmarHomeState = {
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
   pricing: { title: "", tiers: [] },
+};
+const EMPTY_AJLUUD: AjluudState = {
+  header: { badge: "", titleLine1: "", titleAccent: "" },
+  items: [],
 };
 
 const EMPTY_HOME: HomeState = {
@@ -283,7 +301,9 @@ function normalizeServices(v: unknown): ServicesState {
   const root = asRecord(v);
   return {
     header: { ...EMPTY_SERVICES.header, ...asRecord(root.header) },
-    features: Array.isArray(root.features) ? (root.features as { title: string; desc: string }[]) : [],
+    features: Array.isArray(root.features)
+      ? (root.features as { title: string; desc: string; image?: string; accent?: string }[])
+      : [],
     banner: Array.isArray(root.banner)
       ? (root.banner as { value: string; suffix: string; label: string }[])
       : [],
@@ -360,6 +380,13 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
     },
   };
 }
+function normalizeAjluud(v: unknown): AjluudState {
+  const root = asRecord(v);
+  return {
+    header: { ...EMPTY_AJLUUD.header, ...asRecord(root.header) },
+    items: Array.isArray(root.items) ? (root.items as AjluudState["items"]) : [],
+  };
+}
 
 async function fetchSections(pageId: string, lang: string, siteId: string): Promise<Record<string, unknown>> {
   const res = await fetch(
@@ -428,6 +455,12 @@ export function useTabs(siteId: string) {
       hint: "AmarHome бүтээгдэхүүний нүүр хуудасны агуулга",
       icon: Newspaper,
     },
+    {
+      id: "ajluud" as const,
+      label: t.siteContent.tabs.ajluud.label,
+      hint: t.siteContent.tabs.ajluud.hint,
+      icon: ClipboardList,
+    },
   ];
 
   if (siteId === "posease") {
@@ -436,10 +469,9 @@ export function useTabs(siteId: string) {
   if (siteId === "amarhome") {
     return tabs.filter((t) => t.id === "amarhome" || t.id === "footer");
   }
-  return tabs.filter((t) => t.id !== "posease" && t.id !== "amarhome");
-}
+  return tabs.filter((t) => t.id !== "posease" && t.id !== "amarhome");}
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease" | "amarhome";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease" | "amarhome" | "ajluud";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
@@ -465,12 +497,13 @@ export default function SiteContentPage() {
   const [teamPage, setTeamPage] = useState<TeamPageState>(EMPTY_TEAM_PAGE);
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
   const [amarHome, setAmarHome] = useState<AmarHomeState>(EMPTY_AMARHOME);
+  const [ajluud, setAjluud] = useState<AjluudState>(EMPTY_AJLUUD);
 
   const load = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pe, ah] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pe, ah, aj] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -482,6 +515,7 @@ export default function SiteContentPage() {
         fetchSections("footer", lang, siteId),
         fetchSections("posease", lang, siteId),
         fetchSections("amarhome", lang, siteId),
+        fetchSections("ajluud", lang, siteId),
       ]);
       setHome(normalizeHome(h));
       setAbout(normalizeAbout(a));
@@ -494,6 +528,7 @@ export default function SiteContentPage() {
       setFooter(normalizeFooter(f));
       setPosEase(normalizePosEase(pe));
       setAmarHome(normalizeAmarHome(ah));
+      setAjluud(normalizeAjluud(aj));
     } catch (e) {
       if (e instanceof Error && e.message === "FC_FORBIDDEN") {
         setError(t.siteContent.common.forbidden);
@@ -562,7 +597,9 @@ export default function SiteContentPage() {
                   ? posEase
                   : pageId === "amarhome"
                     ? amarHome
-                    : footer;
+                    : pageId === "ajluud"
+                      ? ajluud
+                      : footer;
     try {
       const res = await fetch(
         joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/site-pages/${pageId}?lang=${lang}&siteId=${siteId}`),
@@ -1126,47 +1163,95 @@ export default function SiteContentPage() {
                       {services.features.map((f, i) => (
                         <div
                           key={i}
-                          className="rounded-xl border border-slate-200/90 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/40"
+                          className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-3 dark:border-slate-700 dark:bg-slate-900/40"
                         >
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            #{i + 1}
+                          </span>
                           <input
                             className={scInput}
                             placeholder={t.siteContent.common.title}
                             value={f.title}
                             onChange={(e) => {
                               const features = [...services.features];
-                              features[i] = {
-                                ...features[i],
-                                title: e.target.value,
-                              };
+                              features[i] = { ...features[i], title: e.target.value };
                               setServices({ ...services, features });
                             }}
                           />
                           <textarea
-                            className={`mt-2 ${scTextarea("min-h-[72px]")}`}
+                            className={scTextarea("min-h-[72px]")}
                             placeholder={t.siteContent.common.description}
                             value={f.desc}
                             onChange={(e) => {
                               const features = [...services.features];
-                              features[i] = {
-                                ...features[i],
-                                desc: e.target.value,
-                              };
+                              features[i] = { ...features[i], desc: e.target.value };
                               setServices({ ...services, features });
                             }}
                           />
-                          <DangerMini
-                            className="mt-2"
-                            onClick={() =>
-                              setServices({
-                                ...services,
-                                features: services.features.filter(
-                                  (_, j) => j !== i,
-                                ),
-                              })
-                            }
-                          >
-                            {t.siteContent.common.remove}
-                          </DangerMini>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Зураг (Image)
+                            </label>
+                            <ImageUploadField
+                              value={f.image ?? ""}
+                              onChange={(next) => {
+                                const features = [...services.features];
+                                features[i] = { ...features[i], image: next };
+                                setServices({ ...services, features });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Accent өнгө (e.g. rgb(99, 102, 241))
+                            </label>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <input
+                                type="color"
+                                className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-900"
+                                value={(() => {
+                                  const c = f.accent ?? "";
+                                  const m = c.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                                  if (m) {
+                                    const hex = (n: number) => n.toString(16).padStart(2, "0");
+                                    return `#${hex(+m[1])}${hex(+m[2])}${hex(+m[3])}`;
+                                  }
+                                  return c.startsWith("#") ? c : "#6366f1";
+                                })()}
+                                onChange={(e) => {
+                                  const hex = e.target.value;
+                                  const r = parseInt(hex.slice(1, 3), 16);
+                                  const g = parseInt(hex.slice(3, 5), 16);
+                                  const b = parseInt(hex.slice(5, 7), 16);
+                                  const features = [...services.features];
+                                  features[i] = { ...features[i], accent: `rgb(${r}, ${g}, ${b})` };
+                                  setServices({ ...services, features });
+                                }}
+                              />
+                              <input
+                                className={`${scInput} flex-1`}
+                                placeholder="rgb(99, 102, 241)"
+                                value={f.accent ?? ""}
+                                onChange={(e) => {
+                                  const features = [...services.features];
+                                  features[i] = { ...features[i], accent: e.target.value };
+                                  setServices({ ...services, features });
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end">
+                            <DangerMini
+                              onClick={() =>
+                                setServices({
+                                  ...services,
+                                  features: services.features.filter((_, j) => j !== i),
+                                })
+                              }
+                            >
+                              {t.siteContent.common.remove}
+                            </DangerMini>
+                          </div>
                         </div>
                       ))}
                       <GhostButton
@@ -1175,7 +1260,7 @@ export default function SiteContentPage() {
                             ...services,
                             features: [
                               ...services.features,
-                              { title: "", desc: "" },
+                              { title: "", desc: "", image: "", accent: "" },
                             ],
                           })
                         }
@@ -2154,6 +2239,173 @@ export default function SiteContentPage() {
                     onClick={() => void save("amarhome")}
                   >
                     {saving ? t.common.saving : "Хадгалах (AmarHome)"}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "ajluud" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "ajluud-header", label: "Толгой" },
+                    { id: "ajluud-items", label: "Бүтээлүүд" },
+                  ]}
+                >
+                  <EditorSection id="ajluud-header" title="Толгой хэсэг" subtitle="Badge, гарчиг, онцлох үг">
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Badge</label>
+                        <input
+                          className={scInput}
+                          placeholder="Манай бүтээлүүд"
+                          value={ajluud.header.badge}
+                          onChange={(e) => setAjluud({ ...ajluud, header: { ...ajluud.header, badge: e.target.value } })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input
+                          className={scInput}
+                          placeholder="Digital"
+                          value={ajluud.header.titleLine1}
+                          onChange={(e) => setAjluud({ ...ajluud, header: { ...ajluud.header, titleLine1: e.target.value } })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Онцлох үг (хоосон бол автомат)</label>
+                        <input
+                          className={scInput}
+                          placeholder="Craft."
+                          value={ajluud.header.titleAccent}
+                          onChange={(e) => setAjluud({ ...ajluud, header: { ...ajluud.header, titleAccent: e.target.value } })}
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="ajluud-items" title="Бүтээлүүд" subtitle="Browser slideshow дээр харагдах бүтээлүүд" defaultOpen={false}>
+                    <div className="space-y-4">
+                      {ajluud.items.map((item, i) => (
+                        <div key={item.id || i} className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">#{i + 1}</span>
+                            <DangerMini onClick={() => setAjluud({ ...ajluud, items: ajluud.items.filter((_, j) => j !== i) })}>
+                              Устгах
+                            </DangerMini>
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className="text-xs text-zinc-500">Нэр</label>
+                              <input
+                                className={scInput}
+                                placeholder="AmarHome"
+                                value={item.title}
+                                onChange={(e) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], title: e.target.value };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-zinc-500">Ангилал</label>
+                              <input
+                                className={scInput}
+                                placeholder="Real Estate Platform"
+                                value={item.category}
+                                onChange={(e) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], category: e.target.value };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-zinc-500">Холбоос (URL)</label>
+                              <input
+                                className={scInput}
+                                placeholder="https://amarhome.mn"
+                                value={item.link ?? ""}
+                                onChange={(e) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], link: e.target.value };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-zinc-500">Тайлбар</label>
+                              <input
+                                className={scInput}
+                                placeholder="Товч тайлбар..."
+                                value={item.description ?? ""}
+                                onChange={(e) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], description: e.target.value };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid gap-6 sm:grid-cols-2">
+                            <div className="space-y-3">
+                              <label className="text-xs text-zinc-500">Үндсэн зураг/видео (Desktop)</label>
+                              <ImageUploadField
+                                previewFit="cover"
+                                value={item.image}
+                                onChange={(next) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], image: next };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-zinc-500">Гар утасны зураг/видео (Mobile)</label>
+                                <label className="inline-flex items-center gap-2 cursor-pointer">
+                                  <input 
+                                    type="checkbox" 
+                                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={item.showMobile}
+                                    onChange={(e) => {
+                                      const items = [...ajluud.items];
+                                      items[i] = { ...items[i], showMobile: e.target.checked };
+                                      setAjluud({ ...ajluud, items });
+                                    }}
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Mobile харуулах</span>
+                                </label>
+                              </div>
+                              <ImageUploadField
+                                previewFit="cover"
+                                value={item.mobileImage ?? ""}
+                                onChange={(next) => {
+                                  const items = [...ajluud.items];
+                                  items[i] = { ...items[i], mobileImage: next };
+                                  setAjluud({ ...ajluud, items });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <GhostButton
+                        onClick={() =>
+                          setAjluud({
+                            ...ajluud,
+                            items: [
+                              ...ajluud.items,
+                              { id: Date.now(), title: "", category: "", image: "", description: "", link: "" },
+                            ],
+                          })
+                        }
+                      >
+                        + Бүтээл нэмэх
+                      </GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave disabled={saving} onClick={() => void save("ajluud")}>
+                    {saving ? t.common.saving : t.siteContent.common.saveTab(t.siteContent.tabs.ajluud.label)}
                   </PrimarySave>
                 </EditorBody>
               ) : (

@@ -15,6 +15,9 @@ import {
   Menu,
   X,
   Users,
+  QrCode,
+  ChevronDown,
+  Building2,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -48,6 +51,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { href: "/sales-ads", label: t.nav.salesAds, icon: Megaphone, perm: "sales-ads" },
     { href: "/jobs", label: t.nav.jobs, icon: Briefcase, perm: "jobs" },
     { href: "/chat", label: t.nav.chat, icon: MessageCircle, perm: "chat" },
+    { href: "/site-content/qr", label: t.nav.qr, icon: QrCode, perm: "site-content" },
     { href: "/users", label: t.nav.users, icon: Users, perm: "admin-users" },
   ];
 
@@ -58,6 +62,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     "/sales-ads": t.nav.salesAds,
     "/jobs": t.nav.jobs,
     "/chat": t.nav.chat,
+    "/site-content/qr": t.nav.qr,
     "/users": t.nav.users,
   };
 
@@ -71,6 +76,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const title = titles[pathname] ?? "Zevtabs Admin";
   const [navOpen, setNavOpen] = useState(false);
+  const [siteMenuOpen, setSiteMenuOpen] = useState(false);
   const [perms, setPerms] = useState<string[]>([]);
   const [who, setWho] = useState<string>("");
 
@@ -191,21 +197,51 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             
             <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-800" />
 
-            <select
-              className="bg-transparent text-sm font-medium text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400"
-              value={siteId}
-              onChange={(e) => {
-                const nextSite = e.target.value;
-                const base = pathname.replace(/^\/[^/]+/, "");
-                router.push(`/${nextSite}${base || "/dashboard"}`);
-              }}
-            >
-              {SITES.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setSiteMenuOpen(!siteMenuOpen)}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-bold text-zinc-700 transition-all hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              >
+                <Building2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{SITES.find((s) => s.id === siteId)?.label || siteId}</span>
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${siteMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {siteMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setSiteMenuOpen(false)}
+                  />
+                  <div className="absolute left-0 top-full z-50 mt-1.5 w-48 origin-top-left overflow-hidden rounded-xl border border-zinc-200 bg-white p-1 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 dark:border-zinc-800 dark:bg-zinc-950">
+                    <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      {lang === "mn" ? "Сайт сонгох" : "Select Site"}
+                    </div>
+                    {SITES.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          const nextSite = s.id;
+                          const base = pathname.replace(/^\/[^/]+/, "");
+                          router.push(`/${nextSite}${base || "/dashboard"}`);
+                          setSiteMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                          siteId === s.id
+                            ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100"
+                            : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                        }`}
+                      >
+                        <div className={`h-1.5 w-1.5 rounded-full ${siteId === s.id ? "bg-emerald-500" : "bg-transparent"}`} />
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           <button
             type="button"

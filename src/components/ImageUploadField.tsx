@@ -11,11 +11,15 @@ import { ImageIcon, Loader2, Upload } from "lucide-react";
 
 /** Match backend `UPLOAD_MAX_MB` (default 15). Set `NEXT_PUBLIC_UPLOAD_MAX_MB` to keep UI in sync. */
 const UPLOAD_MAX_MB =
-  Number(process.env.NEXT_PUBLIC_UPLOAD_MAX_MB ?? "15") || 15;
+  Number(process.env.NEXT_PUBLIC_UPLOAD_MAX_MB ?? "100") || 100;
 const UPLOAD_MAX_BYTES = Math.max(1, UPLOAD_MAX_MB) * 1024 * 1024;
 
 const MSG_IMAGE_TOO_LARGE =
-  "Зургийн хэмжээ хэтэрсэн. Жижигрүүлээд эсвэл бага хэмжээтэй зураг сонгоно уу.";
+  "Файлын хэмжээ хэтэрсэн байна. Видеог 100МБ-аас бага эсвэл зургийг жижигрүүлж оруулна уу.";
+
+function isVideo(path: string): boolean {
+  return /\.(mp4|webm|ogg|mov)$/i.test(path);
+}
 
 function previewUrl(path: string): string {
   const p = path.trim();
@@ -120,7 +124,7 @@ export default function ImageUploadField({
     setErr(null);
     if (file.size > UPLOAD_MAX_BYTES) {
       setErr(
-        `Зургийн хэмжээ хэтэрсэн (хамгийн ихдээ ~${UPLOAD_MAX_MB} МБ). Жижигрүүлээд оролдоно уу.`,
+        `Файлын хэмжээ хэтэрсэн байна (хамгийн ихдээ ${UPLOAD_MAX_MB} МБ). Та файлаа жижигрүүлээд дахин оролдоно уу.`,
       );
       return;
     }
@@ -157,6 +161,7 @@ export default function ImageUploadField({
 
   const remoteSrc = previewUrl(value);
   const src = blobUrl ?? remoteSrc;
+  const isVid = src ? isVideo(src) : false;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-700/90 dark:bg-zinc-950">
@@ -166,19 +171,28 @@ export default function ImageUploadField({
         }`}
       >
         {src ? (
-          // eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URLs
-          <img
-            key={blobUrl ?? (value || "empty")}
-            src={src}
-            alt=""
-            decoding="async"
-            fetchPriority={blobUrl ? "high" : "auto"}
-            className={
-              previewFit === "contain"
-                ? "h-auto max-h-[min(50vh,280px)] w-full max-w-full object-contain object-center"
-                : "h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
-            }
-          />
+          isVid ? (
+            <video
+              key={src}
+              src={src}
+              controls
+              className="h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URLs
+            <img
+              key={blobUrl ?? (value || "empty")}
+              src={src}
+              alt=""
+              decoding="async"
+              fetchPriority={blobUrl ? "high" : "auto"}
+              className={
+                previewFit === "contain"
+                  ? "h-auto max-h-[min(50vh,280px)] w-full max-w-full object-contain object-center"
+                  : "h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
+              }
+            />
+          )
         ) : (
           <div
             className="flex w-full flex-col items-center justify-center gap-2 px-6 py-12 text-center text-zinc-400 dark:text-zinc-500"
@@ -186,7 +200,7 @@ export default function ImageUploadField({
             <div className="rounded-full bg-zinc-200/80 p-4 dark:bg-zinc-800/80">
               <ImageIcon className="h-10 w-10 sm:h-12 sm:w-12" aria-hidden />
             </div>
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Зураг оруулна уу</p>
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Зураг эсвэл Видео оруулна уу</p>
           </div>
         )}
       </div>
@@ -195,7 +209,7 @@ export default function ImageUploadField({
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           className="hidden"
           onChange={onPick}
         />
@@ -210,7 +224,7 @@ export default function ImageUploadField({
           ) : (
             <Upload className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          Зураг оруулах
+          Файл оруулах
         </button>
         {showRemove && onRemove && (
           <button
@@ -224,9 +238,18 @@ export default function ImageUploadField({
       </div>
 
       {err && (
-        <p className="border-t border-zinc-100 px-4 py-2 text-xs text-red-600 dark:border-zinc-800 dark:text-red-400">
-          {err}
-        </p>
+        <div className="border-t border-red-100 bg-red-50/50 px-4 py-3 dark:border-red-900/30 dark:bg-red-950/20">
+          <div className="flex gap-2 text-red-600 dark:text-red-400">
+            <div className="mt-0.5 shrink-0">
+              <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+              </svg>
+            </div>
+            <p className="text-xs font-semibold leading-relaxed">
+              {err}
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
