@@ -9,9 +9,6 @@ import {
 import { getApiBaseUrl, getPublicFrontOrigin, getSocketBaseUrl, joinBackendRequestUrl } from "@/lib/api";
 import { ImageIcon, Loader2, Upload } from "lucide-react";
 
-const VIDEO_EXTS = /\.(mp4|webm|mov|ogg|avi)(\?.*)?$/i;
-function isVideo(src: string) { return VIDEO_EXTS.test(src); }
-
 /** Match backend `UPLOAD_MAX_MB` (default 15). Set `NEXT_PUBLIC_UPLOAD_MAX_MB` to keep UI in sync. */
 const UPLOAD_MAX_MB =
   Number(process.env.NEXT_PUBLIC_UPLOAD_MAX_MB ?? "15") || 15;
@@ -98,7 +95,6 @@ export default function ImageUploadField({
   const [err, setErr] = useState<string | null>(null);
   /** Instant preview while upload runs; cleared once parent `value` matches uploaded path */
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [blobType, setBlobType] = useState<string | null>(null);
   const pendingPathRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -128,7 +124,6 @@ export default function ImageUploadField({
       );
       return;
     }
-    setBlobType(file.type);
     const local = URL.createObjectURL(file);
     setBlobUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -162,8 +157,6 @@ export default function ImageUploadField({
 
   const remoteSrc = previewUrl(value);
   const src = blobUrl ?? remoteSrc;
-  
-  const showVideo = src && ((blobUrl && blobType?.startsWith("video/")) || (!blobUrl && isVideo(src)));
 
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-700/90 dark:bg-zinc-950">
@@ -173,34 +166,19 @@ export default function ImageUploadField({
         }`}
       >
         {src ? (
-          showVideo ? (
-            <video
-              src={src}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className={
-                previewFit === "contain"
-                  ? "h-auto max-h-[min(50vh,280px)] w-full max-w-full object-contain object-center"
-                  : "h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
-              }
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URLs
-            <img
-              key={blobUrl ?? (value || "empty")}
-              src={src}
-              alt=""
-              decoding="async"
-              fetchPriority={blobUrl ? "high" : "auto"}
-              className={
-                previewFit === "contain"
-                  ? "h-auto max-h-[min(50vh,280px)] w-full max-w-full object-contain object-center"
-                  : "h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
-              }
-            />
-          )
+          // eslint-disable-next-line @next/next/no-img-element -- dynamic CMS URLs
+          <img
+            key={blobUrl ?? (value || "empty")}
+            src={src}
+            alt=""
+            decoding="async"
+            fetchPriority={blobUrl ? "high" : "auto"}
+            className={
+              previewFit === "contain"
+                ? "h-auto max-h-[min(50vh,280px)] w-full max-w-full object-contain object-center"
+                : "h-auto max-h-[min(85vh,1200px)] w-full max-w-full object-contain object-center"
+            }
+          />
         ) : (
           <div
             className="flex w-full flex-col items-center justify-center gap-2 px-6 py-12 text-center text-zinc-400 dark:text-zinc-500"
@@ -217,7 +195,7 @@ export default function ImageUploadField({
         <input
           ref={fileRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*"
           className="hidden"
           onChange={onPick}
         />
@@ -232,29 +210,15 @@ export default function ImageUploadField({
           ) : (
             <Upload className="h-4 w-4 shrink-0" aria-hidden />
           )}
-          {value ? "Солих" : "Оруулах"}
+          Зураг оруулах
         </button>
-        {value && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              onChange("");
-              if (fileRef.current) fileRef.current.value = "";
-              setBlobUrl(null);
-            }}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200/90 bg-white px-4 py-2.5 text-sm font-medium text-red-600 shadow-sm transition hover:bg-red-50 disabled:opacity-50 sm:flex-none sm:justify-start dark:border-red-900/50 dark:bg-zinc-950 dark:text-red-400 dark:hover:bg-red-950/40"
-          >
-            Устгах
-          </button>
-        )}
         {showRemove && onRemove && (
           <button
             type="button"
             onClick={onRemove}
             className="rounded-xl border border-red-200/90 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 dark:border-red-900/60 dark:text-red-400 dark:hover:bg-red-950/40"
           >
-            Мөр устгах
+            Устгах
           </button>
         )}
       </div>
