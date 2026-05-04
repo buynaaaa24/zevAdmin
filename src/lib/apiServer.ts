@@ -17,7 +17,7 @@ export type AdminStatsResult = {
   error: "unauthorized" | "forbidden" | "unavailable" | null;
 };
 
-export async function fetchAdminStats(siteId: string = "zevtaps"): Promise<AdminStatsResult> {
+export async function fetchAdminStats(siteId: string = "zevtabs"): Promise<AdminStatsResult> {
   try {
     const res = await apiGet<{ data: AdminStats }>(`/api/v1/admin/stats?siteId=${siteId}`);
     return { data: res.data, error: null };

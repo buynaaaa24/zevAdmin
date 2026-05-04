@@ -24,10 +24,10 @@ const statuses = ["pending", "confirmed", "preparing", "delivered", "cancelled"]
 export default function OrdersPage() {
   const { lang, t } = useAdminLanguage();
   const params = useParams();
-  const siteId = (params?.siteId as string) || "zevtaps";
+  const siteId = (params?.siteId as string) || "zevtabs";
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
+
   const load = useCallback(async () => {
     setError(null);
     try {

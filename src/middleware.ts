@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (norm === "/dashboard") {
-    return NextResponse.redirect(new URL(`${ADMIN_BASE_PATH}/zevtaps/dashboard/`, request.url));
+    return NextResponse.redirect(new URL(`${ADMIN_BASE_PATH}/zevtabs/dashboard/`, request.url));
   }
 
   if (norm.startsWith("/api/auth/login") || norm.startsWith("/api/auth/logout")) {
