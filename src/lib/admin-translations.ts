@@ -651,6 +651,23 @@ export const adminTranslations = {
           brandSubtitle: "Footer description text",
         },
       },
+      ajluud: {
+        sections: {
+          header: "Header",
+          items: "Works",
+        },
+        fields: {
+          badge: "Badge (top label)",
+          titleLine1: "Title",
+          titleAccent: "Title Accent (auto if empty)",
+          id: "ID",
+          title: "Name",
+          category: "Category",
+          image: "Image",
+          description: "Description",
+          link: "Link (URL)",
+        },
+      },
     },
     qrPortal: {
       title: "QR Portal",
