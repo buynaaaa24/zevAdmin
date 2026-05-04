@@ -44,9 +44,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard, perm: "dashboard" },
     { href: "/site-content", label: t.nav.siteContent, icon: FileEdit, perm: "site-content" },
-    { href: "/orders", label: t.nav.orders, icon: ShoppingBag, perm: "orders" },
-    { href: "/sales-ads", label: t.nav.salesAds, icon: Megaphone, perm: "sales-ads" },
-    { href: "/jobs", label: t.nav.jobs, icon: Briefcase, perm: "jobs" },
+    { href: "/site-content/qr", label: lang === 'mn' ? "QR Портал" : "QR Portal", icon: LayoutDashboard, perm: "site-content" },
     { href: "/chat", label: t.nav.chat, icon: MessageCircle, perm: "chat" },
     { href: "/users", label: t.nav.users, icon: Users, perm: "admin-users" },
   ];
@@ -54,9 +52,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const titles: Record<string, string> = {
     "/dashboard": t.nav.dashboard,
     "/site-content": t.nav.siteContent,
-    "/orders": t.nav.orders,
-    "/sales-ads": t.nav.salesAds,
-    "/jobs": t.nav.jobs,
     "/chat": t.nav.chat,
     "/users": t.nav.users,
   };
@@ -112,8 +107,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     };
   }, [navOpen]);
 
+  const [siteDropdownOpen, setSiteDropdownOpen] = useState(false);
+
   return (
     <div className="flex min-h-dvh flex-1 overflow-x-hidden bg-zinc-50 dark:bg-zinc-900">
+      {/* Overlay to close dropdown when clicking outside */}
+      {siteDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-[55]" 
+          onClick={() => setSiteDropdownOpen(false)} 
+        />
+      )}
       {navOpen && (
         <button
           type="button"
@@ -191,21 +195,50 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             
             <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-800" />
 
-            <select
-              className="bg-transparent text-sm font-medium text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400"
-              value={siteId}
-              onChange={(e) => {
-                const nextSite = e.target.value;
-                const base = pathname.replace(/^\/[^/]+/, "");
-                router.push(`/${nextSite}${base || "/dashboard"}`);
-              }}
-            >
-              {SITES.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button 
+                onClick={() => setSiteDropdownOpen(!siteDropdownOpen)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 z-[60] relative ${
+                  siteDropdownOpen 
+                  ? "bg-emerald-50 border-emerald-500/50 shadow-lg shadow-emerald-500/10" 
+                  : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50 hover:bg-zinc-200"
+                }`}
+              >
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  {SITES.find(s => s.id === siteId)?.label || "Select Project"}
+                </span>
+                <svg className={`w-4 h-4 text-zinc-400 transition-transform duration-300 ${siteDropdownOpen ? 'rotate-180 text-emerald-500' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className={`absolute top-full left-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl transition-all duration-300 z-[60] overflow-hidden backdrop-blur-xl bg-white/90 dark:bg-zinc-900/90 ${
+                siteDropdownOpen 
+                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto" 
+                : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+              }`}>
+                {SITES.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      setSiteDropdownOpen(false);
+                      const base = pathname.replace(/^\/[^/]+/, "");
+                      router.push(`/${s.id}${base || "/dashboard"}`);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
+                      siteId === s.id 
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-bold" 
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${siteId === s.id ? 'bg-emerald-500' : 'bg-transparent'}`} />
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           <button
             type="button"
