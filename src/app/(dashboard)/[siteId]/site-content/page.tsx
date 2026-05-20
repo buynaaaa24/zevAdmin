@@ -132,8 +132,11 @@ type TeamPageState = {
 };
 type ParkEaseState = {
   hero: { eyebrow: string; title1: string; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
+  how: { label: string; title: string[]; desc: string; steps: { title: string; desc: string }[] };
+  payments: { label: string; title: string[]; desc: string; qpayTitle: string; qpayBadge: string; qpayDesc: string; stickerTitle: string; stickerBadge: string; stickerDesc: string; note: string };
   features: { title: string; desc: string; items: { title: string; desc: string }[] };
   pricing: { title: string; desc: string; tiers: { name: string; slots: string; features: string[] }[] };
+  free: { title: string; desc: string; cards: { label: string; sub: string }[] };
   cta: { title: string; desc: string; btn: string };
 };
 type PosEaseState = {
@@ -165,8 +168,11 @@ type AjluudState = {
 
 const EMPTY_PARKEASE: ParkEaseState = {
   hero: { eyebrow: "", title1: "", desc: "", cta1: "", cta2: "", stats: [] },
+  how: { label: "", title: ["", ""], desc: "", steps: [] },
+  payments: { label: "", title: ["", ""], desc: "", qpayTitle: "", qpayBadge: "", qpayDesc: "", stickerTitle: "", stickerBadge: "", stickerDesc: "", note: "" },
   features: { title: "", desc: "", items: [] },
   pricing: { title: "", desc: "", tiers: [] },
+  free: { title: "", desc: "", cards: [] },
   cta: { title: "", desc: "", btn: "" },
 };
 const EMPTY_POSEASE: PosEaseState = {
@@ -358,6 +364,17 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       ...asRecord(root.hero),
       stats: Array.isArray(asRecord(root.hero).stats) ? (asRecord(root.hero).stats as any) : [],
     },
+    how: {
+      ...EMPTY_PARKEASE.how,
+      ...asRecord(root.how),
+      title: Array.isArray(asRecord(root.how).title) ? (asRecord(root.how).title as string[]) : ["", ""],
+      steps: Array.isArray(asRecord(root.how).steps) ? (asRecord(root.how).steps as any) : [],
+    },
+    payments: {
+      ...EMPTY_PARKEASE.payments,
+      ...asRecord(root.payments),
+      title: Array.isArray(asRecord(root.payments).title) ? (asRecord(root.payments).title as string[]) : ["", ""],
+    },
     features: {
       ...EMPTY_PARKEASE.features,
       ...asRecord(root.features),
@@ -367,6 +384,11 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       ...EMPTY_PARKEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers) ? (asRecord(root.pricing).tiers as any) : [],
+    },
+    free: {
+      ...EMPTY_PARKEASE.free,
+      ...asRecord(root.free),
+      cards: Array.isArray(asRecord(root.free).cards) ? (asRecord(root.free).cards as any) : [],
     },
     cta: { ...EMPTY_PARKEASE.cta, ...asRecord(root.cta) },
   };
@@ -1951,8 +1973,11 @@ export default function SiteContentPage() {
                   sectionJumpKey={tab}
                   sectionItems={[
                     { id: "pke-hero", label: "Hero хэсэг" },
+                    { id: "pke-how", label: "Хэрхэн ажилладаг" },
+                    { id: "pke-payments", label: "Төлбөр" },
                     { id: "pke-features", label: "Онцлогууд" },
                     { id: "pke-pricing", label: "Үнэ тариф" },
+                    { id: "pke-free", label: "Үнэгүй жолооч" },
                     { id: "pke-cta", label: "Дуудлага" },
                   ]}
                 >
@@ -1999,6 +2024,107 @@ export default function SiteContentPage() {
                         </div>
                       ))}
                       <GhostButton onClick={() => setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats: [...parkEase.hero.stats, { value: "", label: "" }] } })}>+ Статистик нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-how" title="Хэрхэн ажилладаг">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн шошго (label)</label>
+                        <input className={scInput} value={parkEase.how.label} onChange={e => setParkEase({ ...parkEase, how: { ...parkEase.how, label: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={parkEase.how.desc} onChange={e => setParkEase({ ...parkEase, how: { ...parkEase.how, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг 1-р мөр</label>
+                        <input className={scInput} value={parkEase.how.title[0] ?? ""} onChange={e => {
+                          const title = [...parkEase.how.title]; title[0] = e.target.value;
+                          setParkEase({ ...parkEase, how: { ...parkEase.how, title } });
+                        }} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг 2-р мөр</label>
+                        <input className={scInput} value={parkEase.how.title[1] ?? ""} onChange={e => {
+                          const title = [...parkEase.how.title]; title[1] = e.target.value;
+                          setParkEase({ ...parkEase, how: { ...parkEase.how, title } });
+                        }} />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Алхамууд</label>
+                      {parkEase.how.steps.map((step, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2">
+                          <div className="flex gap-3">
+                            <input className={`${scInput} flex-1`} placeholder={`${i + 1}-р алхамын гарчиг`} value={step.title} onChange={e => {
+                              const steps = [...parkEase.how.steps]; steps[i] = { ...steps[i], title: e.target.value };
+                              setParkEase({ ...parkEase, how: { ...parkEase.how, steps } });
+                            }} />
+                            <DangerMini onClick={() => setParkEase({ ...parkEase, how: { ...parkEase.how, steps: parkEase.how.steps.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                          </div>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={step.desc} onChange={e => {
+                            const steps = [...parkEase.how.steps]; steps[i] = { ...steps[i], desc: e.target.value };
+                            setParkEase({ ...parkEase, how: { ...parkEase.how, steps } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, how: { ...parkEase.how, steps: [...parkEase.how.steps, { title: "", desc: "" }] } })}>+ Алхам нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-payments" title="Төлбөр">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн шошго (label)</label>
+                        <input className={scInput} value={parkEase.payments.label} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, label: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={parkEase.payments.desc} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг 1-р мөр</label>
+                        <input className={scInput} value={parkEase.payments.title[0] ?? ""} onChange={e => {
+                          const title = [...parkEase.payments.title]; title[0] = e.target.value;
+                          setParkEase({ ...parkEase, payments: { ...parkEase.payments, title } });
+                        }} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг 2-р мөр</label>
+                        <input className={scInput} value={parkEase.payments.title[1] ?? ""} onChange={e => {
+                          const title = [...parkEase.payments.title]; title[1] = e.target.value;
+                          setParkEase({ ...parkEase, payments: { ...parkEase.payments, title } });
+                        }} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">QPay гарчиг</label>
+                        <input className={scInput} value={parkEase.payments.qpayTitle} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, qpayTitle: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">QPay шошго (badge)</label>
+                        <input className={scInput} value={parkEase.payments.qpayBadge} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, qpayBadge: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">QPay тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={parkEase.payments.qpayDesc} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, qpayDesc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Стикер QR гарчиг</label>
+                        <input className={scInput} value={parkEase.payments.stickerTitle} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, stickerTitle: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Стикер QR шошго (badge)</label>
+                        <input className={scInput} value={parkEase.payments.stickerBadge} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, stickerBadge: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Стикер QR тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={parkEase.payments.stickerDesc} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, stickerDesc: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
+                        <input className={scInput} value={parkEase.payments.note} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, note: e.target.value } })} />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -2069,6 +2195,36 @@ export default function SiteContentPage() {
                         </div>
                       ))}
                       <GhostButton onClick={() => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers: [...parkEase.pricing.tiers, { name: "", slots: "", features: [] }] } })}>+ Багц нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-free" title="Үнэгүй жолооч">
+                    <div className="grid gap-4 mb-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={parkEase.free.title} onChange={e => setParkEase({ ...parkEase, free: { ...parkEase.free, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[70px]")} value={parkEase.free.desc} onChange={e => setParkEase({ ...parkEase, free: { ...parkEase.free, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Картууд</label>
+                      {parkEase.free.cards.map((card, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input className={`${scInput} flex-1`} placeholder="Гарчиг" value={card.label} onChange={e => {
+                            const cards = [...parkEase.free.cards]; cards[i] = { ...cards[i], label: e.target.value };
+                            setParkEase({ ...parkEase, free: { ...parkEase.free, cards } });
+                          }} />
+                          <input className={`${scInput} flex-1`} placeholder="Дэд текст" value={card.sub} onChange={e => {
+                            const cards = [...parkEase.free.cards]; cards[i] = { ...cards[i], sub: e.target.value };
+                            setParkEase({ ...parkEase, free: { ...parkEase.free, cards } });
+                          }} />
+                          <DangerMini onClick={() => setParkEase({ ...parkEase, free: { ...parkEase.free, cards: parkEase.free.cards.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, free: { ...parkEase.free, cards: [...parkEase.free.cards, { label: "", sub: "" }] } })}>+ Карт нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
