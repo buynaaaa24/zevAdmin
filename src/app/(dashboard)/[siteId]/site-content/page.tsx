@@ -130,6 +130,12 @@ type TeamPageState = {
   }[];
   cta: { title: string; subtitle: string; buttonLabel: string; buttonHref: string };
 };
+type ParkEaseState = {
+  hero: { eyebrow: string; title1: string; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
+  features: { title: string; desc: string; items: { title: string; desc: string }[] };
+  pricing: { title: string; desc: string; tiers: { name: string; slots: string; features: string[] }[] };
+  cta: { title: string; desc: string; btn: string };
+};
 type PosEaseState = {
   hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
   features: { title: string; desc: string; items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[] };
@@ -157,6 +163,12 @@ type AjluudState = {
   }[];
 };
 
+const EMPTY_PARKEASE: ParkEaseState = {
+  hero: { eyebrow: "", title1: "", desc: "", cta1: "", cta2: "", stats: [] },
+  features: { title: "", desc: "", items: [] },
+  pricing: { title: "", desc: "", tiers: [] },
+  cta: { title: "", desc: "", btn: "" },
+};
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
   features: { title: "", desc: "", items: [] },
@@ -338,6 +350,27 @@ function normalizeTeamPage(v: unknown): TeamPageState {
     cta: { ...EMPTY_TEAM_PAGE.cta, ...asRecord(root.cta) },
   };
 }
+function normalizeParkEase(v: unknown): ParkEaseState {
+  const root = asRecord(v);
+  return {
+    hero: {
+      ...EMPTY_PARKEASE.hero,
+      ...asRecord(root.hero),
+      stats: Array.isArray(asRecord(root.hero).stats) ? (asRecord(root.hero).stats as any) : [],
+    },
+    features: {
+      ...EMPTY_PARKEASE.features,
+      ...asRecord(root.features),
+      items: Array.isArray(asRecord(root.features).items) ? (asRecord(root.features).items as any) : [],
+    },
+    pricing: {
+      ...EMPTY_PARKEASE.pricing,
+      ...asRecord(root.pricing),
+      tiers: Array.isArray(asRecord(root.pricing).tiers) ? (asRecord(root.pricing).tiers as any) : [],
+    },
+    cta: { ...EMPTY_PARKEASE.cta, ...asRecord(root.cta) },
+  };
+}
 function normalizePosEase(v: unknown): PosEaseState {
   const root = asRecord(v);
   return {
@@ -444,6 +477,12 @@ export function useTabs(siteId: string) {
       icon: LayoutGrid,
     },
     {
+      id: "parkease" as const,
+      label: "ParkEase",
+      hint: "ParkEase автомат зогсоолын системийн агуулга",
+      icon: Newspaper,
+    },
+    {
       id: "posease" as const,
       label: "PosEase",
       hint: "PosEase бүтээгдэхүүний нүүр хуудасны агуулга",
@@ -463,22 +502,25 @@ export function useTabs(siteId: string) {
     },
   ];
 
+  if (siteId === "parkease") {
+    return tabs.filter((t) => t.id === "parkease");
+  }
   if (siteId === "posease") {
     return tabs.filter((t) => t.id === "posease" || t.id === "footer");
   }
   if (siteId === "amarhome") {
     return tabs.filter((t) => t.id === "amarhome" || t.id === "footer");
   }
-  return tabs.filter((t) => t.id !== "posease" && t.id !== "amarhome");}
+  return tabs.filter((t) => t.id !== "parkease" && t.id !== "posease" && t.id !== "amarhome");}
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "posease" | "amarhome" | "ajluud";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "parkease" | "posease" | "amarhome" | "ajluud";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
   const params = useParams();
   const siteId = (params?.siteId as string) || "zevtabs";
   const TABS = useTabs(siteId);
-  const [tab, setTab] = useState<TabId>(siteId === "posease" ? "posease" : "home");
+  const [tab, setTab] = useState<TabId>(siteId === "parkease" ? "parkease" : siteId === "posease" ? "posease" : "home");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -495,6 +537,7 @@ export default function SiteContentPage() {
   const [salesPage, setSalesPage] = useState<SalesPageState>(EMPTY_SALES_PAGE);
   const [jobsPage, setJobsPage] = useState<JobsPageState>(EMPTY_JOBS_PAGE);
   const [teamPage, setTeamPage] = useState<TeamPageState>(EMPTY_TEAM_PAGE);
+  const [parkEase, setParkEase] = useState<ParkEaseState>(EMPTY_PARKEASE);
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
   const [amarHome, setAmarHome] = useState<AmarHomeState>(EMPTY_AMARHOME);
   const [ajluud, setAjluud] = useState<AjluudState>(EMPTY_AJLUUD);
@@ -503,7 +546,7 @@ export default function SiteContentPage() {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pe, ah, aj] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, aj] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -513,6 +556,7 @@ export default function SiteContentPage() {
         fetchSections("jobs-page", lang, siteId),
         fetchSections("team", lang, siteId),
         fetchSections("footer", lang, siteId),
+        fetchSections("parkease", lang, siteId),
         fetchSections("posease", lang, siteId),
         fetchSections("amarhome", lang, siteId),
         fetchSections("ajluud", lang, siteId),
@@ -526,6 +570,7 @@ export default function SiteContentPage() {
       setJobsPage(normalizeJobsPage(jp));
       setTeamPage(normalizeTeamPage(tm));
       setFooter(normalizeFooter(f));
+      setParkEase(normalizeParkEase(pke));
       setPosEase(normalizePosEase(pe));
       setAmarHome(normalizeAmarHome(ah));
       setAjluud(normalizeAjluud(aj));
@@ -593,7 +638,9 @@ export default function SiteContentPage() {
               ? contact
               : pageId === "properties-page"
                 ? propertiesPage
-                : pageId === "posease"
+                : pageId === "parkease"
+                  ? parkEase
+                  : pageId === "posease"
                   ? posEase
                   : pageId === "amarhome"
                     ? amarHome
@@ -1897,6 +1944,153 @@ export default function SiteContentPage() {
                     onClick={() => void save("properties-page")}
                   >
                     {saving ? t.common.saving : t.siteContent.common.saveTab(t.siteContent.tabs.propertiesPage.label)}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "parkease" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "pke-hero", label: "Hero хэсэг" },
+                    { id: "pke-features", label: "Онцлогууд" },
+                    { id: "pke-pricing", label: "Үнэ тариф" },
+                    { id: "pke-cta", label: "Дуудлага" },
+                  ]}
+                >
+                  <EditorSection id="pke-hero" title="Hero хэсэг">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Eyebrow (дээрх жижиг текст)</label>
+                        <input className={scInput} value={parkEase.hero.eyebrow} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, eyebrow: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (title1)</label>
+                        <input className={scInput} value={parkEase.hero.title1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, title1: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч (cta1)</label>
+                        <input className={scInput} value={parkEase.hero.cta1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta1: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хоёрдогч товч (cta2)</label>
+                        <input className={scInput} value={parkEase.hero.cta2} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta2: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[80px]")} value={parkEase.hero.desc} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, desc: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero зураг</label>
+                        <ImageUploadField value={parkEase.hero.image || ""} onChange={next => setParkEase({ ...parkEase, hero: { ...parkEase.hero, image: next } })} />
+                      </div>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Статистик</label>
+                      {parkEase.hero.stats.map((stat, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input className={`${scInput} w-24`} placeholder="Утга" value={stat.value} onChange={e => {
+                            const stats = [...parkEase.hero.stats]; stats[i] = { ...stats[i], value: e.target.value };
+                            setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats } });
+                          }} />
+                          <input className={`${scInput} flex-1`} placeholder="Шошго" value={stat.label} onChange={e => {
+                            const stats = [...parkEase.hero.stats]; stats[i] = { ...stats[i], label: e.target.value };
+                            setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats } });
+                          }} />
+                          <DangerMini onClick={() => setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats: parkEase.hero.stats.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats: [...parkEase.hero.stats, { value: "", label: "" }] } })}>+ Статистик нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-features" title="Онцлогууд">
+                    <div className="grid gap-4 mb-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={parkEase.features.desc} onChange={e => setParkEase({ ...parkEase, features: { ...parkEase.features, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {parkEase.features.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2">
+                          <div className="flex gap-3">
+                            <input className={`${scInput} flex-1`} placeholder="Гарчиг" value={item.title} onChange={e => {
+                              const items = [...parkEase.features.items]; items[i] = { ...items[i], title: e.target.value };
+                              setParkEase({ ...parkEase, features: { ...parkEase.features, items } });
+                            }} />
+                            <DangerMini onClick={() => setParkEase({ ...parkEase, features: { ...parkEase.features, items: parkEase.features.items.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                          </div>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...parkEase.features.items]; items[i] = { ...items[i], desc: e.target.value };
+                            setParkEase({ ...parkEase, features: { ...parkEase.features, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, features: { ...parkEase.features, items: [...parkEase.features.items, { title: "", desc: "" }] } })}>+ Онцлог нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-pricing" title="Үнэ тариф">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={parkEase.pricing.title} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={parkEase.pricing.desc} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {parkEase.pricing.tiers.map((tier, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-3">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                              const tiers = [...parkEase.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value };
+                              setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                            }} />
+                            <input className={scInput} placeholder="Зогсоол (жш: 30 хүртэл)" value={tier.slots} onChange={e => {
+                              const tiers = [...parkEase.pricing.tiers]; tiers[i] = { ...tiers[i], slots: e.target.value };
+                              setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                            }} />
+                            <DangerMini onClick={() => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers: parkEase.pricing.tiers.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-zinc-500">Боломжуудын жагсаалт (мөр бүр нэг боломж)</label>
+                            <textarea
+                              className={scTextarea("min-h-[80px]")}
+                              value={tier.features.join("\n")}
+                              onChange={e => {
+                                const tiers = [...parkEase.pricing.tiers];
+                                tiers[i] = { ...tiers[i], features: e.target.value.split("\n") };
+                                setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers: [...parkEase.pricing.tiers, { name: "", slots: "", features: [] }] } })}>+ Багц нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="pke-cta" title="Дуудлага (CTA)">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={parkEase.cta.title} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товчны текст</label>
+                        <input className={scInput} value={parkEase.cta.btn} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, btn: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[70px]")} value={parkEase.cta.desc} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave disabled={saving} onClick={() => void save("parkease")}>
+                    {saving ? t.common.saving : "Хадгалах (ParkEase)"}
                   </PrimarySave>
                 </EditorBody>
               ) : tab === "posease" ? (
