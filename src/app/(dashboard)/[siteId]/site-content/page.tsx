@@ -134,8 +134,8 @@ type ParkEaseState = {
   hero: { eyebrow: string; title1: string; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
   how: { label: string; title: string[]; desc: string; steps: { title: string; desc: string }[] };
   payments: { label: string; title: string[]; desc: string; qpayTitle: string; qpayBadge: string; qpayDesc: string; stickerTitle: string; stickerBadge: string; stickerDesc: string; note: string; banks: { name: string; sub: string; image?: string }[] };
-  features: { title: string; desc: string; items: { title: string; desc: string }[] };
-  pricing: { title: string; desc: string; tiers: { name: string; slots: string; features: string[] }[] };
+  features: { label: string; title: string; desc: string; items: { title: string; desc: string }[] };
+  pricing: { label: string; title: string; desc: string; mostPopular: string; ctaBtn: string; note: string; quoteBtn: string; tiers: { name: string; slots: string; features: string[] }[] };
   free: { title: string; desc: string; cards: { label: string; sub: string }[] };
   cta: { title: string; desc: string; btn: string };
 };
@@ -170,8 +170,8 @@ const EMPTY_PARKEASE: ParkEaseState = {
   hero: { eyebrow: "", title1: "", desc: "", cta1: "", cta2: "", stats: [] },
   how: { label: "", title: ["", ""], desc: "", steps: [] },
   payments: { label: "", title: ["", ""], desc: "", qpayTitle: "", qpayBadge: "", qpayDesc: "", stickerTitle: "", stickerBadge: "", stickerDesc: "", note: "", banks: [] },
-  features: { title: "", desc: "", items: [] },
-  pricing: { title: "", desc: "", tiers: [] },
+  features: { label: "", title: "", desc: "", items: [] },
+  pricing: { label: "", title: "", desc: "", mostPopular: "", ctaBtn: "", note: "", quoteBtn: "", tiers: [] },
   free: { title: "", desc: "", cards: [] },
   cta: { title: "", desc: "", btn: "" },
 };
@@ -2157,7 +2157,11 @@ export default function SiteContentPage() {
                   </EditorSection>
 
                   <EditorSection id="pke-features" title="Онцлогууд">
-                    <div className="grid gap-4 mb-4">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
+                        <input className={scInput} value={parkEase.features.label} onChange={e => setParkEase({ ...parkEase, features: { ...parkEase.features, label: e.target.value } })} />
+                      </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
                         <textarea className={scTextarea("min-h-[60px]")} value={parkEase.features.desc} onChange={e => setParkEase({ ...parkEase, features: { ...parkEase.features, desc: e.target.value } })} />
@@ -2186,12 +2190,32 @@ export default function SiteContentPage() {
                   <EditorSection id="pke-pricing" title="Үнэ тариф">
                     <div className="grid gap-4 mb-4 sm:grid-cols-2">
                       <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
+                        <input className={scInput} value={parkEase.pricing.label} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, label: e.target.value } })} />
+                      </div>
+                      <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
                         <input className={scInput} value={parkEase.pricing.title} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, title: e.target.value } })} />
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
                         <input className={scInput} value={parkEase.pricing.desc} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хамгийн алдартай шошго</label>
+                        <input className={scInput} placeholder="жш: Хамгийн алдартай" value={parkEase.pricing.mostPopular} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, mostPopular: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товч текст</label>
+                        <input className={scInput} placeholder="жш: Эхлэх →" value={parkEase.pricing.ctaBtn} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, ctaBtn: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
+                        <input className={scInput} value={parkEase.pricing.note} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, note: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үнийн санал товч</label>
+                        <input className={scInput} placeholder="жш: Үнийн санал авах →" value={parkEase.pricing.quoteBtn} onChange={e => setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, quoteBtn: e.target.value } })} />
                       </div>
                     </div>
                     <div className="space-y-4">
