@@ -137,7 +137,7 @@ type ParkEaseState = {
   features: { label: string; title: string; desc: string; items: { title: string; desc: string }[] };
   pricing: { label: string; title: string; desc: string; mostPopular: string; ctaBtn: string; note: string; quoteBtn: string; tiers: { name: string; slots: string; features: string[] }[] };
   free: { title: string; desc: string; cards: { label: string; sub: string }[] };
-  cta: { title: string; desc: string; btn: string; emailLabel: string; email: string };
+  cta: { title: string; desc: string; btn: string; emailLabel: string; email: string; phoneLabel: string; phone: string; locationLabel: string; location: string };
 };
 type PosEaseState = {
   hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
@@ -173,7 +173,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
   features: { label: "", title: "", desc: "", items: [] },
   pricing: { label: "", title: "", desc: "", mostPopular: "", ctaBtn: "", note: "", quoteBtn: "", tiers: [] },
   free: { title: "", desc: "", cards: [] },
-  cta: { title: "", desc: "", btn: "", emailLabel: "", email: "" },
+  cta: { title: "", desc: "", btn: "", emailLabel: "", email: "", phoneLabel: "", phone: "", locationLabel: "", location: "" },
 };
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
@@ -2310,12 +2310,28 @@ export default function SiteContentPage() {
                         <textarea className={scTextarea("min-h-[70px]")} placeholder="жш: Бид таны санааг бодит болгоход бэлэн байна..." value={parkEase.cta.desc} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, desc: e.target.value } })} />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Email товших текст — жижиг дээрх шошго</label>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Email товших текст — жижиг шошго</label>
                         <input className={scInput} placeholder="жш: Email Us" value={parkEase.cta.emailLabel} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, emailLabel: e.target.value } })} />
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">И-мэйл хаяг</label>
                         <input className={scInput} placeholder="жш: contact@zevtabs.mn" type="email" value={parkEase.cta.email} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, email: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Утасны шошго</label>
+                        <input className={scInput} placeholder="жш: Утас" value={parkEase.cta.phoneLabel} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, phoneLabel: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Утасны дугаар</label>
+                        <input className={scInput} placeholder="жш: +976 9900 0000" type="tel" value={parkEase.cta.phone} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, phone: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Байршлын шошго</label>
+                        <input className={scInput} placeholder="жш: Байршил" value={parkEase.cta.locationLabel} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, locationLabel: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Байршил</label>
+                        <input className={scInput} placeholder="жш: Улаанбаатар, Монгол" value={parkEase.cta.location} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, location: e.target.value } })} />
                       </div>
                     </div>
                   </EditorSection>
