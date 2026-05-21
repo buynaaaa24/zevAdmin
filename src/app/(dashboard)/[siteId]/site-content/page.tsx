@@ -2298,16 +2298,16 @@ export default function SiteContentPage() {
                   <EditorSection id="pke-cta" title="Дуудлага (CTA)" subtitle="Хуудсын доод хэсэгт харилцагч татах хэсэг">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
-                        <input className={scInput} value={parkEase.cta.title} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, title: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго — дээрх жижиг badge текст</label>
+                        <input className={scInput} placeholder="жш: Холбоо барих" value={parkEase.cta.btn} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, btn: e.target.value } })} />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товчны текст</label>
-                        <input className={scInput} value={parkEase.cta.btn} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, btn: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг — том үсгийн heading</label>
+                        <input className={scInput} placeholder="жш: Санаагаа бодит болгон хувиргацгаая" value={parkEase.cta.title} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, title: e.target.value } })} />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
-                        <textarea className={scTextarea("min-h-[70px]")} value={parkEase.cta.desc} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, desc: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар — гарчгийн доорх параграф текст</label>
+                        <textarea className={scTextarea("min-h-[70px]")} placeholder="жш: Бид таны санааг бодит болгоход бэлэн байна..." value={parkEase.cta.desc} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, desc: e.target.value } })} />
                       </div>
                     </div>
                   </EditorSection>
