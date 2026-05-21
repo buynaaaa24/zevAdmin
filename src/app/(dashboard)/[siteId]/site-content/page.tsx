@@ -133,7 +133,7 @@ type TeamPageState = {
 type ParkEaseState = {
   hero: { eyebrow: string; title1: string; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
   how: { label: string; title: string[]; desc: string; steps: { title: string; desc: string }[] };
-  payments: { label: string; title: string[]; desc: string; qpayTitle: string; qpayBadge: string; qpayDesc: string; stickerTitle: string; stickerBadge: string; stickerDesc: string; note: string };
+  payments: { label: string; title: string[]; desc: string; qpayTitle: string; qpayBadge: string; qpayDesc: string; stickerTitle: string; stickerBadge: string; stickerDesc: string; note: string; banks: { name: string; sub: string; image?: string }[] };
   features: { title: string; desc: string; items: { title: string; desc: string }[] };
   pricing: { title: string; desc: string; tiers: { name: string; slots: string; features: string[] }[] };
   free: { title: string; desc: string; cards: { label: string; sub: string }[] };
@@ -169,7 +169,7 @@ type AjluudState = {
 const EMPTY_PARKEASE: ParkEaseState = {
   hero: { eyebrow: "", title1: "", desc: "", cta1: "", cta2: "", stats: [] },
   how: { label: "", title: ["", ""], desc: "", steps: [] },
-  payments: { label: "", title: ["", ""], desc: "", qpayTitle: "", qpayBadge: "", qpayDesc: "", stickerTitle: "", stickerBadge: "", stickerDesc: "", note: "" },
+  payments: { label: "", title: ["", ""], desc: "", qpayTitle: "", qpayBadge: "", qpayDesc: "", stickerTitle: "", stickerBadge: "", stickerDesc: "", note: "", banks: [] },
   features: { title: "", desc: "", items: [] },
   pricing: { title: "", desc: "", tiers: [] },
   free: { title: "", desc: "", cards: [] },
@@ -374,6 +374,7 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       ...EMPTY_PARKEASE.payments,
       ...asRecord(root.payments),
       title: Array.isArray(asRecord(root.payments).title) ? (asRecord(root.payments).title as string[]) : ["", ""],
+      banks: Array.isArray(asRecord(root.payments).banks) ? (asRecord(root.payments).banks as any) : [],
     },
     features: {
       ...EMPTY_PARKEASE.features,
@@ -2125,6 +2126,33 @@ export default function SiteContentPage() {
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
                         <input className={scInput} value={parkEase.payments.note} onChange={e => setParkEase({ ...parkEase, payments: { ...parkEase.payments, note: e.target.value } })} />
                       </div>
+                    </div>
+                    <div className="space-y-3 mt-2">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Банкнуудын лого</label>
+                      {parkEase.payments.banks.map((bank, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2">
+                          <div className="flex gap-2">
+                            <input className={`${scInput} flex-1`} placeholder="Банкны нэр (жш: Khan Bank)" value={bank.name} onChange={e => {
+                              const banks = [...parkEase.payments.banks]; banks[i] = { ...banks[i], name: e.target.value };
+                              setParkEase({ ...parkEase, payments: { ...parkEase.payments, banks } });
+                            }} />
+                            <input className={`${scInput} flex-1`} placeholder="Дэд нэр (жш: Хаан Банк)" value={bank.sub} onChange={e => {
+                              const banks = [...parkEase.payments.banks]; banks[i] = { ...banks[i], sub: e.target.value };
+                              setParkEase({ ...parkEase, payments: { ...parkEase.payments, banks } });
+                            }} />
+                            <DangerMini onClick={() => setParkEase({ ...parkEase, payments: { ...parkEase.payments, banks: parkEase.payments.banks.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                          </div>
+                          <ImageUploadField
+                            value={bank.image ?? ""}
+                            previewFit="contain"
+                            onChange={next => {
+                              const banks = [...parkEase.payments.banks]; banks[i] = { ...banks[i], image: next };
+                              setParkEase({ ...parkEase, payments: { ...parkEase.payments, banks } });
+                            }}
+                          />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, payments: { ...parkEase.payments, banks: [...parkEase.payments.banks, { name: "", sub: "", image: "" }] } })}>+ Банк нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
