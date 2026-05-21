@@ -131,7 +131,7 @@ type TeamPageState = {
   cta: { title: string; subtitle: string; buttonLabel: string; buttonHref: string };
 };
 type ParkEaseState = {
-  hero: { eyebrow: string; title1: string; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
+  hero: { eyebrow: string; title1: string; words: string[]; desc: string; cta1: string; cta2: string; image?: string; stats: { value: string; label: string }[] };
   how: { label: string; title: string[]; desc: string; steps: { title: string; desc: string }[] };
   payments: { label: string; title: string[]; desc: string; qpayTitle: string; qpayBadge: string; qpayDesc: string; stickerTitle: string; stickerBadge: string; stickerDesc: string; note: string; banks: { name: string; sub: string; image?: string }[] };
   features: { label: string; title: string; desc: string; items: { title: string; desc: string }[] };
@@ -167,7 +167,7 @@ type AjluudState = {
 };
 
 const EMPTY_PARKEASE: ParkEaseState = {
-  hero: { eyebrow: "", title1: "", desc: "", cta1: "", cta2: "", stats: [] },
+  hero: { eyebrow: "", title1: "", words: [], desc: "", cta1: "", cta2: "", stats: [] },
   how: { label: "", title: ["", ""], desc: "", steps: [] },
   payments: { label: "", title: ["", ""], desc: "", qpayTitle: "", qpayBadge: "", qpayDesc: "", stickerTitle: "", stickerBadge: "", stickerDesc: "", note: "", banks: [] },
   features: { label: "", title: "", desc: "", items: [] },
@@ -362,6 +362,7 @@ function normalizeParkEase(v: unknown): ParkEaseState {
     hero: {
       ...EMPTY_PARKEASE.hero,
       ...asRecord(root.hero),
+      words: Array.isArray(asRecord(root.hero).words) ? (asRecord(root.hero).words as string[]) : [],
       stats: Array.isArray(asRecord(root.hero).stats) ? (asRecord(root.hero).stats as any) : [],
     },
     how: {
@@ -1982,26 +1983,26 @@ export default function SiteContentPage() {
                     { id: "pke-cta", label: "Дуудлага" },
                   ]}
                 >
-                  <EditorSection id="pke-hero" title="Hero хэсэг">
+                  <EditorSection id="pke-hero" title="Hero хэсэг" subtitle="Нүүр хуудсын том зураг дээрх агуулга">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Eyebrow (дээрх жижиг текст)</label>
-                        <input className={scInput} value={parkEase.hero.eyebrow} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, eyebrow: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Eyebrow — гарчгийн дээрх жижиг текст</label>
+                        <input className={scInput} placeholder="жш: Автомат зогсоол" value={parkEase.hero.eyebrow} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, eyebrow: e.target.value } })} />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (title1)</label>
-                        <input className={scInput} value={parkEase.hero.title1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, title1: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг — том үсгээр харагдах нэр</label>
+                        <input className={scInput} placeholder="жш: ParkEase" value={parkEase.hero.title1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, title1: e.target.value } })} />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч (cta1)</label>
-                        <input className={scInput} value={parkEase.hero.cta1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta1: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч — шар өнгийн томоохон товч</label>
+                        <input className={scInput} placeholder="жш: Холбоо барих" value={parkEase.hero.cta1} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta1: e.target.value } })} />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хоёрдогч товч (cta2)</label>
-                        <input className={scInput} value={parkEase.hero.cta2} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta2: e.target.value } })} />
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хоёрдогч товч — цагаан хүрээтэй товч</label>
+                        <input className={scInput} placeholder="жш: Хэрхэн ажилладаг вэ?" value={parkEase.hero.cta2} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, cta2: e.target.value } })} />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар — гарчгийн доорх дэлгэрэнгүй текст</label>
                         <textarea className={scTextarea("min-h-[80px]")} value={parkEase.hero.desc} onChange={e => setParkEase({ ...parkEase, hero: { ...parkEase.hero, desc: e.target.value } })} />
                       </div>
                       <div className="sm:col-span-2">
@@ -2010,14 +2011,28 @@ export default function SiteContentPage() {
                       </div>
                     </div>
                     <div className="mt-4 space-y-2">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Статистик</label>
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Эргэлдэх үгс — гарчгийн доор ээлжлэн харагдах үгс</label>
+                      <p className="text-[11px] text-zinc-400 -mt-1">жш: 24/7. · Ажилтангүй. · Бүх Банк. — хэд ч болно</p>
+                      {parkEase.hero.words.map((word, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input className={`${scInput} flex-1`} placeholder={`${i + 1}-р үг`} value={word} onChange={e => {
+                            const words = [...parkEase.hero.words]; words[i] = e.target.value;
+                            setParkEase({ ...parkEase, hero: { ...parkEase.hero, words } });
+                          }} />
+                          <DangerMini onClick={() => setParkEase({ ...parkEase, hero: { ...parkEase.hero, words: parkEase.hero.words.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setParkEase({ ...parkEase, hero: { ...parkEase.hero, words: [...parkEase.hero.words, ""] } })}>+ Үг нэмэх</GhostButton>
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Статистик — хуудсын доод хэсэгт харагдах тоон мэдээлэл</label>
                       {parkEase.hero.stats.map((stat, i) => (
                         <div key={i} className="flex gap-2">
-                          <input className={`${scInput} w-24`} placeholder="Утга" value={stat.value} onChange={e => {
+                          <input className={`${scInput} w-28`} placeholder="Тоо (жш: 200+)" value={stat.value} onChange={e => {
                             const stats = [...parkEase.hero.stats]; stats[i] = { ...stats[i], value: e.target.value };
                             setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats } });
                           }} />
-                          <input className={`${scInput} flex-1`} placeholder="Шошго" value={stat.label} onChange={e => {
+                          <input className={`${scInput} flex-1`} placeholder="Тайлбар (жш: Зогсоол)" value={stat.label} onChange={e => {
                             const stats = [...parkEase.hero.stats]; stats[i] = { ...stats[i], label: e.target.value };
                             setParkEase({ ...parkEase, hero: { ...parkEase.hero, stats } });
                           }} />
@@ -2028,7 +2043,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-how" title="Хэрхэн ажилладаг">
+                  <EditorSection id="pke-how" title="Хэрхэн ажилладаг" subtitle="3 алхамт процессын тайлбар хэсэг">
                     <div className="grid gap-4 mb-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн шошго (label)</label>
@@ -2074,7 +2089,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-payments" title="Төлбөр">
+                  <EditorSection id="pke-payments" title="Төлбөр" subtitle="QPay, Sticker QR картууд болон банкны лого жагсаалт">
                     <div className="grid gap-4 mb-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн шошго (label)</label>
@@ -2156,7 +2171,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-features" title="Онцлогууд">
+                  <EditorSection id="pke-features" title="Онцлогууд" subtitle="Системийн давуу талуудын карт жагсаалт">
                     <div className="grid gap-4 mb-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
@@ -2187,7 +2202,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-pricing" title="Үнэ тариф">
+                  <EditorSection id="pke-pricing" title="Үнэ тариф" subtitle="Үнийн багцууд болон товчны текст">
                     <div className="grid gap-4 mb-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
@@ -2250,7 +2265,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-free" title="Үнэгүй жолооч">
+                  <EditorSection id="pke-free" title="Үнэгүй жолооч" subtitle="Жолооч үнэгүй зогсоолдох нөхцөлийн карт хэсэг">
                     <div className="grid gap-4 mb-4">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
@@ -2280,7 +2295,7 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pke-cta" title="Дуудлага (CTA)">
+                  <EditorSection id="pke-cta" title="Дуудлага (CTA)" subtitle="Хуудсын доод хэсэгт харилцагч татах хэсэг">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
