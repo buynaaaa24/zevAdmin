@@ -137,7 +137,7 @@ type ParkEaseState = {
   features: { label: string; title: string; desc: string; items: { title: string; desc: string }[] };
   pricing: { label: string; title: string; desc: string; mostPopular: string; ctaBtn: string; note: string; quoteBtn: string; tiers: { name: string; slots: string; features: string[] }[] };
   free: { title: string; desc: string; cards: { label: string; sub: string }[] };
-  cta: { title: string; desc: string; btn: string };
+  cta: { title: string; desc: string; btn: string; emailLabel: string; email: string };
 };
 type PosEaseState = {
   hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
@@ -173,7 +173,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
   features: { label: "", title: "", desc: "", items: [] },
   pricing: { label: "", title: "", desc: "", mostPopular: "", ctaBtn: "", note: "", quoteBtn: "", tiers: [] },
   free: { title: "", desc: "", cards: [] },
-  cta: { title: "", desc: "", btn: "" },
+  cta: { title: "", desc: "", btn: "", emailLabel: "", email: "" },
 };
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
@@ -2308,6 +2308,14 @@ export default function SiteContentPage() {
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар — гарчгийн доорх параграф текст</label>
                         <textarea className={scTextarea("min-h-[70px]")} placeholder="жш: Бид таны санааг бодит болгоход бэлэн байна..." value={parkEase.cta.desc} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Email товших текст — жижиг дээрх шошго</label>
+                        <input className={scInput} placeholder="жш: Email Us" value={parkEase.cta.emailLabel} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, emailLabel: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">И-мэйл хаяг</label>
+                        <input className={scInput} placeholder="жш: contact@zevtabs.mn" type="email" value={parkEase.cta.email} onChange={e => setParkEase({ ...parkEase, cta: { ...parkEase.cta, email: e.target.value } })} />
                       </div>
                     </div>
                   </EditorSection>
