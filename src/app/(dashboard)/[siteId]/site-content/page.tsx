@@ -151,6 +151,15 @@ type AmarHomeState = {
   hardware: { title: string; items: { name: string; desc: string; label: string; image?: string }[] };
   pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
 };
+type GlobalContactState = {
+  emailLabel: string;
+  email: string;
+  phoneLabel: string;
+  phone: string;
+  locationLabel: string;
+  location: string;
+};
+
 type AjluudState = {
   header: { badge: string; titleLine1: string; titleAccent: string };
   items: {
@@ -187,6 +196,15 @@ const EMPTY_AMARHOME: AmarHomeState = {
   hardware: { title: "", items: [] },
   pricing: { title: "", tiers: [] },
 };
+const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
+  emailLabel: "И-Мэйл",
+  email: "info@zevtabs.mn",
+  phoneLabel: "Утас",
+  phone: "",
+  locationLabel: "Байршил",
+  location: "",
+};
+
 const EMPTY_AJLUUD: AjluudState = {
   header: { badge: "", titleLine1: "", titleAccent: "" },
   items: [],
@@ -437,6 +455,10 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
     },
   };
 }
+function normalizeGlobalContact(v: unknown): GlobalContactState {
+  const root = asRecord(v);
+  return { ...EMPTY_GLOBAL_CONTACT, ...root };
+}
 function normalizeAjluud(v: unknown): AjluudState {
   const root = asRecord(v);
   return {
@@ -524,6 +546,12 @@ export function useTabs(siteId: string) {
       hint: t.siteContent.tabs.ajluud.hint,
       icon: ClipboardList,
     },
+    {
+      id: "global-contact" as const,
+      label: "Глобал холбоо",
+      hint: "Бүх бүтээгдэхүүний хуудсанд харагдах нийтлэг холбоо барих мэдээлэл",
+      icon: Phone,
+    },
   ];
 
   if (siteId === "parkease") {
@@ -537,7 +565,7 @@ export function useTabs(siteId: string) {
   }
   return tabs.filter((t) => t.id !== "parkease" && t.id !== "posease" && t.id !== "amarhome");}
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "parkease" | "posease" | "amarhome" | "ajluud";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "parkease" | "posease" | "amarhome" | "ajluud" | "global-contact";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
@@ -565,12 +593,13 @@ export default function SiteContentPage() {
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
   const [amarHome, setAmarHome] = useState<AmarHomeState>(EMPTY_AMARHOME);
   const [ajluud, setAjluud] = useState<AjluudState>(EMPTY_AJLUUD);
+  const [globalContact, setGlobalContact] = useState<GlobalContactState>(EMPTY_GLOBAL_CONTACT);
 
   const load = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, aj] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, aj, gc] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -584,6 +613,7 @@ export default function SiteContentPage() {
         fetchSections("posease", lang, siteId),
         fetchSections("amarhome", lang, siteId),
         fetchSections("ajluud", lang, siteId),
+        fetchSections("global-contact", "mn", "zevtabs"),
       ]);
       setHome(normalizeHome(h));
       setAbout(normalizeAbout(a));
@@ -598,6 +628,7 @@ export default function SiteContentPage() {
       setPosEase(normalizePosEase(pe));
       setAmarHome(normalizeAmarHome(ah));
       setAjluud(normalizeAjluud(aj));
+      setGlobalContact(normalizeGlobalContact(gc));
     } catch (e) {
       if (e instanceof Error && e.message === "FC_FORBIDDEN") {
         setError(t.siteContent.common.forbidden);
@@ -670,10 +701,13 @@ export default function SiteContentPage() {
                     ? amarHome
                     : pageId === "ajluud"
                       ? ajluud
-                      : footer;
+                      : pageId === "global-contact"
+                        ? globalContact
+                        : footer;
+    const saveSiteId = pageId === "global-contact" ? "zevtabs" : siteId;
     try {
       const res = await fetch(
-        joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/site-pages/${pageId}?lang=${lang}&siteId=${siteId}`),
+        joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/site-pages/${pageId}?lang=${lang}&siteId=${saveSiteId}`),
         withClientAdminAuth({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -2847,6 +2881,46 @@ export default function SiteContentPage() {
 
                   <PrimarySave disabled={saving} onClick={() => void save("ajluud")}>
                     {saving ? t.common.saving : t.siteContent.common.saveTab(t.siteContent.tabs.ajluud.label)}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "global-contact" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "gc-contact", label: "Холбоо барих мэдээлэл" },
+                  ]}
+                >
+                  <EditorSection id="gc-contact" title="Нийтлэг холбоо барих мэдээлэл" subtitle="Бүх бүтээгдэхүүний хуудсанд харагдана — ParkEase, PosEase, AmarHome, Rently">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">И-Мэйл шошго (жш: И-Мэйл)</label>
+                        <input className={scInput} placeholder="И-Мэйл" value={globalContact.emailLabel} onChange={e => setGlobalContact({ ...globalContact, emailLabel: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">И-Мэйл хаяг</label>
+                        <input className={scInput} placeholder="info@zevtabs.mn" value={globalContact.email} onChange={e => setGlobalContact({ ...globalContact, email: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Утасны шошго (жш: Утас)</label>
+                        <input className={scInput} placeholder="Утас" value={globalContact.phoneLabel} onChange={e => setGlobalContact({ ...globalContact, phoneLabel: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Утасны дугаар (хоосон бол харагдахгүй)</label>
+                        <input className={scInput} placeholder="+976 9999-9999" value={globalContact.phone} onChange={e => setGlobalContact({ ...globalContact, phone: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Байршлын шошго (жш: Байршил)</label>
+                        <input className={scInput} placeholder="Байршил" value={globalContact.locationLabel} onChange={e => setGlobalContact({ ...globalContact, locationLabel: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Байршил (хоосон бол харагдахгүй)</label>
+                        <input className={scInput} placeholder="Улаанбаатар, Монгол" value={globalContact.location} onChange={e => setGlobalContact({ ...globalContact, location: e.target.value })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave disabled={saving} onClick={() => void save("global-contact")}>
+                    {saving ? t.common.saving : "Хадгалах (Нийтлэг холбоо)"}
                   </PrimarySave>
                 </EditorBody>
               ) : (
