@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   basePath: "/admin",
   trailingSlash: true,
   async rewrites() {
-    const origin = "http://103.236.194.106:5000";
+    const origin = "http://103.236.194.68:3003";
     return [
       {
         source: "/upload/:path*",

@@ -1,5 +1,5 @@
 /** Default matches a backend served over plain HTTP (no TLS on API). */
-const DEFAULT_API = "http://103.236.194.106:5000/api";
+const DEFAULT_API = "http://103.236.194.68:3003/api";
 
 function normalizeApiBase(raw: string): string {
   let url = raw.trim().replace(/\/+$/, "");
