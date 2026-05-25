@@ -151,6 +151,14 @@ type AmarHomeState = {
   hardware: { title: string; items: { name: string; desc: string; label: string; image?: string }[] };
   pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
 };
+type RentlyState = {
+  hero: { title: string; titleAccent: string; desc: string; cta: string; secondary: string; image?: string };
+  features: { title: string; desc: string; items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[] };
+  notifications: { title: string; desc: string };
+  penalties: { title: string; desc: string };
+  costs: { title: string; desc: string };
+  pricing: { title: string; tiers: { name: string; price: string; desc: string }[] };
+};
 type GlobalContactState = {
   emailLabel: string;
   email: string;
@@ -194,6 +202,14 @@ const EMPTY_AMARHOME: AmarHomeState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "" },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
+  pricing: { title: "", tiers: [] },
+};
+const EMPTY_RENTLY: RentlyState = {
+  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
+  features: { title: "", desc: "", items: [] },
+  notifications: { title: "", desc: "" },
+  penalties: { title: "", desc: "" },
+  costs: { title: "", desc: "" },
   pricing: { title: "", tiers: [] },
 };
 const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
@@ -455,6 +471,25 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
     },
   };
 }
+function normalizeRently(v: unknown): RentlyState {
+  const root = asRecord(v);
+  return {
+    hero: { ...EMPTY_RENTLY.hero, ...asRecord(root.hero) },
+    features: {
+      ...EMPTY_RENTLY.features,
+      ...asRecord(root.features),
+      items: Array.isArray(asRecord(root.features).items) ? (asRecord(root.features).items as any) : [],
+    },
+    notifications: { ...EMPTY_RENTLY.notifications, ...asRecord(root.notifications) },
+    penalties: { ...EMPTY_RENTLY.penalties, ...asRecord(root.penalties) },
+    costs: { ...EMPTY_RENTLY.costs, ...asRecord(root.costs) },
+    pricing: {
+      ...EMPTY_RENTLY.pricing,
+      ...asRecord(root.pricing),
+      tiers: Array.isArray(asRecord(root.pricing).tiers) ? (asRecord(root.pricing).tiers as any) : [],
+    },
+  };
+}
 function normalizeGlobalContact(v: unknown): GlobalContactState {
   const root = asRecord(v);
   return { ...EMPTY_GLOBAL_CONTACT, ...root };
@@ -541,6 +576,12 @@ export function useTabs(siteId: string) {
       icon: Newspaper,
     },
     {
+      id: "rently" as const,
+      label: "Rently",
+      hint: "Rently түрээсийн удирдлагын системийн агуулга",
+      icon: Newspaper,
+    },
+    {
       id: "ajluud" as const,
       label: t.siteContent.tabs.ajluud.label,
       hint: t.siteContent.tabs.ajluud.hint,
@@ -563,16 +604,19 @@ export function useTabs(siteId: string) {
   if (siteId === "amarhome") {
     return tabs.filter((t) => t.id === "amarhome" || t.id === "footer");
   }
-  return tabs.filter((t) => t.id !== "parkease" && t.id !== "posease" && t.id !== "amarhome");}
+  if (siteId === "rently") {
+    return tabs.filter((t) => t.id === "rently" || t.id === "footer");
+  }
+  return tabs.filter((t) => t.id !== "parkease" && t.id !== "posease" && t.id !== "amarhome" && t.id !== "rently");}
 
-type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "parkease" | "posease" | "amarhome" | "ajluud" | "global-contact";
+type TabId = "home" | "about" | "services" | "contact" | "properties-page" | "sales-page" | "jobs-page" | "team" | "footer" | "parkease" | "posease" | "amarhome" | "rently" | "ajluud" | "global-contact";
 
 export default function SiteContentPage() {
   const { lang, t } = useAdminLanguage();
   const params = useParams();
   const siteId = (params?.siteId as string) || "zevtabs";
   const TABS = useTabs(siteId);
-  const [tab, setTab] = useState<TabId>(siteId === "parkease" ? "parkease" : siteId === "posease" ? "posease" : "home");
+  const [tab, setTab] = useState<TabId>(siteId === "parkease" ? "parkease" : siteId === "posease" ? "posease" : siteId === "rently" ? "rently" : "home");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -593,13 +637,14 @@ export default function SiteContentPage() {
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
   const [amarHome, setAmarHome] = useState<AmarHomeState>(EMPTY_AMARHOME);
   const [ajluud, setAjluud] = useState<AjluudState>(EMPTY_AJLUUD);
+  const [rently, setRently] = useState<RentlyState>(EMPTY_RENTLY);
   const [globalContact, setGlobalContact] = useState<GlobalContactState>(EMPTY_GLOBAL_CONTACT);
 
   const load = useCallback(async () => {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, aj, gc] = await Promise.all([
+      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, re, aj, gc] = await Promise.all([
         fetchSections("home", lang, siteId),
         fetchSections("about", lang, siteId),
         fetchSections("services", lang, siteId),
@@ -612,6 +657,7 @@ export default function SiteContentPage() {
         fetchSections("parkease", lang, siteId),
         fetchSections("posease", lang, siteId),
         fetchSections("amarhome", lang, siteId),
+        fetchSections("rently", lang, siteId),
         fetchSections("ajluud", lang, siteId),
         fetchSections("global-contact", "mn", "zevtabs"),
       ]);
@@ -627,6 +673,7 @@ export default function SiteContentPage() {
       setParkEase(normalizeParkEase(pke));
       setPosEase(normalizePosEase(pe));
       setAmarHome(normalizeAmarHome(ah));
+      setRently(normalizeRently(re));
       setAjluud(normalizeAjluud(aj));
       setGlobalContact(normalizeGlobalContact(gc));
     } catch (e) {
@@ -701,9 +748,11 @@ export default function SiteContentPage() {
                     ? amarHome
                     : pageId === "ajluud"
                       ? ajluud
-                      : pageId === "global-contact"
-                        ? globalContact
-                        : footer;
+                      : pageId === "rently"
+                        ? rently
+                        : pageId === "global-contact"
+                          ? globalContact
+                          : footer;
     const saveSiteId = pageId === "global-contact" ? "zevtabs" : siteId;
     try {
       const res = await fetch(
@@ -2881,6 +2930,168 @@ export default function SiteContentPage() {
 
                   <PrimarySave disabled={saving} onClick={() => void save("ajluud")}>
                     {saving ? t.common.saving : t.siteContent.common.saveTab(t.siteContent.tabs.ajluud.label)}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "rently" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    { id: "re-hero", label: "Hero хэсэг" },
+                    { id: "re-features", label: "Боломжууд" },
+                    { id: "re-notifications", label: "Мэдэгдэл" },
+                    { id: "re-penalties", label: "Торгууль" },
+                    { id: "re-costs", label: "Зардал" },
+                    { id: "re-pricing", label: "Үнэ тариф" },
+                  ]}
+                >
+                  <EditorSection id="re-hero" title="Hero хэсэг">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.hero.title} onChange={e => setRently({ ...rently, hero: { ...rently.hero, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг (онцлох)</label>
+                        <input className={scInput} value={rently.hero.titleAccent} onChange={e => setRently({ ...rently, hero: { ...rently.hero, titleAccent: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үндсэн товч</label>
+                        <input className={scInput} value={rently.hero.cta} onChange={e => setRently({ ...rently, hero: { ...rently.hero, cta: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Туслах товч</label>
+                        <input className={scInput} value={rently.hero.secondary} onChange={e => setRently({ ...rently, hero: { ...rently.hero, secondary: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[80px]")} value={rently.hero.desc} onChange={e => setRently({ ...rently, hero: { ...rently.hero, desc: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Hero Image</label>
+                        <ImageUploadField value={rently.hero.image || ""} onChange={next => setRently({ ...rently, hero: { ...rently.hero, image: next } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="re-features" title="Боломжууд">
+                    <div className="grid gap-4 mb-6">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                        <input className={scInput} value={rently.features.title} onChange={e => setRently({ ...rently, features: { ...rently.features, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн тайлбар</label>
+                        <textarea className={scTextarea("min-h-[60px]")} value={rently.features.desc} onChange={e => setRently({ ...rently, features: { ...rently.features, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {rently.features.items.map((item, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Гарчиг" value={item.title} onChange={e => {
+                              const items = [...rently.features.items]; items[i] = { ...items[i], title: e.target.value };
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }} />
+                            <select className={scInput} value={item.size} onChange={e => {
+                              const items = [...rently.features.items]; items[i] = { ...items[i], size: e.target.value as "small" | "medium" | "large" };
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }}>
+                              <option value="small">Жижиг</option>
+                              <option value="medium">Дунд</option>
+                              <option value="large">Том</option>
+                            </select>
+                            <DangerMini onClick={() => {
+                              const items = rently.features.items.filter((_, j) => j !== i);
+                              setRently({ ...rently, features: { ...rently.features, items } });
+                            }}>Устгах</DangerMini>
+                          </div>
+                          <ImageUploadField value={item.image || ""} onChange={next => {
+                            const items = [...rently.features.items]; items[i] = { ...items[i], image: next };
+                            setRently({ ...rently, features: { ...rently.features, items } });
+                          }} />
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={item.desc} onChange={e => {
+                            const items = [...rently.features.items]; items[i] = { ...items[i], desc: e.target.value };
+                            setRently({ ...rently, features: { ...rently.features, items } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setRently({ ...rently, features: { ...rently.features, items: [...rently.features.items, { title: "", desc: "", size: "small" }] } })}>+ Боломж нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="re-notifications" title="Мэдэгдэл" subtitle="Түрээсийн мэдэгдлийн хэсэг">
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.notifications.title} onChange={e => setRently({ ...rently, notifications: { ...rently.notifications, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[80px]")} value={rently.notifications.desc} onChange={e => setRently({ ...rently, notifications: { ...rently.notifications, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="re-penalties" title="Торгуулийн нөхцөл" subtitle="Хариуцлагын болон торгуулийн мэдээлэл">
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.penalties.title} onChange={e => setRently({ ...rently, penalties: { ...rently.penalties, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[80px]")} value={rently.penalties.desc} onChange={e => setRently({ ...rently, penalties: { ...rently.penalties, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="re-costs" title="Зардлын мэдээлэл" subtitle="Хөлс, зардлын тайлбар">
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.costs.title} onChange={e => setRently({ ...rently, costs: { ...rently.costs, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <textarea className={scTextarea("min-h-[80px]")} value={rently.costs.desc} onChange={e => setRently({ ...rently, costs: { ...rently.costs, desc: e.target.value } })} />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection id="re-pricing" title="Үнэ тариф">
+                    <div className="mb-6">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
+                      <input className={scInput} value={rently.pricing.title} onChange={e => setRently({ ...rently, pricing: { ...rently.pricing, title: e.target.value } })} />
+                    </div>
+                    <div className="space-y-4">
+                      {rently.pricing.tiers.map((tier, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                          <div className="flex gap-4">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={e => {
+                              const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value };
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={e => {
+                              const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value };
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }} />
+                            <DangerMini onClick={() => {
+                              const tiers = rently.pricing.tiers.filter((_, j) => j !== i);
+                              setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                            }}>Устгах</DangerMini>
+                          </div>
+                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={e => {
+                            const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value };
+                            setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                          }} />
+                        </div>
+                      ))}
+                      <GhostButton onClick={() => setRently({ ...rently, pricing: { ...rently.pricing, tiers: [...rently.pricing.tiers, { name: "", price: "", desc: "" }] } })}>+ Багц нэмэх</GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <PrimarySave disabled={saving} onClick={() => void save("rently")}>
+                    {saving ? t.common.saving : "Хадгалах (Rently)"}
                   </PrimarySave>
                 </EditorBody>
               ) : tab === "global-contact" ? (
