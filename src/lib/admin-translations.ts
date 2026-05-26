@@ -36,9 +36,18 @@ export const adminTranslations = {
         about: { label: "Бидний тухай", hint: "Танилцуулга, статистик" },
         services: { label: "Үйлчилгээ", hint: "Давуу тал, тоонууд" },
         contact: { label: "Холбоо барих", hint: "Хаяг, утас, кард" },
-        propertiesPage: { label: "Төсөл (Projects)", hint: "/properties — ангилал, картууд" },
-        ajluud: { label: "Ажлууд (Gallery)", hint: "Нүүр хуудасны browser slideshow — гарчиг, бүтээлүүд" },
-        salesPage: { label: "Борлуулалт", hint: "Зар мэдээ — борлуулалтын толгой" },
+        propertiesPage: {
+          label: "Төсөл (Projects)",
+          hint: "/properties — ангилал, картууд",
+        },
+        ajluud: {
+          label: "Ажлууд (Gallery)",
+          hint: "Нүүр хуудасны browser slideshow — гарчиг, бүтээлүүд",
+        },
+        salesPage: {
+          label: "Борлуулалт",
+          hint: "Зар мэдээ — борлуулалтын толгой",
+        },
         jobsPage: { label: "Ажлын зар", hint: "Зар мэдээ — жагсаалтын толгой" },
         team: { label: "Мэдээ мэдээлэл", hint: "Зар мэдээ — баг, CTA" },
         footer: { label: "Хөл", hint: "Түншүүд, танилцуулга" },
@@ -254,7 +263,8 @@ export const adminTranslations = {
     },
     qrPortal: {
       title: "QR Портал",
-      subtitle: (siteId: string) => `${siteId} - Аппликейшн холбоос болон сошиал хаягуудыг удирдах`,
+      subtitle: (siteId: string) =>
+        `${siteId} - Аппликейшн холбоос болон сошиал хаягуудыг удирдах`,
       sections: {
         appLinks: "Аппликейшн холбоосууд",
         social: "Сошиал хаягууд",
@@ -270,7 +280,23 @@ export const adminTranslations = {
         instagramName: "Instagram нэр (Дэлгэцэнд харагдах)",
         color: "Үндсэн өнгө",
         glow: "Гэрэлтэлтийн өнгө (RGBA/HEX)",
-        descPlaceholder: (lang: string) => `${lang === "mn" ? "Монгол" : "Англи"} хэл дээр тайлбар оруулна уу...`,
+        descPlaceholder: (lang: string) =>
+          `${lang === "mn" ? "Монгол" : "Англи"} хэл дээр тайлбар оруулна уу...`,
+        hideDescription: "Тайлбар хэсгийг нуух",
+        hideAppLinks: "Аппликейшн холбоос хэсгийг нуух",
+        hideSocial: "Сошиал хаяг хэсгийг нуух",
+        addSocial: "Сошиал хаяг нэмэх",
+        socialName: "Нэр (ж: Facebook)",
+        socialLabel: "Шошго (ж: Zevtabs Mongolia)",
+        socialUrl: "Холбоос (URL)",
+        socialIcon: "Лого / Икон",
+        socialColor: "Өнгө (HEX)",
+      },
+      visibility: {
+        title: "Харагдац",
+        hideDescription: "Засварлаж буй хуудас (Description) нуух",
+        hideAppLinks: "Аппликейшн холбоосууд нуух",
+        hideSocial: "Сошиал хаягууд нуух",
       },
       messages: {
         loading: "Тохиргоог ачаалж байна...",
@@ -336,8 +362,10 @@ export const adminTranslations = {
         closed: "Хаасан",
       },
       alerts: {
-        notLoaded: "Статистик ачаалагдсангүй. API холболт болон backend статусыг шалгана уу.",
-        unauthorized: "Статистик ачаалагдсангүй. Серверийн нэвтрэх эрх хүчингүй байна — дахин нэвтэрнэ үү.",
+        notLoaded:
+          "Статистик ачаалагдсангүй. API холболт болон backend статусыг шалгана уу.",
+        unauthorized:
+          "Статистик ачаалагдсангүй. Серверийн нэвтрэх эрх хүчингүй байна — дахин нэвтэрнэ үү.",
         forbidden: "Самбарын статистик харах эрх танд байхгүй байна.",
       },
     },
@@ -393,20 +421,23 @@ export const adminTranslations = {
       },
       chatbot: {
         title: "Чатботын сонголтууд",
-        description: "Сайтын чат дээрх хурдан сонголтууд, хариу текст — эндээс тохируулна.",
+        description:
+          "Сайтын чат дээрх хурдан сонголтууд, хариу текст — эндээс тохируулна.",
         fields: {
           startButton: "Эхлэх товч",
           restartButton: "Дахин эхлэх товч",
           welcomeMessage: "Нээлтийн мэндчилгээ",
           fallbackReply: "Чөлөөт асуултын ерөнхий хариу",
-          fallbackHint: "Сонголтонд таарахгүй бичвэрт бот өгөх хариу. Хоосон бол эхний мэндчилгээг ашиглана.",
+          fallbackHint:
+            "Сонголтонд таарахгүй бичвэрт бот өгөх хариу. Хоосон бол эхний мэндчилгээг ашиглана.",
         },
         actions: {
           addRoot: "Үндсэн сонголт нэмэх",
           addChild: "Дэд сонголт",
           placeholderLabel: "Сонголтын текст (ж: Захиалга)",
           placeholderAnswer: "Хариу текст",
-          emptyChoices: "Сонголт алга. «Үндсэн сонголт нэмэх» дээр дарж эхлүүлнэ үү.",
+          emptyChoices:
+            "Сонголт алга. «Үндсэн сонголт нэмэх» дээр дарж эхлүүлнэ үү.",
         },
         status: {
           loading: "Тохиргоо ачаалж байна…",
@@ -453,9 +484,18 @@ export const adminTranslations = {
         about: { label: "About Us", hint: "Intro, statistics" },
         services: { label: "Services", hint: "Advantages, numbers" },
         contact: { label: "Contact", hint: "Address, phone, cards" },
-        propertiesPage: { label: "Projects / Showcase", hint: "/properties — categories, cards" },
-        ajluud: { label: "Works (Gallery)", hint: "Homepage browser slideshow — header, project items" },
-        salesPage: { label: "Sales Page", hint: "Announcements — sales header" },
+        propertiesPage: {
+          label: "Projects / Showcase",
+          hint: "/properties — categories, cards",
+        },
+        ajluud: {
+          label: "Works (Gallery)",
+          hint: "Homepage browser slideshow — header, project items",
+        },
+        salesPage: {
+          label: "Sales Page",
+          hint: "Announcements — sales header",
+        },
         jobsPage: { label: "Jobs Page", hint: "Announcements — list header" },
         team: { label: "News Feed", hint: "Announcements — team, CTA" },
         footer: { label: "Footer", hint: "Partners, introduction" },
@@ -671,7 +711,8 @@ export const adminTranslations = {
     },
     qrPortal: {
       title: "QR Portal",
-      subtitle: (siteId: string) => `Manage mobile app links and social identity for ${siteId}`,
+      subtitle: (siteId: string) =>
+        `Manage mobile app links and social identity for ${siteId}`,
       sections: {
         appLinks: "App Store Links",
         social: "Social Handles",
@@ -687,7 +728,23 @@ export const adminTranslations = {
         instagramName: "Instagram Name (Display)",
         color: "Theme Accent Color",
         glow: "Ambient Glow Color (RGBA/HEX)",
-        descPlaceholder: (lang: string) => `Enter description in ${lang === "mn" ? "Mongolian" : "English"}...`,
+        descPlaceholder: (lang: string) =>
+          `Enter description in ${lang === "mn" ? "Mongolian" : "English"}...`,
+        hideDescription: "Hide Description Section",
+        hideAppLinks: "Hide App Links Section",
+        hideSocial: "Hide Social Section",
+        addSocial: "Add Social Link",
+        socialName: "Name (e.g. Facebook)",
+        socialLabel: "Label (e.g. Zevtabs Mongolia)",
+        socialUrl: "Link (URL)",
+        socialIcon: "Icon / Logo",
+        socialColor: "Color (HEX)",
+      },
+      visibility: {
+        title: "Visibility",
+        hideDescription: "Hide Description section",
+        hideAppLinks: "Hide App Links section",
+        hideSocial: "Hide Social section",
       },
       messages: {
         loading: "Loading QR settings...",
@@ -753,8 +810,10 @@ export const adminTranslations = {
         closed: "Closed",
       },
       alerts: {
-        notLoaded: "Statistics failed to load. Check API connection and backend status.",
-        unauthorized: "Statistics failed to load. Server session invalid — please log in again.",
+        notLoaded:
+          "Statistics failed to load. Check API connection and backend status.",
+        unauthorized:
+          "Statistics failed to load. Server session invalid — please log in again.",
         forbidden: "You do not have permission to view dashboard statistics.",
       },
     },
@@ -810,13 +869,15 @@ export const adminTranslations = {
       },
       chatbot: {
         title: "Chatbot Options",
-        description: "Configure quick choices and automated replies for the site chat.",
+        description:
+          "Configure quick choices and automated replies for the site chat.",
         fields: {
           startButton: "Start Button",
           restartButton: "Restart Button",
           welcomeMessage: "Welcome Message",
           fallbackReply: "Fallback Bot Reply",
-          fallbackHint: "Response for inputs that don't match any checks. Uses welcome message if empty.",
+          fallbackHint:
+            "Response for inputs that don't match any checks. Uses welcome message if empty.",
         },
         actions: {
           addRoot: "Add Root Choice",
