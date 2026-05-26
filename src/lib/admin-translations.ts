@@ -260,6 +260,11 @@ export const adminTranslations = {
           link: "Холбоос (URL)",
         },
       },
+      visibility: {
+        title: "Харагдац",
+        hideDescription: "Тайлбар хэсгийг нуух",
+        hideAppLinks: "Аппликейшн холбоосууд нуух",
+      },
     },
     qrPortal: {
       title: "QR Портал",
@@ -707,6 +712,11 @@ export const adminTranslations = {
           description: "Description",
           link: "Link (URL)",
         },
+      },
+      visibility: {
+        title: "Visibility",
+        hideDescription: "Hide Description section",
+        hideAppLinks: "Hide App Links section",
       },
     },
     qrPortal: {
