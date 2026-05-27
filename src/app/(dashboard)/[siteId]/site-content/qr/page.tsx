@@ -10,13 +10,17 @@ import {
   FileEdit,
   Globe,
   QrCode,
-  Eye,
   Plus,
   Trash2
 } from "lucide-react";
 import { ADMIN_BASE_PATH } from "@/lib/adminBasePath";
-import { readClientAdminToken } from "@/lib/adminClientAuth";
+import { 
+  ensureClientAuthorized, 
+  readClientAdminToken, 
+  withClientAdminAuth 
+} from "@/lib/adminClientAuth";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import { getApiBaseUrl, joinBackendRequestUrl } from "@/lib/api";
 import ImageUploadField from "@/components/ImageUploadField";
 import {
   EditorAlerts,
@@ -32,7 +36,7 @@ import {
   SubCard,
 } from "../editorUi";
 
-type QrTabId = "app-links" | "social" | "descriptions" | "branding" | "visibility";
+type QrTabId = "app-links" | "social" | "descriptions" | "branding";
 
 interface SocialLink {
   name: string;
@@ -74,14 +78,19 @@ export default function QrContentPage() {
     { id: "social", label: t.qrPortal.sections.social, hint: "Facebook & Instagram", icon: Share2 },
     { id: "descriptions", label: t.qrPortal.sections.descriptions, hint: "Welcome Messages", icon: FileEdit },
     { id: "branding", label: t.qrPortal.sections.branding, hint: "Colors & Glow", icon: Layout },
-    { id: "visibility", label: t.qrPortal.visibility.title, hint: "Show/Hide sections on page", icon: Eye },
   ];
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?siteId=${siteId}`);
+        const res = await fetch(
+          joinBackendRequestUrl(
+            getApiBaseUrl(),
+            `/api/v1/admin/site-pages/qr-portal?siteId=${siteId}`
+          ),
+          withClientAdminAuth()
+        );
         if (res.ok) {
           const json = await res.json();
           if (json.data?.sections) {
@@ -112,18 +121,28 @@ export default function QrContentPage() {
     setSaving(true);
     setMessage(null);
     try {
-      const res = await fetch(`${ADMIN_BASE_PATH}/api-proxy/api/v1/site-pages/qr-portal?siteId=${siteId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${readClientAdminToken()}`
-        },
-        body: JSON.stringify({
-          pageId: "qr-portal",
-          siteId: siteId,
-          sections: formData
+      const res = await fetch(
+        joinBackendRequestUrl(
+          getApiBaseUrl(),
+          `/api/v1/admin/site-pages/qr-portal?siteId=${siteId}`
+        ),
+        withClientAdminAuth({
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pageId: "qr-portal",
+            siteId: siteId,
+            sections: formData
+          })
         })
-      });
+      );
+
+      const gate = await ensureClientAuthorized(res);
+      if (gate === "forbidden") {
+        setMessage({ type: "error", text: t.siteContent.common.forbidden });
+        return;
+      }
+      if (gate !== "ok") return;
 
       if (res.ok) {
         setMessage({ type: "success", text: t.qrPortal.messages.success });
@@ -183,29 +202,49 @@ export default function QrContentPage() {
                     id="app-links" 
                     title={t.qrPortal.sections.appLinks}
                   >
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <Field label={t.qrPortal.fields.ios}>
-                        <div className="relative">
-                          <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                          <input
-                            className={`${scInput} pl-10`}
-                            value={formData.ios}
-                            onChange={e => setFormData({ ...formData, ios: e.target.value })}
-                            placeholder="https://apps.apple.com/..."
-                          />
+                    <div className="space-y-6">
+                      {/* Section Toggle */}
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div>
+                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            {t.qrPortal.visibility.hideAppLinks}
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {t.qrPortal.fields.hideAppLinks}
+                          </p>
                         </div>
-                      </Field>
-                      <Field label={t.qrPortal.fields.android}>
-                        <div className="relative">
-                          <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                          <input
-                            className={`${scInput} pl-10`}
-                            value={formData.android}
-                            onChange={e => setFormData({ ...formData, android: e.target.value })}
-                            placeholder="https://play.google.com/..."
-                          />
-                        </div>
-                      </Field>
+                        <input
+                          type="checkbox"
+                          checked={formData.hideAppLinks}
+                          onChange={e => setFormData({ ...formData, hideAppLinks: e.target.checked })}
+                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <Field label={t.qrPortal.fields.ios}>
+                          <div className="relative">
+                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <input
+                              className={`${scInput} pl-10`}
+                              value={formData.ios}
+                              onChange={e => setFormData({ ...formData, ios: e.target.value })}
+                              placeholder="https://apps.apple.com/..."
+                            />
+                          </div>
+                        </Field>
+                        <Field label={t.qrPortal.fields.android}>
+                          <div className="relative">
+                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <input
+                              className={`${scInput} pl-10`}
+                              value={formData.android}
+                              onChange={e => setFormData({ ...formData, android: e.target.value })}
+                              placeholder="https://play.google.com/..."
+                            />
+                          </div>
+                        </Field>
+                      </div>
                     </div>
                   </EditorSection>
                 )}
@@ -257,7 +296,7 @@ export default function QrContentPage() {
                                         const newLinks = formData.socialLinks.filter((_, i) => i !== idx);
                                         setFormData({ ...formData, socialLinks: newLinks });
                                       }}
-                                      className="inline-flex items-center gap-1 text-xs font-black text-red-500 hover:text-red-700 uppercase transition-colors"
+                                      className="inline-flex items-center gap-1 text-xs font-black text-red-500 hover:text-red-750 uppercase transition-colors"
                                     >
                                       <Trash2 size={14} /> {t.siteContent.common.remove}
                                     </button>
@@ -409,36 +448,56 @@ export default function QrContentPage() {
                     id="descriptions" 
                     title={t.qrPortal.sections.descriptions}
                   >
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1.5 dark:bg-slate-800 w-fit">
-                        <button
-                          type="button"
-                          onClick={() => setContentLang("mn")}
-                          className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'mn' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                          <Globe size={14} /> Монгол
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setContentLang("en")}
-                          className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'en' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                          <Globe size={14} /> English
-                        </button>
-                      </div>
-                      
-                      <Field label={contentLang === 'mn' ? t.qrPortal.fields.descPlaceholder('mn') : t.qrPortal.fields.descPlaceholder('en')}>
-                        <textarea
-                          value={formData.description[contentLang]}
-                          onChange={e => {
-                            const newDesc = { ...formData.description, [contentLang]: e.target.value };
-                            setFormData({ ...formData, description: newDesc });
-                          }}
-                          rows={8}
-                          className={scTextarea("min-h-[200px]")}
-                          placeholder={t.qrPortal.fields.descPlaceholder(contentLang)}
+                    <div className="space-y-6">
+                      {/* Section Toggle */}
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div>
+                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            {t.qrPortal.visibility.hideDescription}
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {t.qrPortal.fields.hideDescription}
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={formData.hideDescription}
+                          onChange={e => setFormData({ ...formData, hideDescription: e.target.checked })}
+                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
-                      </Field>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1.5 dark:bg-slate-800 w-fit">
+                          <button
+                            type="button"
+                            onClick={() => setContentLang("mn")}
+                            className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'mn' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
+                          >
+                            <Globe size={14} /> Монгол
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setContentLang("en")}
+                            className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'en' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
+                          >
+                            <Globe size={14} /> English
+                          </button>
+                        </div>
+                        
+                        <Field label={contentLang === 'mn' ? t.qrPortal.fields.descPlaceholder('mn') : t.qrPortal.fields.descPlaceholder('en')}>
+                          <textarea
+                            value={formData.description[contentLang]}
+                            onChange={e => {
+                              const newDesc = { ...formData.description, [contentLang]: e.target.value };
+                              setFormData({ ...formData, description: newDesc });
+                            }}
+                            rows={8}
+                            className={scTextarea("min-h-[200px]")}
+                            placeholder={t.qrPortal.fields.descPlaceholder(contentLang)}
+                          />
+                        </Field>
+                      </div>
                     </div>
                   </EditorSection>
                 )}
@@ -472,66 +531,6 @@ export default function QrContentPage() {
                           placeholder="rgba(59, 130, 246, 0.5)"
                         />
                       </Field>
-                    </div>
-                  </EditorSection>
-                )}
-
-                {tab === "visibility" && (
-                  <EditorSection 
-                    id="visibility-settings" 
-                    title={t.qrPortal.visibility.title}
-                  >
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                        <div>
-                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            {t.qrPortal.visibility.hideDescription}
-                          </label>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {t.qrPortal.fields.hideDescription}
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={formData.hideDescription}
-                          onChange={e => setFormData({ ...formData, hideDescription: e.target.checked })}
-                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                        <div>
-                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            {t.qrPortal.visibility.hideAppLinks}
-                          </label>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {t.qrPortal.fields.hideAppLinks}
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={formData.hideAppLinks}
-                          onChange={e => setFormData({ ...formData, hideAppLinks: e.target.checked })}
-                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                        <div>
-                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            {t.qrPortal.visibility.hideSocial}
-                          </label>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {t.qrPortal.fields.hideSocial}
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={formData.hideSocial}
-                          onChange={e => setFormData({ ...formData, hideSocial: e.target.checked })}
-                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                      </div>
                     </div>
                   </EditorSection>
                 )}
