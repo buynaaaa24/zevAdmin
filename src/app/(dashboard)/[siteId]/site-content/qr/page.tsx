@@ -58,6 +58,7 @@ export default function QrContentPage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [formData, setFormData] = useState({
+    logo: "",
     description: { mn: "", en: "" },
     ios: "",
     android: "",
@@ -98,6 +99,7 @@ export default function QrContentPage() {
             setFormData(prev => ({
               ...prev,
               ...data,
+              logo: data.logo || "",
               description: data.description && typeof data.description === 'object' 
                 ? { ...prev.description, ...data.description }
                 : prev.description,
@@ -507,30 +509,43 @@ export default function QrContentPage() {
                     id="branding" 
                     title={t.qrPortal.sections.branding}
                   >
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <Field label={t.qrPortal.fields.color}>
-                        <div className="flex gap-3">
-                          <input
-                            type="color"
-                            value={formData.color}
-                            onChange={e => setFormData({ ...formData, color: e.target.value })}
-                            className="h-11 w-14 shrink-0 rounded-xl border border-slate-200 bg-white p-1 cursor-pointer dark:border-slate-700 dark:bg-slate-900"
-                          />
+                    <div className="space-y-6">
+                      <SubCard>
+                        <span className="text-xs font-bold text-slate-650 dark:text-slate-400 block mb-2">
+                          Main Logo / Апп-ны лого зураг
+                        </span>
+                        <ImageUploadField
+                          value={formData.logo}
+                          onChange={path => setFormData({ ...formData, logo: path })}
+                          previewFit="contain"
+                        />
+                      </SubCard>
+
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        <Field label={t.qrPortal.fields.color}>
+                          <div className="flex gap-3">
+                            <input
+                              type="color"
+                              value={formData.color}
+                              onChange={e => setFormData({ ...formData, color: e.target.value })}
+                              className="h-11 w-14 shrink-0 rounded-xl border border-slate-200 bg-white p-1 cursor-pointer dark:border-slate-700 dark:bg-slate-900"
+                            />
+                            <input
+                              className={scInput}
+                              value={formData.color}
+                              onChange={e => setFormData({ ...formData, color: e.target.value })}
+                            />
+                          </div>
+                        </Field>
+                        <Field label={t.qrPortal.fields.glow}>
                           <input
                             className={scInput}
-                            value={formData.color}
-                            onChange={e => setFormData({ ...formData, color: e.target.value })}
+                            value={formData.glow}
+                            onChange={e => setFormData({ ...formData, glow: e.target.value })}
+                            placeholder="rgba(59, 130, 246, 0.5)"
                           />
-                        </div>
-                      </Field>
-                      <Field label={t.qrPortal.fields.glow}>
-                        <input
-                          className={scInput}
-                          value={formData.glow}
-                          onChange={e => setFormData({ ...formData, glow: e.target.value })}
-                          placeholder="rgba(59, 130, 246, 0.5)"
-                        />
-                      </Field>
+                        </Field>
+                      </div>
                     </div>
                   </EditorSection>
                 )}
