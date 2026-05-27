@@ -9,11 +9,15 @@ import {
   Layout, 
   FileEdit,
   Globe,
-  QrCode
+  QrCode,
+  Eye,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { ADMIN_BASE_PATH } from "@/lib/adminBasePath";
 import { readClientAdminToken } from "@/lib/adminClientAuth";
 import { useAdminLanguage } from "@/contexts/AdminLanguageContext";
+import ImageUploadField from "@/components/ImageUploadField";
 import {
   EditorAlerts,
   EditorBody,
@@ -28,7 +32,15 @@ import {
   SubCard,
 } from "../editorUi";
 
-type QrTabId = "app-links" | "social" | "descriptions" | "branding";
+type QrTabId = "app-links" | "social" | "descriptions" | "branding" | "visibility";
+
+interface SocialLink {
+  name: string;
+  label: string;
+  url: string;
+  icon: string;
+  color?: string;
+}
 
 export default function QrContentPage() {
   const params = useParams();
@@ -51,6 +63,10 @@ export default function QrContentPage() {
     instagramName: "",
     color: "#3b82f6",
     glow: "rgba(59, 130, 246, 0.5)",
+    hideDescription: false,
+    hideAppLinks: false,
+    hideSocial: false,
+    socialLinks: [] as SocialLink[]
   });
 
   const QR_TABS = [
@@ -58,6 +74,7 @@ export default function QrContentPage() {
     { id: "social", label: t.qrPortal.sections.social, hint: "Facebook & Instagram", icon: Share2 },
     { id: "descriptions", label: t.qrPortal.sections.descriptions, hint: "Welcome Messages", icon: FileEdit },
     { id: "branding", label: t.qrPortal.sections.branding, hint: "Colors & Glow", icon: Layout },
+    { id: "visibility", label: t.qrPortal.visibility.title, hint: "Show/Hide sections on page", icon: Eye },
   ];
 
   useEffect(() => {
@@ -74,7 +91,11 @@ export default function QrContentPage() {
               ...data,
               description: data.description && typeof data.description === 'object' 
                 ? { ...prev.description, ...data.description }
-                : prev.description
+                : prev.description,
+              hideDescription: !!data.hideDescription,
+              hideAppLinks: !!data.hideAppLinks,
+              hideSocial: !!data.hideSocial,
+              socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : []
             }));
           }
         }
@@ -194,48 +215,191 @@ export default function QrContentPage() {
                     id="social-handles" 
                     title={t.qrPortal.sections.social}
                   >
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <SubCard>
-                        <div className="space-y-4">
-                          <Field label={t.qrPortal.fields.facebook}>
-                            <input
-                              className={scInput}
-                              value={formData.facebook}
-                              onChange={e => setFormData({ ...formData, facebook: e.target.value })}
-                              placeholder="https://facebook.com/..."
-                            />
-                          </Field>
-                          <Field label={t.qrPortal.fields.facebookName}>
-                            <input
-                              className={scInput}
-                              value={formData.facebookName}
-                              onChange={e => setFormData({ ...formData, facebookName: e.target.value })}
-                              placeholder="Zevtabs"
-                            />
-                          </Field>
+                    <div className="space-y-8">
+                      {/* Dynamic links */}
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                          <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                            Dynamic Social Handles List
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newLinks = [
+                                ...formData.socialLinks,
+                                { name: "", label: "", url: "", icon: "", color: "#10b981" }
+                              ];
+                              setFormData({ ...formData, socialLinks: newLinks });
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-md transition-all duration-200"
+                          >
+                            <Plus size={14} /> {t.qrPortal.fields.addSocial}
+                          </button>
                         </div>
-                      </SubCard>
 
-                      <SubCard>
-                        <div className="space-y-4">
-                          <Field label={t.qrPortal.fields.instagram}>
-                            <input
-                              className={scInput}
-                              value={formData.instagram}
-                              onChange={e => setFormData({ ...formData, instagram: e.target.value })}
-                              placeholder="https://instagram.com/..."
-                            />
-                          </Field>
-                          <Field label={t.qrPortal.fields.instagramName}>
-                            <input
-                              className={scInput}
-                              value={formData.instagramName}
-                              onChange={e => setFormData({ ...formData, instagramName: e.target.value })}
-                              placeholder="zevtabs_official"
-                            />
-                          </Field>
-                        </div>
-                      </SubCard>
+                        {formData.socialLinks.length === 0 ? (
+                          <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-850 rounded-3xl text-slate-400 dark:text-slate-500">
+                            No dynamic social links added yet. Click the button above to add one.
+                          </div>
+                        ) : (
+                          <div className="grid gap-6">
+                            {formData.socialLinks.map((link, idx) => (
+                              <SubCard key={idx}>
+                                <div className="flex flex-col gap-6">
+                                  {/* Header with Remove Button */}
+                                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                                    <span className="text-xs font-black text-indigo-500 uppercase tracking-widest">
+                                      Social Link #{idx + 1}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newLinks = formData.socialLinks.filter((_, i) => i !== idx);
+                                        setFormData({ ...formData, socialLinks: newLinks });
+                                      }}
+                                      className="inline-flex items-center gap-1 text-xs font-black text-red-500 hover:text-red-700 uppercase transition-colors"
+                                    >
+                                      <Trash2 size={14} /> {t.siteContent.common.remove}
+                                    </button>
+                                  </div>
+
+                                  {/* Link Fields */}
+                                  <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-4">
+                                      <Field label={t.qrPortal.fields.socialName}>
+                                        <input
+                                          className={scInput}
+                                          value={link.name}
+                                          onChange={e => {
+                                            const newLinks = [...formData.socialLinks];
+                                            newLinks[idx].name = e.target.value;
+                                            setFormData({ ...formData, socialLinks: newLinks });
+                                          }}
+                                          placeholder="Facebook, Instagram, LinkedIn..."
+                                        />
+                                      </Field>
+
+                                      <Field label={t.qrPortal.fields.socialLabel}>
+                                        <input
+                                          className={scInput}
+                                          value={link.label}
+                                          onChange={e => {
+                                            const newLinks = [...formData.socialLinks];
+                                            newLinks[idx].label = e.target.value;
+                                            setFormData({ ...formData, socialLinks: newLinks });
+                                          }}
+                                          placeholder="e.g. zevtabs_official"
+                                        />
+                                      </Field>
+
+                                      <Field label={t.qrPortal.fields.socialUrl}>
+                                        <input
+                                          className={scInput}
+                                          value={link.url}
+                                          onChange={e => {
+                                            const newLinks = [...formData.socialLinks];
+                                            newLinks[idx].url = e.target.value;
+                                            setFormData({ ...formData, socialLinks: newLinks });
+                                          }}
+                                          placeholder="https://..."
+                                        />
+                                      </Field>
+
+                                      <Field label={t.qrPortal.fields.socialColor}>
+                                        <div className="flex gap-2">
+                                          <input
+                                            type="color"
+                                            value={link.color || "#10b981"}
+                                            onChange={e => {
+                                              const newLinks = [...formData.socialLinks];
+                                              newLinks[idx].color = e.target.value;
+                                              setFormData({ ...formData, socialLinks: newLinks });
+                                            }}
+                                            className="h-10 w-12 shrink-0 rounded-xl border border-slate-200 bg-white p-1 cursor-pointer dark:border-slate-700 dark:bg-slate-900"
+                                          />
+                                          <input
+                                            className={scInput}
+                                            value={link.color || ""}
+                                            onChange={e => {
+                                              const newLinks = [...formData.socialLinks];
+                                              newLinks[idx].color = e.target.value;
+                                              setFormData({ ...formData, socialLinks: newLinks });
+                                            }}
+                                            placeholder="#10b981"
+                                          />
+                                        </div>
+                                      </Field>
+                                    </div>
+
+                                    {/* Logo Upload */}
+                                    <div className="space-y-2">
+                                      <span className="text-xs font-bold text-slate-650 dark:text-slate-400 block mb-1">
+                                        {t.qrPortal.fields.socialIcon}
+                                      </span>
+                                      <ImageUploadField
+                                        value={link.icon}
+                                        onChange={path => {
+                                          const newLinks = [...formData.socialLinks];
+                                          newLinks[idx].icon = path;
+                                          setFormData({ ...formData, socialLinks: newLinks });
+                                        }}
+                                        previewFit="contain"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </SubCard>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Legacy fallbacks section for backward compatibility */}
+                      <div className="grid gap-6 sm:grid-cols-2 border-t border-slate-100 dark:border-slate-800 pt-8 mt-8">
+                        <SubCard>
+                          <h4 className="text-[11px] font-black uppercase text-slate-400 mb-4 tracking-wider">Facebook (Legacy Static Fallback)</h4>
+                          <div className="space-y-4">
+                            <Field label={t.qrPortal.fields.facebook}>
+                              <input
+                                className={scInput}
+                                value={formData.facebook}
+                                onChange={e => setFormData({ ...formData, facebook: e.target.value })}
+                                placeholder="https://facebook.com/..."
+                              />
+                            </Field>
+                            <Field label={t.qrPortal.fields.facebookName}>
+                              <input
+                                className={scInput}
+                                value={formData.facebookName}
+                                onChange={e => setFormData({ ...formData, facebookName: e.target.value })}
+                                placeholder="Zevtabs"
+                              />
+                            </Field>
+                          </div>
+                        </SubCard>
+
+                        <SubCard>
+                          <h4 className="text-[11px] font-black uppercase text-slate-400 mb-4 tracking-wider">Instagram (Legacy Static Fallback)</h4>
+                          <div className="space-y-4">
+                            <Field label={t.qrPortal.fields.instagram}>
+                              <input
+                                className={scInput}
+                                value={formData.instagram}
+                                onChange={e => setFormData({ ...formData, instagram: e.target.value })}
+                                placeholder="https://instagram.com/..."
+                              />
+                            </Field>
+                            <Field label={t.qrPortal.fields.instagramName}>
+                              <input
+                                className={scInput}
+                                value={formData.instagramName}
+                                onChange={e => setFormData({ ...formData, instagramName: e.target.value })}
+                                placeholder="zevtabs_official"
+                              />
+                            </Field>
+                          </div>
+                        </SubCard>
+                      </div>
                     </div>
                   </EditorSection>
                 )}
@@ -248,12 +412,14 @@ export default function QrContentPage() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1.5 dark:bg-slate-800 w-fit">
                         <button
+                          type="button"
                           onClick={() => setContentLang("mn")}
                           className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'mn' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                           <Globe size={14} /> Монгол
                         </button>
                         <button
+                          type="button"
                           onClick={() => setContentLang("en")}
                           className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${contentLang === 'en' ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300' : 'text-slate-500 hover:text-slate-700'}`}
                         >
@@ -306,6 +472,66 @@ export default function QrContentPage() {
                           placeholder="rgba(59, 130, 246, 0.5)"
                         />
                       </Field>
+                    </div>
+                  </EditorSection>
+                )}
+
+                {tab === "visibility" && (
+                  <EditorSection 
+                    id="visibility-settings" 
+                    title={t.qrPortal.visibility.title}
+                  >
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div>
+                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            {t.qrPortal.visibility.hideDescription}
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {t.qrPortal.fields.hideDescription}
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={formData.hideDescription}
+                          onChange={e => setFormData({ ...formData, hideDescription: e.target.checked })}
+                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div>
+                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            {t.qrPortal.visibility.hideAppLinks}
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {t.qrPortal.fields.hideAppLinks}
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={formData.hideAppLinks}
+                          onChange={e => setFormData({ ...formData, hideAppLinks: e.target.checked })}
+                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                        <div>
+                          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            {t.qrPortal.visibility.hideSocial}
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {t.qrPortal.fields.hideSocial}
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={formData.hideSocial}
+                          onChange={e => setFormData({ ...formData, hideSocial: e.target.checked })}
+                          className="h-5 w-5 rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        />
+                      </div>
                     </div>
                   </EditorSection>
                 )}
