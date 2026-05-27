@@ -302,6 +302,7 @@ type GlobalContactState = {
   phone: string;
   locationLabel: string;
   location: string;
+  locationUrl: string;
 };
 
 type AjluudState = {
@@ -394,6 +395,7 @@ const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
   phone: "",
   locationLabel: "Байршил",
   location: "",
+  locationUrl: "",
 };
 
 const EMPTY_AJLUUD: AjluudState = {
@@ -5897,6 +5899,22 @@ export default function SiteContentPage() {
                             setGlobalContact({
                               ...globalContact,
                               location: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Google Maps холбоос (байршил дарахад нээгдэнэ)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="https://maps.google.com/?q=..."
+                          value={globalContact.locationUrl}
+                          onChange={(e) =>
+                            setGlobalContact({
+                              ...globalContact,
+                              locationUrl: e.target.value,
                             })
                           }
                         />
