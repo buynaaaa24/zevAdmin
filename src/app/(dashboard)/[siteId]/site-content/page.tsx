@@ -229,7 +229,12 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string }[];
+    tiers: {
+      name: string;
+      price: string;
+      desc: string;
+      discounts: { label: string; color: string }[];
+    }[];
   };
 };
 type AmarHomeState = {
@@ -666,7 +671,12 @@ function normalizePosEase(v: unknown): PosEaseState {
       ...EMPTY_POSEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-        ? (asRecord(root.pricing).tiers as any)
+        ? (asRecord(root.pricing).tiers as any[]).map((t: any) => ({
+            name: t.name ?? "",
+            price: t.price ?? "",
+            desc: t.desc ?? "",
+            discounts: Array.isArray(t.discounts) ? t.discounts : [],
+          }))
         : [],
     },
   };
@@ -4343,13 +4353,104 @@ export default function SiteContentPage() {
                             value={tier.desc}
                             onChange={(e) => {
                               const tiers = [...posEase.pricing.tiers];
-                              tiers[i].desc = e.target.value;
+                              tiers[i] = { ...tiers[i], desc: e.target.value };
                               setPosEase({
                                 ...posEase,
                                 pricing: { ...posEase.pricing, tiers },
                               });
                             }}
                           />
+                          {/* Discount badges */}
+                          <div className="pt-2 border-t border-slate-200">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
+                              Хөнгөлөлт
+                            </p>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc, di) => (
+                                <div
+                                  key={di}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input
+                                    className={scInput}
+                                    placeholder="Жишээ: 20% хямдрал"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        label: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  />
+                                  <input
+                                    type="color"
+                                    title="Дэвсгэр өнгө"
+                                    value={disc.color || "#e11d48"}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        color: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      tiers[i] = {
+                                        ...tiers[i],
+                                        discounts: tiers[i].discounts.filter(
+                                          (_, k) => k !== di,
+                                        ),
+                                      };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  >
+                                    ✕
+                                  </DangerMini>
+                                </div>
+                              ))}
+                              <GhostButton
+                                onClick={() => {
+                                  const tiers = [...posEase.pricing.tiers];
+                                  tiers[i] = {
+                                    ...tiers[i],
+                                    discounts: [
+                                      ...(tiers[i].discounts || []),
+                                      { label: "", color: "#e11d48" },
+                                    ],
+                                  };
+                                  setPosEase({
+                                    ...posEase,
+                                    pricing: { ...posEase.pricing, tiers },
+                                  });
+                                }}
+                              >
+                                + Хөнгөлөлт нэмэх
+                              </GhostButton>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <GhostButton
@@ -4360,7 +4461,12 @@ export default function SiteContentPage() {
                               ...posEase.pricing,
                               tiers: [
                                 ...posEase.pricing.tiers,
-                                { name: "", price: "", desc: "" },
+                                {
+                                  name: "",
+                                  price: "",
+                                  desc: "",
+                                  discounts: [],
+                                },
                               ],
                             },
                           })
