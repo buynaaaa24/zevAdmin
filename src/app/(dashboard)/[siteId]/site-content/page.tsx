@@ -229,7 +229,16 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
+<<<<<<< HEAD
     tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+=======
+    tiers: {
+      name: string;
+      price: string;
+      desc: string;
+      discounts: { label: string; color: string }[];
+    }[];
+>>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
   };
 };
 type AmarHomeState = {
@@ -302,6 +311,7 @@ type GlobalContactState = {
   phone: string;
   locationLabel: string;
   location: string;
+  locationUrl: string;
 };
 
 type AjluudState = {
@@ -395,6 +405,7 @@ const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
   phone: "",
   locationLabel: "Байршил",
   location: "",
+  locationUrl: "",
 };
 
 const EMPTY_AJLUUD: AjluudState = {
@@ -675,9 +686,17 @@ function normalizePosEase(v: unknown): PosEaseState {
       ...EMPTY_POSEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
+<<<<<<< HEAD
         ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
             ...tier,
             discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
+=======
+        ? (asRecord(root.pricing).tiers as any[]).map((t: any) => ({
+            name: t.name ?? "",
+            price: t.price ?? "",
+            desc: t.desc ?? "",
+            discounts: Array.isArray(t.discounts) ? t.discounts : [],
+>>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
           }))
         : [],
     },
@@ -4423,13 +4442,14 @@ export default function SiteContentPage() {
                             value={tier.desc}
                             onChange={(e) => {
                               const tiers = [...posEase.pricing.tiers];
-                              tiers[i].desc = e.target.value;
+                              tiers[i] = { ...tiers[i], desc: e.target.value };
                               setPosEase({
                                 ...posEase,
                                 pricing: { ...posEase.pricing, tiers },
                               });
                             }}
                           />
+<<<<<<< HEAD
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                               Хөнгөлөлт / Бадж (Badges)
@@ -4460,20 +4480,90 @@ export default function SiteContentPage() {
                                       tiers[i] = { ...tiers[i], discounts };
                                       setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
                                     }}
+=======
+                          {/* Discount badges */}
+                          <div className="pt-2 border-t border-slate-200">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
+                              Хөнгөлөлт
+                            </p>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc, di) => (
+                                <div
+                                  key={di}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input
+                                    className={scInput}
+                                    placeholder="Жишээ: 20% хямдрал"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        label: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  />
+                                  <input
+                                    type="color"
+                                    title="Дэвсгэр өнгө"
+                                    value={disc.color || "#e11d48"}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        color: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+>>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                                   />
                                   <DangerMini
                                     onClick={() => {
                                       const tiers = [...posEase.pricing.tiers];
+<<<<<<< HEAD
                                       const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
                                       tiers[i] = { ...tiers[i], discounts };
                                       setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
                                     }}
                                   >
                                     Устгах
+=======
+                                      tiers[i] = {
+                                        ...tiers[i],
+                                        discounts: tiers[i].discounts.filter(
+                                          (_, k) => k !== di,
+                                        ),
+                                      };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  >
+                                    ✕
+>>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                                   </DangerMini>
                                 </div>
                               ))}
                               <GhostButton
+<<<<<<< HEAD
                                 className="text-[10px] py-1"
                                 onClick={() => {
                                   const tiers = [...posEase.pricing.tiers];
@@ -4483,6 +4573,24 @@ export default function SiteContentPage() {
                                 }}
                               >
                                 + Бадж нэмэх
+=======
+                                onClick={() => {
+                                  const tiers = [...posEase.pricing.tiers];
+                                  tiers[i] = {
+                                    ...tiers[i],
+                                    discounts: [
+                                      ...(tiers[i].discounts || []),
+                                      { label: "", color: "#e11d48" },
+                                    ],
+                                  };
+                                  setPosEase({
+                                    ...posEase,
+                                    pricing: { ...posEase.pricing, tiers },
+                                  });
+                                }}
+                              >
+                                + Хөнгөлөлт нэмэх
+>>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                               </GhostButton>
                             </div>
                           </div>
@@ -4496,7 +4604,12 @@ export default function SiteContentPage() {
                               ...posEase.pricing,
                               tiers: [
                                 ...posEase.pricing.tiers,
-                                { name: "", price: "", desc: "" },
+                                {
+                                  name: "",
+                                  price: "",
+                                  desc: "",
+                                  discounts: [],
+                                },
                               ],
                             },
                           })
@@ -6208,6 +6321,22 @@ export default function SiteContentPage() {
                             setGlobalContact({
                               ...globalContact,
                               location: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Google Maps холбоос (байршил дарахад нээгдэнэ)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="https://maps.google.com/?q=..."
+                          value={globalContact.locationUrl}
+                          onChange={(e) =>
+                            setGlobalContact({
+                              ...globalContact,
+                              locationUrl: e.target.value,
                             })
                           }
                         />
