@@ -416,6 +416,7 @@ export const adminTranslations = {
         backToList: "Жагсаалт руу буцах",
         connectHuman: "Ажилтан авах (бот унтраах)",
         backToBot: "Бот руу буцаах",
+        closeThread: "Яриаг хаах",
         inputPlaceholder: "Хариу бичих…",
         send: "Илгээх",
         roles: {
@@ -869,6 +870,7 @@ export const adminTranslations = {
         backToList: "Back to list",
         connectHuman: "Connect Human (disable bot)",
         backToBot: "Back to Bot",
+        closeThread: "Close Conversation",
         inputPlaceholder: "Type a reply...",
         send: "Send",
         roles: {

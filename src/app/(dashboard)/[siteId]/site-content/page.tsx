@@ -229,16 +229,7 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
-<<<<<<< HEAD
     tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
-=======
-    tiers: {
-      name: string;
-      price: string;
-      desc: string;
-      discounts: { label: string; color: string }[];
-    }[];
->>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
   };
 };
 type AmarHomeState = {
@@ -686,17 +677,11 @@ function normalizePosEase(v: unknown): PosEaseState {
       ...EMPTY_POSEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-<<<<<<< HEAD
-        ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
-            ...tier,
-            discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
-=======
         ? (asRecord(root.pricing).tiers as any[]).map((t: any) => ({
             name: t.name ?? "",
             price: t.price ?? "",
             desc: t.desc ?? "",
             discounts: Array.isArray(t.discounts) ? t.discounts : [],
->>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
           }))
         : [],
     },
@@ -4449,38 +4434,6 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
-<<<<<<< HEAD
-                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт / Бадж (Badges)
-                            </label>
-                            <div className="space-y-2">
-                              {(tier.discounts || []).map((disc: any, k: number) => (
-                                <div key={k} className="flex gap-2 items-center">
-                                  <input
-                                    className={`${scInput} text-xs py-1.5`}
-                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
-                                    value={disc.label}
-                                    onChange={(e) => {
-                                      const tiers = [...posEase.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], label: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
-                                    }}
-                                  />
-                                  <input
-                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
-                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
-                                    value={disc.color || ""}
-                                    onChange={(e) => {
-                                      const tiers = [...posEase.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], color: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
-                                    }}
-=======
                           {/* Discount badges */}
                           <div className="pt-2 border-t border-slate-200">
                             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
@@ -4532,22 +4485,13 @@ export default function SiteContentPage() {
                                       });
                                     }}
                                     className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
->>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                                   />
                                   <DangerMini
                                     onClick={() => {
                                       const tiers = [...posEase.pricing.tiers];
-<<<<<<< HEAD
-                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
-                                    }}
-                                  >
-                                    Устгах
-=======
                                       tiers[i] = {
                                         ...tiers[i],
-                                        discounts: tiers[i].discounts.filter(
+                                        discounts: (tiers[i].discounts || []).filter(
                                           (_, k) => k !== di,
                                         ),
                                       };
@@ -4558,22 +4502,10 @@ export default function SiteContentPage() {
                                     }}
                                   >
                                     ✕
->>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                                   </DangerMini>
                                 </div>
                               ))}
                               <GhostButton
-<<<<<<< HEAD
-                                className="text-[10px] py-1"
-                                onClick={() => {
-                                  const tiers = [...posEase.pricing.tiers];
-                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
-                                  tiers[i] = { ...tiers[i], discounts };
-                                  setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
-                                }}
-                              >
-                                + Бадж нэмэх
-=======
                                 onClick={() => {
                                   const tiers = [...posEase.pricing.tiers];
                                   tiers[i] = {
@@ -4590,7 +4522,6 @@ export default function SiteContentPage() {
                                 }}
                               >
                                 + Хөнгөлөлт нэмэх
->>>>>>> 588f1c594a8e0e7462f518d5bbef92cc78ed40bb
                               </GhostButton>
                             </div>
                           </div>

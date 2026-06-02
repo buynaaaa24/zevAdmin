@@ -425,6 +425,31 @@ export default function ChatAdminPage() {
     }
   }
 
+  async function closeConversation() {
+    if (!selected) return;
+    try {
+      const res = await fetch(
+        joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/conversations/${selected.id}`),
+        withClientAdminAuth({
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "closed" }),
+        }),
+      );
+      const gate = await ensureClientAuthorized(res);
+      if (gate === "forbidden") {
+        setError(t.siteContent.common.forbidden);
+        return;
+      }
+      if (gate !== "ok") return;
+      if (!res.ok) throw new Error(await res.text());
+      setSelected(null);
+      void loadConversations();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t.siteContent.common.error);
+    }
+  }
+
   async function saveBotConfig() {
     setConfigSaving(true);
     setConfigMsg(null);
@@ -717,6 +742,13 @@ export default function ChatAdminPage() {
                 className="min-h-9 shrink-0 rounded-lg border border-zinc-200 px-2 py-1.5 text-xs leading-tight dark:border-zinc-700 sm:max-w-none"
               >
                 {selected.humanMode ? t.chat.thread.backToBot : t.chat.thread.connectHuman}
+              </button>
+              <button
+                type="button"
+                onClick={() => void closeConversation()}
+                className="min-h-9 shrink-0 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 px-2 py-1.5 text-xs leading-tight dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300 dark:hover:bg-red-950/50 sm:max-w-none"
+              >
+                {t.chat.thread.closeThread}
               </button>
             </div>
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-3 sm:px-4">
