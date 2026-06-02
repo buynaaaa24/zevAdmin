@@ -3593,14 +3593,14 @@ export default function SiteContentPage() {
                           </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт / Бадж (Badges)
+                              Хөнгөлөлт
                             </label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc: any, k: number) => (
                                 <div key={k} className="flex gap-2 items-center">
                                   <input
                                     className={`${scInput} text-xs py-1.5`}
-                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    placeholder="6 mth /5% OFF"
                                     value={disc.label}
                                     onChange={(e) => {
                                       const tiers = [...parkEase.pricing.tiers];
@@ -3630,7 +3630,7 @@ export default function SiteContentPage() {
                                       setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
                                     }}
                                   >
-                                    Устгах
+                                    ✕
                                   </DangerMini>
                                 </div>
                               ))}
@@ -3643,7 +3643,7 @@ export default function SiteContentPage() {
                                   setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
                                 }}
                               >
-                                + Бадж нэмэх
+                                + Хөнгөлөлт нэмэх
                               </GhostButton>
                             </div>
                           </div>
@@ -4447,7 +4447,7 @@ export default function SiteContentPage() {
                                 >
                                   <input
                                     className={scInput}
-                                    placeholder="Жишээ: 20% хямдрал"
+                                    placeholder="6 mth /5% OFF"
                                     value={disc.label}
                                     onChange={(e) => {
                                       const tiers = [...posEase.pricing.tiers];
@@ -5029,14 +5029,14 @@ export default function SiteContentPage() {
                           />
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт / Бадж (Badges)
+                              Хөнгөлөлт
                             </label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc: any, k: number) => (
                                 <div key={k} className="flex gap-2 items-center">
                                   <input
                                     className={`${scInput} text-xs py-1.5`}
-                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    placeholder="6 mth /5% OFF"
                                     value={disc.label}
                                     onChange={(e) => {
                                       const tiers = [...amarHome.pricing.tiers];
@@ -5066,7 +5066,7 @@ export default function SiteContentPage() {
                                       setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
                                     }}
                                   >
-                                    Устгах
+                                    ✕
                                   </DangerMini>
                                 </div>
                               ))}
@@ -5079,7 +5079,7 @@ export default function SiteContentPage() {
                                   setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
                                 }}
                               >
-                                + Бадж нэмэх
+                                + Хөнгөлөлт нэмэх
                               </GhostButton>
                             </div>
                           </div>
@@ -6002,14 +6002,14 @@ export default function SiteContentPage() {
                           />
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт / Бадж (Badges)
+                              Хөнгөлөлт
                             </label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc: any, k: number) => (
                                 <div key={k} className="flex gap-2 items-center">
                                   <input
                                     className={`${scInput} text-xs py-1.5`}
-                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    placeholder="6 mth /5% OFF"
                                     value={disc.label}
                                     onChange={(e) => {
                                       const tiers = [...rently.pricing.tiers];
@@ -6039,7 +6039,7 @@ export default function SiteContentPage() {
                                       setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
                                     }}
                                   >
-                                    Устгах
+                                    ✕
                                   </DangerMini>
                                 </div>
                               ))}
@@ -6052,7 +6052,7 @@ export default function SiteContentPage() {
                                   setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
                                 }}
                               >
-                                + Бадж нэмэх
+                                + Хөнгөлөлт нэмэх
                               </GhostButton>
                             </div>
                           </div>
