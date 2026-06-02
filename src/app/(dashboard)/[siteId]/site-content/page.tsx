@@ -183,7 +183,7 @@ type ParkEaseState = {
     ctaBtn: string;
     note: string;
     quoteBtn: string;
-    tiers: { name: string; slots: string; features: string[] }[];
+    tiers: { name: string; slots: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
   };
   free: {
     title: string;
@@ -229,7 +229,7 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string }[];
+    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type AmarHomeState = {
@@ -258,7 +258,7 @@ type AmarHomeState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string }[];
+    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type RentlyState = {
@@ -282,12 +282,17 @@ type RentlyState = {
       image?: string;
     }[];
   };
-  notifications: { title: string; desc: string };
-  penalties: { title: string; desc: string };
-  costs: { title: string; desc: string };
+  notifications: { title: string; desc: string; label?: string; image?: string };
+  penalties: { title: string; desc: string; label?: string; image?: string };
+  costs: { title: string; desc: string; label?: string; image?: string };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string }[];
+    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+  };
+  cta?: {
+    title: string;
+    subtitle: string;
+    desc: string;
   };
 };
 type GlobalContactState = {
@@ -377,10 +382,11 @@ const EMPTY_AMARHOME: AmarHomeState = {
 const EMPTY_RENTLY: RentlyState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
   features: { title: "", desc: "", items: [] },
-  notifications: { title: "", desc: "" },
-  penalties: { title: "", desc: "" },
-  costs: { title: "", desc: "" },
+  notifications: { title: "", desc: "", label: "", image: "" },
+  penalties: { title: "", desc: "", label: "", image: "" },
+  costs: { title: "", desc: "", label: "", image: "" },
   pricing: { title: "", tiers: [] },
+  cta: { title: "", subtitle: "", desc: "" },
 };
 const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
   emailLabel: "И-Мэйл",
@@ -629,7 +635,10 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       ...EMPTY_PARKEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-        ? (asRecord(root.pricing).tiers as any)
+        ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
+            ...tier,
+            discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
+          }))
         : [],
     },
     free: {
@@ -666,7 +675,10 @@ function normalizePosEase(v: unknown): PosEaseState {
       ...EMPTY_POSEASE.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-        ? (asRecord(root.pricing).tiers as any)
+        ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
+            ...tier,
+            discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
+          }))
         : [],
     },
   };
@@ -695,7 +707,10 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
       ...EMPTY_AMARHOME.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-        ? (asRecord(root.pricing).tiers as any)
+        ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
+            ...tier,
+            discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
+          }))
         : [],
     },
   };
@@ -723,9 +738,18 @@ function normalizeRently(v: unknown): RentlyState {
       ...EMPTY_RENTLY.pricing,
       ...asRecord(root.pricing),
       tiers: Array.isArray(asRecord(root.pricing).tiers)
-        ? (asRecord(root.pricing).tiers as any)
+        ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
+            ...tier,
+            discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
+          }))
         : [],
     },
+    cta: {
+      title: "",
+      subtitle: "",
+      desc: "",
+      ...asRecord(root.cta),
+    } as { title: string; subtitle: string; desc: string },
   };
 }
 function normalizeGlobalContact(v: unknown): GlobalContactState {
@@ -843,16 +867,16 @@ export function useTabs(siteId: string) {
   ];
 
   if (siteId === "parkease") {
-    return tabs.filter((t) => t.id === "parkease");
+    return tabs.filter((t) => t.id === "parkease" || t.id === "global-contact");
   }
   if (siteId === "posease") {
-    return tabs.filter((t) => t.id === "posease" || t.id === "footer");
+    return tabs.filter((t) => t.id === "posease" || t.id === "footer" || t.id === "global-contact");
   }
   if (siteId === "amarhome") {
-    return tabs.filter((t) => t.id === "amarhome" || t.id === "footer");
+    return tabs.filter((t) => t.id === "amarhome" || t.id === "footer" || t.id === "global-contact");
   }
   if (siteId === "rently") {
-    return tabs.filter((t) => t.id === "rently" || t.id === "footer");
+    return tabs.filter((t) => t.id === "rently" || t.id === "footer" || t.id === "global-contact");
   }
   return tabs.filter(
     (t) =>
@@ -2876,7 +2900,7 @@ export default function SiteContentPage() {
                       {parkEase.how.steps.map((step, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-2"
                         >
                           <div className="flex gap-3">
                             <input
@@ -3155,7 +3179,7 @@ export default function SiteContentPage() {
                       {parkEase.payments.banks.map((bank, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-2"
                         >
                           <div className="flex gap-2">
                             <input
@@ -3283,7 +3307,7 @@ export default function SiteContentPage() {
                       {parkEase.features.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-2"
                         >
                           <div className="flex gap-3">
                             <input
@@ -3492,7 +3516,7 @@ export default function SiteContentPage() {
                       {parkEase.pricing.tiers.map((tier, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-3">
                             <input
@@ -3562,6 +3586,62 @@ export default function SiteContentPage() {
                                 });
                               }}
                             />
+                          </div>
+                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт / Бадж (Badges)
+                            </label>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc: any, k: number) => (
+                                <div key={k} className="flex gap-2 items-center">
+                                  <input
+                                    className={`${scInput} text-xs py-1.5`}
+                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...parkEase.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], label: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                    }}
+                                  />
+                                  <input
+                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                    value={disc.color || ""}
+                                    onChange={(e) => {
+                                      const tiers = [...parkEase.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], color: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                    }}
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...parkEase.pricing.tiers];
+                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                    }}
+                                  >
+                                    Устгах
+                                  </DangerMini>
+                                </div>
+                              ))}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...parkEase.pricing.tiers];
+                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                }}
+                              >
+                                + Бадж нэмэх
+                              </GhostButton>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -4069,7 +4149,7 @@ export default function SiteContentPage() {
                       {posEase.features.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4183,7 +4263,7 @@ export default function SiteContentPage() {
                       {posEase.hardware.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4294,7 +4374,7 @@ export default function SiteContentPage() {
                       {posEase.pricing.tiers.map((tier, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4350,6 +4430,62 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
+                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт / Бадж (Badges)
+                            </label>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc: any, k: number) => (
+                                <div key={k} className="flex gap-2 items-center">
+                                  <input
+                                    className={`${scInput} text-xs py-1.5`}
+                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], label: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                                    }}
+                                  />
+                                  <input
+                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                    value={disc.color || ""}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], color: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                                    }}
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                                    }}
+                                  >
+                                    Устгах
+                                  </DangerMini>
+                                </div>
+                              ))}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...posEase.pricing.tiers];
+                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } });
+                                }}
+                              >
+                                + Бадж нэмэх
+                              </GhostButton>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <GhostButton
@@ -4566,7 +4702,7 @@ export default function SiteContentPage() {
                       {amarHome.features.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4680,7 +4816,7 @@ export default function SiteContentPage() {
                       {amarHome.hardware.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4791,7 +4927,7 @@ export default function SiteContentPage() {
                       {amarHome.pricing.tiers.map((tier, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -4847,6 +4983,62 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
+                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт / Бадж (Badges)
+                            </label>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc: any, k: number) => (
+                                <div key={k} className="flex gap-2 items-center">
+                                  <input
+                                    className={`${scInput} text-xs py-1.5`}
+                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...amarHome.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], label: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                                    }}
+                                  />
+                                  <input
+                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                    value={disc.color || ""}
+                                    onChange={(e) => {
+                                      const tiers = [...amarHome.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], color: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                                    }}
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...amarHome.pricing.tiers];
+                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                                    }}
+                                  >
+                                    Устгах
+                                  </DangerMini>
+                                </div>
+                              ))}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...amarHome.pricing.tiers];
+                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
+                                }}
+                              >
+                                + Бадж нэмэх
+                              </GhostButton>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <GhostButton
@@ -4857,7 +5049,7 @@ export default function SiteContentPage() {
                               ...amarHome.pricing,
                               tiers: [
                                 ...amarHome.pricing.tiers,
-                                { name: "", price: "", desc: "" },
+                                { name: "", price: "", desc: "", discounts: [] },
                               ],
                             },
                           })
@@ -5150,6 +5342,7 @@ export default function SiteContentPage() {
                     { id: "re-penalties", label: "Торгууль" },
                     { id: "re-costs", label: "Зардал" },
                     { id: "re-pricing", label: "Үнэ тариф" },
+                    { id: "re-cta", label: "Холбоо барих хэсэг" },
                   ]}
                 >
                   <EditorSection
@@ -5344,7 +5537,7 @@ export default function SiteContentPage() {
                       {rently.features.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -5452,6 +5645,24 @@ export default function SiteContentPage() {
                     <div className="grid gap-4">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Шошго
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.notifications.label || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              notifications: {
+                                ...rently.notifications,
+                                label: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Гарчиг
                         </label>
                         <input
@@ -5486,6 +5697,23 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Зураг / Икон
+                        </label>
+                        <ImageUploadField
+                          value={rently.notifications.image || ""}
+                          onChange={(next) =>
+                            setRently({
+                              ...rently,
+                              notifications: {
+                                ...rently.notifications,
+                                image: next,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -5495,6 +5723,24 @@ export default function SiteContentPage() {
                     subtitle="Хариуцлагын болон торгуулийн мэдээлэл"
                   >
                     <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Шошго
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.penalties.label || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              penalties: {
+                                ...rently.penalties,
+                                label: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Гарчиг
@@ -5531,6 +5777,23 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Зураг / Икон
+                        </label>
+                        <ImageUploadField
+                          value={rently.penalties.image || ""}
+                          onChange={(next) =>
+                            setRently({
+                              ...rently,
+                              penalties: {
+                                ...rently.penalties,
+                                image: next,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -5540,6 +5803,24 @@ export default function SiteContentPage() {
                     subtitle="Хөлс, зардлын тайлбар"
                   >
                     <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Шошго
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.costs.label || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              costs: {
+                                ...rently.costs,
+                                label: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Гарчиг
@@ -5570,6 +5851,23 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Зураг / Икон
+                        </label>
+                        <ImageUploadField
+                          value={rently.costs.image || ""}
+                          onChange={(next) =>
+                            setRently({
+                              ...rently,
+                              costs: {
+                                ...rently.costs,
+                                image: next,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -5596,7 +5894,7 @@ export default function SiteContentPage() {
                       {rently.pricing.tiers.map((tier, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
                           <div className="flex gap-4">
                             <input
@@ -5658,6 +5956,62 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
+                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт / Бадж (Badges)
+                            </label>
+                            <div className="space-y-2">
+                              {(tier.discounts || []).map((disc: any, k: number) => (
+                                <div key={k} className="flex gap-2 items-center">
+                                  <input
+                                    className={`${scInput} text-xs py-1.5`}
+                                    placeholder="Бичвэр (жш: 6 mth /5% OFF)"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...rently.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], label: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                                    }}
+                                  />
+                                  <input
+                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                    value={disc.color || ""}
+                                    onChange={(e) => {
+                                      const tiers = [...rently.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], color: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                                    }}
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...rently.pricing.tiers];
+                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                                    }}
+                                  >
+                                    Устгах
+                                  </DangerMini>
+                                </div>
+                              ))}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...rently.pricing.tiers];
+                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
+                                }}
+                              >
+                                + Бадж нэмэх
+                              </GhostButton>
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <GhostButton
@@ -5668,7 +6022,7 @@ export default function SiteContentPage() {
                               ...rently.pricing,
                               tiers: [
                                 ...rently.pricing.tiers,
-                                { name: "", price: "", desc: "" },
+                                { name: "", price: "", desc: "", discounts: [] },
                               ],
                             },
                           })
@@ -5676,6 +6030,69 @@ export default function SiteContentPage() {
                       >
                         + Багц нэмэх
                       </GhostButton>
+                    </div>
+                  </EditorSection>
+
+                  <EditorSection
+                    id="re-cta"
+                    title="Холбоо барих хэсэг"
+                    subtitle="Хуудасны доор байрлах бүртгэлийн формын текст"
+                  >
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Дэд гарчиг (Subtitle)
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.cta?.subtitle || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              cta: {
+                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                subtitle: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Гарчиг (Title)
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.cta?.title || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              cta: {
+                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                title: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Тайлбар (Description)
+                        </label>
+                        <textarea
+                          className={scTextarea("min-h-[80px]")}
+                          value={rently.cta?.desc || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              cta: {
+                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                desc: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
