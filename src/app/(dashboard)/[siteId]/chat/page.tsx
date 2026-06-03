@@ -309,10 +309,17 @@ export default function ChatAdminPage() {
   }, [tab, loadBotConfig]);
 
   useEffect(() => {
-    const s = io(getSocketBaseUrl(), {
+    const baseUrl = getSocketBaseUrl();
+    const isRelative = !baseUrl || baseUrl.startsWith("/");
+    const socketUrl = isRelative ? window.location.origin : baseUrl;
+    const socketOptions: any = {
       transports: ["websocket", "polling"],
       withCredentials: true,
-    });
+    };
+    if (isRelative) {
+      socketOptions.path = baseUrl ? `${baseUrl}/socket.io` : "/socket.io";
+    }
+    const s = io(socketUrl, socketOptions);
     socketRef.current = s;
     s.on("message:new", (payload: { conversationId?: string; message?: Msg }) => {
       if (!payload?.conversationId || !payload?.message) return;
