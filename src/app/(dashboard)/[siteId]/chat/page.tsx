@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { Bot, ChevronLeft, MessageSquare, Plus, Trash2 } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
+import { useSearchParams } from "next/navigation";
 import {
   ensureClientAuthorized,
   withClientAdminAuth,
@@ -258,13 +259,24 @@ function triggerDesktopNotification(messageText: string, lang = "mn") {
   }
 }
 
-export default function ChatAdminPage() {
+export function ChatAdminPageContent() {
   const { lang, t } = useAdminLanguage();
+  const searchParams = useSearchParams();
+  const cId = searchParams?.get("cId");
   const [tab, setTab] = useState<ChatTab>("chats");
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [selected, setSelected] = useState<Conv | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+
+  useEffect(() => {
+    if (cId && conversations.length > 0) {
+      const found = conversations.find((c) => c.id === cId);
+      if (found && selected?.id !== cId) {
+        setSelected(found);
+      }
+    }
+  }, [cId, conversations, selected]);
 
   const DEFAULT_CHATBOT_CONFIG: ChatbotConfig = {
     startButtonLabel: t.chat.chatbot.fields.startButton,
@@ -952,5 +964,13 @@ export default function ChatAdminPage() {
       </div>
       )}
     </div>
+  );
+}
+
+export default function ChatAdminPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-zinc-500">Loading chat...</div>}>
+      <ChatAdminPageContent />
+    </Suspense>
   );
 }
