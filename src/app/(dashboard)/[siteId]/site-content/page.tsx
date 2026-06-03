@@ -154,6 +154,7 @@ type ParkEaseState = {
     desc: string;
     cta1: string;
     cta2: string;
+    cta2Link?: string;
     image?: string;
     stats: { value: string; label: string }[];
   };
@@ -336,6 +337,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
     desc: "",
     cta1: "",
     cta2: "",
+    cta2Link: "",
     stats: [],
   },
   how: { label: "", title: ["", ""], desc: "", steps: [] },
@@ -2950,6 +2952,22 @@ export default function SiteContentPage() {
                             setParkEase({
                               ...parkEase,
                               hero: { ...parkEase.hero, cta2: e.target.value },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Хоёрдогч товчны холбоос — шинэ таб нээгдэнэ (хоосон бол доош гүйлгэнэ)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://parkease.mn"
+                          value={parkEase.hero.cta2Link || ""}
+                          onChange={(e) =>
+                            setParkEase({
+                              ...parkEase,
+                              hero: { ...parkEase.hero, cta2Link: e.target.value },
                             })
                           }
                         />
