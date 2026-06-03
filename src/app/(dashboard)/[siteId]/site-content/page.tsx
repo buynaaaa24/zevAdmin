@@ -120,6 +120,10 @@ type SalesPageState = {
 type JobsPageState = { header: { title: string; intro: string } };
 type ZarPageState = {
   header: { eyebrow: string; title: string; intro: string };
+  jobsHeader?: { eyebrow: string; title: string; intro: string };
+  salesHeader?: { eyebrow: string; title: string; intro: string };
+  jobsTabLabel?: string;
+  salesTabLabel?: string;
 };
 type TeamPageState = {
   header: { eyebrow: string; h2Line1: string; h2Accent: string; intro: string };
@@ -469,6 +473,10 @@ const EMPTY_JOBS_PAGE: JobsPageState = {
 };
 const EMPTY_ZAR_PAGE: ZarPageState = {
   header: { eyebrow: "", title: "", intro: "" },
+  jobsHeader: { eyebrow: "", title: "", intro: "" },
+  salesHeader: { eyebrow: "", title: "", intro: "" },
+  jobsTabLabel: "",
+  salesTabLabel: "",
 };
 const EMPTY_TEAM_PAGE: TeamPageState = {
   header: { eyebrow: "", h2Line1: "", h2Accent: "", intro: "" },
@@ -598,6 +606,20 @@ function normalizeZarPage(v: unknown): ZarPageState {
       intro: "",
       ...asRecord(root.header),
     },
+    jobsHeader: {
+      eyebrow: "",
+      title: "",
+      intro: "",
+      ...asRecord(root.jobsHeader),
+    },
+    salesHeader: {
+      eyebrow: "",
+      title: "",
+      intro: "",
+      ...asRecord(root.salesHeader),
+    },
+    jobsTabLabel: typeof root.jobsTabLabel === "string" ? root.jobsTabLabel : "",
+    salesTabLabel: typeof root.salesTabLabel === "string" ? root.salesTabLabel : "",
   };
 }
 function normalizeTeamPage(v: unknown): TeamPageState {
@@ -1383,20 +1405,29 @@ export default function SiteContentPage() {
                   sectionJumpKey={tab}
                   sectionItems={[
                     {
-                      id: "zar-header",
-                      label: lang === "mn" ? "Толгой хэсэг" : "Header Section",
+                      id: "zar-general",
+                      label: lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings",
+                    },
+                    {
+                      id: "zar-jobs",
+                      label: lang === "mn" ? "Ажлын зар" : "Jobs Header",
+                    },
+                    {
+                      id: "zar-sales",
+                      label: lang === "mn" ? "Борлуулалтын зар" : "Sales Header",
                     },
                   ]}
                 >
+                  {/* General settings */}
                   <EditorSection
-                    id="zar-header"
-                    title={lang === "mn" ? "Толгой хэсэг" : "Header Section"}
-                    subtitle={lang === "mn" ? "Дээд шошго, гарчиг, танилцуулга" : "Eyebrow, title, intro text"}
+                    id="zar-general"
+                    title={lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings"}
+                    subtitle={lang === "mn" ? "Хуудасны ерөнхий толгой (Fallback болгон ашиглагдана)" : "General page header used as fallback"}
                   >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Дээд шошго (eyebrow)" : "Eyebrow"}
+                          {lang === "mn" ? "Ерөнхий дээд шошго (eyebrow)" : "General Eyebrow"}
                         </label>
                         <input
                           className={scInput}
@@ -1410,7 +1441,7 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Гарчиг" : "Title"}
+                          {lang === "mn" ? "Ерөнхий гарчиг" : "General Title"}
                         </label>
                         <input
                           className={scInput}
@@ -1424,21 +1455,161 @@ export default function SiteContentPage() {
                       </div>
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Танилцуулга" : "Introduction"}
+                          {lang === "mn" ? "Ерөнхий танилцуулга" : "General Introduction"}
                         </label>
                         <textarea
                           className={scTextarea("min-h-[100px]")}
                           value={zarPage.header.intro}
-                          onChange={(e) =>
-                            setZarPage({
-                              ...zarPage,
-                              header: { ...zarPage.header, intro: e.target.value },
-                            })
-                          }
+                          onChange={(e) => {
+                            const header = { ...zarPage.header, intro: e.target.value };
+                            setZarPage({ ...zarPage, header });
+                            debouncedSave("zar-page", { ...zarPage, header });
+                          }}
                         />
                       </div>
                     </div>
                   </EditorSection>
+
+                  {/* Jobs view settings */}
+                  <EditorSection
+                    id="zar-jobs"
+                    title={lang === "mn" ? "Ажлын зар тохиргоо" : "Jobs View Settings"}
+                    subtitle={lang === "mn" ? "Ажлын зарын таб болон толгой хэсэг" : "Jobs tab label and custom header"}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Ажлын зарын табын нэр" : "Jobs Tab Label"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.jobsTabLabel ?? ""}
+                          placeholder="Ажлын зар"
+                          onChange={(e) => {
+                            const next = { ...zarPage, jobsTabLabel: e.target.value };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Ажлын зарын дээд шошго (eyebrow)" : "Jobs Eyebrow"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.jobsHeader?.eyebrow ?? ""}
+                          onChange={(e) => {
+                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), eyebrow: e.target.value };
+                            const next = { ...zarPage, jobsHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Ажлын зарын гарчиг" : "Jobs Title"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.jobsHeader?.title ?? ""}
+                          onChange={(e) => {
+                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), title: e.target.value };
+                            const next = { ...zarPage, jobsHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Ажлын зарын танилцуулга" : "Jobs Introduction"}
+                        </label>
+                        <textarea
+                          className={scTextarea("min-h-[100px]")}
+                          value={zarPage.jobsHeader?.intro ?? ""}
+                          onChange={(e) => {
+                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), intro: e.target.value };
+                            const next = { ...zarPage, jobsHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+
+                  {/* Sales view settings */}
+                  <EditorSection
+                    id="zar-sales"
+                    title={lang === "mn" ? "Борлуулалтын зар тохиргоо" : "Sales View Settings"}
+                    subtitle={lang === "mn" ? "Борлуулалтын зарын таб болон толгой хэсэг" : "Sales tab label and custom header"}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Борлуулалтын зарын табын нэр" : "Sales Tab Label"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.salesTabLabel ?? ""}
+                          placeholder="Борлуулалтын зар"
+                          onChange={(e) => {
+                            const next = { ...zarPage, salesTabLabel: e.target.value };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Борлуулалтын зарын дээд шошго (eyebrow)" : "Sales Eyebrow"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.salesHeader?.eyebrow ?? ""}
+                          onChange={(e) => {
+                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), eyebrow: e.target.value };
+                            const next = { ...zarPage, salesHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Борлуулалтын зарын гарчиг" : "Sales Title"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.salesHeader?.title ?? ""}
+                          onChange={(e) => {
+                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), title: e.target.value };
+                            const next = { ...zarPage, salesHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Борлуулалтын зарын танилцуулга" : "Sales Introduction"}
+                        </label>
+                        <textarea
+                          className={scTextarea("min-h-[100px]")}
+                          value={zarPage.salesHeader?.intro ?? ""}
+                          onChange={(e) => {
+                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), intro: e.target.value };
+                            const next = { ...zarPage, salesHeader };
+                            setZarPage(next);
+                            debouncedSave("zar-page", next);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+
                   <PrimarySave
                     disabled={saving}
                     onClick={() => void save("zar-page")}
