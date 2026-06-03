@@ -183,6 +183,7 @@ type ParkEaseState = {
     ctaBtn: string;
     note: string;
     quoteBtn: string;
+    quoteLink?: string;
     tiers: { name: string; slots: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
   };
   free: {
@@ -353,6 +354,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
     ctaBtn: "",
     note: "",
     quoteBtn: "",
+    quoteLink: "",
     tiers: [],
   },
   free: { title: "", desc: "", cards: [] },
@@ -3564,6 +3566,25 @@ export default function SiteContentPage() {
                               pricing: {
                                 ...parkEase.pricing,
                                 quoteBtn: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Үнийн санал товчны холбоос
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: #kholbooBarikh эсвэл /quote"
+                          value={parkEase.pricing.quoteLink || ""}
+                          onChange={(e) =>
+                            setParkEase({
+                              ...parkEase,
+                              pricing: {
+                                ...parkEase.pricing,
+                                quoteLink: e.target.value,
                               },
                             })
                           }
