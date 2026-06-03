@@ -232,6 +232,8 @@ export default function ChatAdminPage() {
     selectedRef.current = selected;
   }, [selected]);
 
+  const [humanModeLoading, setHumanModeLoading] = useState(false);
+
   const loadConversations = useCallback(async () => {
     try {
       const res = await fetch(
@@ -279,7 +281,7 @@ export default function ChatAdminPage() {
     setConfigLoading(true);
     try {
       const res = await fetch(
-        joinBackendRequestUrl(getApiBaseUrl(), "/api/v1/admin/site-pages/chatbot"),
+        joinBackendRequestUrl(getApiBaseUrl(), "/api/v1/admin/site-pages/chatbot?lang=mn"),
         withClientAdminAuth(),
       );
       const gate = await ensureClientAuthorized(res);
@@ -408,6 +410,7 @@ export default function ChatAdminPage() {
 
   async function setHumanMode(humanMode: boolean) {
     if (!selected) return;
+    setHumanModeLoading(true);
     try {
       const res = await fetch(
         joinBackendRequestUrl(getApiBaseUrl(), `/api/v1/admin/conversations/${selected.id}`),
@@ -429,6 +432,8 @@ export default function ChatAdminPage() {
       void loadConversations();
     } catch (e) {
       setError(e instanceof Error ? e.message : t.siteContent.common.error);
+    } finally {
+      setHumanModeLoading(false);
     }
   }
 
@@ -468,21 +473,35 @@ export default function ChatAdminPage() {
           .map((n) => normalizeChoiceNode(n))
           .filter((n): n is ChatChoiceNode => Boolean(n)),
       };
-      const res = await fetch(
-        joinBackendRequestUrl(getApiBaseUrl(), "/api/v1/admin/site-pages/chatbot"),
-        withClientAdminAuth({
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sections: cleaned }),
-        }),
-      );
-      const gate = await ensureClientAuthorized(res);
-      if (gate === "forbidden") {
+      const [resMN, resEN] = await Promise.all([
+        fetch(
+          joinBackendRequestUrl(getApiBaseUrl(), "/api/v1/admin/site-pages/chatbot?lang=mn"),
+          withClientAdminAuth({
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sections: cleaned }),
+          }),
+        ),
+        fetch(
+          joinBackendRequestUrl(getApiBaseUrl(), "/api/v1/admin/site-pages/chatbot?lang=en"),
+          withClientAdminAuth({
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sections: cleaned }),
+          }),
+        ),
+      ]);
+
+      const gateMN = await ensureClientAuthorized(resMN);
+      if (gateMN === "forbidden") {
         setError(t.siteContent.common.forbidden);
         return;
       }
-      if (gate !== "ok") return;
-      if (!res.ok) throw new Error(await res.text());
+      if (gateMN !== "ok") return;
+
+      if (!resMN.ok) throw new Error(await resMN.text());
+      if (!resEN.ok) throw new Error(await resEN.text());
+
       setConfigMsg(t.chat.chatbot.status.success);
       setTimeout(() => setConfigMsg(null), 3000);
     } catch (e) {
@@ -707,8 +726,24 @@ export default function ChatAdminPage() {
                 : "hover:bg-zinc-50 dark:hover:bg-zinc-900"
             }`}
           >
-            <div className="font-medium truncate">
-               {c.displayName || (t.chat.thread.roles.user + " " + c.guestId.slice(0, 8))}
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-medium truncate flex-1">
+                {c.displayName || (
+                  <>
+                    {t.chat.thread.roles.user}
+                    {c.updatedAt && (
+                      <span className="ml-1.5 opacity-60 font-normal">
+                        · {new Date(c.updatedAt).toLocaleDateString([], { month: '2-digit', day: '2-digit' })} {new Date(c.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+              {c.updatedAt && (
+                <div className="shrink-0 text-[10px] text-zinc-400">
+                  {new Date(c.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              )}
             </div>
             <div className="text-xs text-zinc-500">
               {c.humanMode ? t.chat.thread.roles.agent("") : t.chat.thread.roles.bot} · {c.status}
@@ -746,9 +781,10 @@ export default function ChatAdminPage() {
               <button
                 type="button"
                 onClick={() => setHumanMode(!selected.humanMode)}
-                className="min-h-9 shrink-0 rounded-lg border border-zinc-200 px-2 py-1.5 text-xs leading-tight dark:border-zinc-700 sm:max-w-none"
+                disabled={humanModeLoading}
+                className="min-h-9 shrink-0 rounded-lg border border-zinc-200 px-2 py-1.5 text-xs leading-tight dark:border-zinc-700 sm:max-w-none disabled:opacity-50"
               >
-                {selected.humanMode ? t.chat.thread.backToBot : t.chat.thread.connectHuman}
+                {humanModeLoading ? t.chat.chatbot.status.saving : (selected.humanMode ? t.chat.thread.backToBot : t.chat.thread.connectHuman)}
               </button>
               <button
                 type="button"
@@ -775,13 +811,20 @@ export default function ChatAdminPage() {
                           : "bg-amber-100 text-amber-950 dark:bg-amber-900 dark:text-amber-50"
                     }`}
                   >
-                    <span className="mb-0.5 block text-[10px] uppercase opacity-70">
-                      {m.role === "agent" && (m.agentDisplayName || m.agentUsername)
-                        ? t.chat.thread.roles.agent(m.agentDisplayName || m.agentUsername || "")
-                        : m.role === "user"
-                          ? t.chat.thread.roles.user
-                          : t.chat.thread.roles.bot}
-                    </span>
+                    <div className="mb-0.5 flex items-center justify-between gap-3 text-[10px] uppercase opacity-70">
+                      <span>
+                        {m.role === "agent" && (m.agentDisplayName || m.agentUsername)
+                          ? t.chat.thread.roles.agent(m.agentDisplayName || m.agentUsername || "")
+                          : m.role === "user"
+                            ? t.chat.thread.roles.user
+                            : t.chat.thread.roles.bot}
+                      </span>
+                      {m.createdAt && (
+                        <span>
+                          {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
                     {m.text}
                   </div>
                 </div>
