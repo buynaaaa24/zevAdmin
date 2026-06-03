@@ -3697,6 +3697,19 @@ export default function SiteContentPage() {
                                       setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
                                     }}
                                   />
+                                  <input
+                                    type="color"
+                                    title="Дэвсгэр өнгө"
+                                    value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"}
+                                    onChange={(e) => {
+                                      const tiers = [...parkEase.pricing.tiers];
+                                      const discounts = [...(tiers[i].discounts || [])];
+                                      discounts[k] = { ...discounts[k], color: e.target.value };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                    }}
+                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                  />
                                   <DangerMini
                                     onClick={() => {
                                       const tiers = [...parkEase.pricing.tiers];
@@ -4450,7 +4463,8 @@ export default function SiteContentPage() {
                               {(tier.discounts || []).map((disc, di) => (
                                 <div key={di} className="flex items-center gap-2">
                                   <input className={scInput} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
-                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color || "#e11d48"} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
+                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #e11d48)" value={disc.color || ""} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#e11d48"} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
                                   <DangerMini onClick={() => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], discounts: (tiers[i].discounts || []).filter((_, k) => k !== di) }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
@@ -4881,6 +4895,7 @@ export default function SiteContentPage() {
                                 <div key={k} className="flex gap-2 items-center">
                                   <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
                                   <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
                                   <DangerMini onClick={() => { const tiers = [...amarHome.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
@@ -5725,6 +5740,7 @@ export default function SiteContentPage() {
                                 <div key={k} className="flex gap-2 items-center">
                                   <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
                                   <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
                                   <DangerMini onClick={() => { const tiers = [...rently.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
