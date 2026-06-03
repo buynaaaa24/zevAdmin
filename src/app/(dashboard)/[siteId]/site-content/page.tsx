@@ -118,6 +118,9 @@ type SalesPageState = {
   header: { eyebrow: string; title: string; intro: string };
 };
 type JobsPageState = { header: { title: string; intro: string } };
+type ZarPageState = {
+  header: { eyebrow: string; title: string; intro: string };
+};
 type TeamPageState = {
   header: { eyebrow: string; h2Line1: string; h2Accent: string; intro: string };
   members: {
@@ -464,6 +467,9 @@ const EMPTY_SALES_PAGE: SalesPageState = {
 const EMPTY_JOBS_PAGE: JobsPageState = {
   header: { title: "", intro: "" },
 };
+const EMPTY_ZAR_PAGE: ZarPageState = {
+  header: { eyebrow: "", title: "", intro: "" },
+};
 const EMPTY_TEAM_PAGE: TeamPageState = {
   header: { eyebrow: "", h2Line1: "", h2Accent: "", intro: "" },
   members: [],
@@ -582,6 +588,17 @@ function normalizeSalesPage(v: unknown): SalesPageState {
 function normalizeJobsPage(v: unknown): JobsPageState {
   const root = asRecord(v);
   return { header: { ...EMPTY_JOBS_PAGE.header, ...asRecord(root.header) } };
+}
+function normalizeZarPage(v: unknown): ZarPageState {
+  const root = asRecord(v);
+  return {
+    header: {
+      eyebrow: "",
+      title: "",
+      intro: "",
+      ...asRecord(root.header),
+    },
+  };
 }
 function normalizeTeamPage(v: unknown): TeamPageState {
   const root = asRecord(v);
@@ -801,7 +818,7 @@ async function fetchSections(
 }
 
 export function useTabs(siteId: string) {
-  const { t } = useAdminLanguage();
+  const { lang, t } = useAdminLanguage();
   const tabs = [
     {
       id: "home" as const,
@@ -870,6 +887,12 @@ export function useTabs(siteId: string) {
       icon: ClipboardList,
     },
     {
+      id: "zar-page" as const,
+      label: lang === "mn" ? "Зар хуудас" : "Zar Page",
+      hint: lang === "mn" ? "Зар хуудасны толгой, тайлбар" : "Zar page header and description",
+      icon: Newspaper,
+    },
+    {
       id: "global-contact" as const,
       label: "Глобал холбоо",
       hint: "Бүх бүтээгдэхүүний хуудсанд харагдах нийтлэг холбоо барих мэдээлэл",
@@ -906,6 +929,7 @@ type TabId =
   | "properties-page"
   | "sales-page"
   | "jobs-page"
+  | "zar-page"
   | "team"
   | "footer"
   | "parkease"
@@ -944,6 +968,7 @@ export default function SiteContentPage() {
   );
   const [salesPage, setSalesPage] = useState<SalesPageState>(EMPTY_SALES_PAGE);
   const [jobsPage, setJobsPage] = useState<JobsPageState>(EMPTY_JOBS_PAGE);
+  const [zarPage, setZarPage] = useState<ZarPageState>(EMPTY_ZAR_PAGE);
   const [teamPage, setTeamPage] = useState<TeamPageState>(EMPTY_TEAM_PAGE);
   const [parkEase, setParkEase] = useState<ParkEaseState>(EMPTY_PARKEASE);
   const [posEase, setPosEase] = useState<PosEaseState>(EMPTY_POSEASE);
@@ -957,7 +982,7 @@ export default function SiteContentPage() {
     setError(null);
     setLoading(true);
     try {
-      const [h, a, svc, c, pp, sp, jp, tm, f, pke, pe, ah, re, aj, gc] =
+      const [h, a, svc, c, pp, sp, jp, zp, tm, f, pke, pe, ah, re, aj, gc] =
         await Promise.all([
           fetchSections("home", lang, siteId),
           fetchSections("about", lang, siteId),
@@ -966,6 +991,7 @@ export default function SiteContentPage() {
           fetchSections("properties-page", lang, siteId),
           fetchSections("sales-page", lang, siteId),
           fetchSections("jobs-page", lang, siteId),
+          fetchSections("zar-page", lang, siteId),
           fetchSections("team", lang, siteId),
           fetchSections("footer", lang, siteId),
           fetchSections("parkease", lang, siteId),
@@ -982,6 +1008,7 @@ export default function SiteContentPage() {
       setPropertiesPage(normalizePropertiesPage(pp));
       setSalesPage(normalizeSalesPage(sp));
       setJobsPage(normalizeJobsPage(jp));
+      setZarPage(normalizeZarPage(zp));
       setTeamPage(normalizeTeamPage(tm));
       setFooter(normalizeFooter(f));
       setParkEase(normalizeParkEase(pke));
@@ -1057,19 +1084,21 @@ export default function SiteContentPage() {
               ? contact
               : pageId === "properties-page"
                 ? propertiesPage
-                : pageId === "parkease"
-                  ? parkEase
-                  : pageId === "posease"
-                    ? posEase
-                    : pageId === "amarhome"
-                      ? amarHome
-                      : pageId === "ajluud"
-                        ? ajluud
-                        : pageId === "rently"
-                          ? rently
-                          : pageId === "global-contact"
-                            ? globalContact
-                            : footer;
+                : pageId === "zar-page"
+                  ? zarPage
+                  : pageId === "parkease"
+                    ? parkEase
+                    : pageId === "posease"
+                      ? posEase
+                      : pageId === "amarhome"
+                        ? amarHome
+                        : pageId === "ajluud"
+                          ? ajluud
+                          : pageId === "rently"
+                            ? rently
+                            : pageId === "global-contact"
+                              ? globalContact
+                              : footer;
     const saveSiteId = pageId === "global-contact" ? "zevtabs" : siteId;
     try {
       const res = await fetch(
@@ -1346,6 +1375,78 @@ export default function SiteContentPage() {
                       ? t.common.saving
                       : t.siteContent.common.saveTab(
                           t.siteContent.tabs.home.label,
+                        )}
+                  </PrimarySave>
+                </EditorBody>
+              ) : tab === "zar-page" ? (
+                <EditorBody
+                  sectionJumpKey={tab}
+                  sectionItems={[
+                    {
+                      id: "zar-header",
+                      label: lang === "mn" ? "Толгой хэсэг" : "Header Section",
+                    },
+                  ]}
+                >
+                  <EditorSection
+                    id="zar-header"
+                    title={lang === "mn" ? "Толгой хэсэг" : "Header Section"}
+                    subtitle={lang === "mn" ? "Дээд шошго, гарчиг, танилцуулга" : "Eyebrow, title, intro text"}
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Дээд шошго (eyebrow)" : "Eyebrow"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.header.eyebrow}
+                          onChange={(e) => {
+                            const header = { ...zarPage.header, eyebrow: e.target.value };
+                            setZarPage({ ...zarPage, header });
+                            debouncedSave("zar-page", { ...zarPage, header });
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Гарчиг" : "Title"}
+                        </label>
+                        <input
+                          className={scInput}
+                          value={zarPage.header.title}
+                          onChange={(e) => {
+                            const header = { ...zarPage.header, title: e.target.value };
+                            setZarPage({ ...zarPage, header });
+                            debouncedSave("zar-page", { ...zarPage, header });
+                          }}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          {lang === "mn" ? "Танилцуулга" : "Introduction"}
+                        </label>
+                        <textarea
+                          className={scTextarea("min-h-[100px]")}
+                          value={zarPage.header.intro}
+                          onChange={(e) =>
+                            setZarPage({
+                              ...zarPage,
+                              header: { ...zarPage.header, intro: e.target.value },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+                  <PrimarySave
+                    disabled={saving}
+                    onClick={() => void save("zar-page")}
+                  >
+                    {saving
+                      ? t.common.saving
+                      : t.siteContent.common.saveTab(
+                          lang === "mn" ? "Зар" : "Zar",
                         )}
                   </PrimarySave>
                 </EditorBody>
