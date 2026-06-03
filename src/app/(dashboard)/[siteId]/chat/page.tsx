@@ -321,21 +321,44 @@ export default function ChatAdminPage() {
     if (isRelative) {
       socketOptions.path = baseUrl ? `${baseUrl}/socket.io` : "/socket.io";
     }
+    console.log(`[Admin Chat Socket] Initializing connection to ${socketUrl} with options:`, socketOptions);
     const s = io(socketUrl, socketOptions);
     socketRef.current = s;
+
+    s.on("connect", () => {
+      console.log(`[Admin Chat Socket] Connected successfully! Socket ID: ${s.id}`);
+    });
+
+    s.on("connect_error", (err) => {
+      console.error("[Admin Chat Socket] Connection error:", err);
+    });
+
+    s.on("disconnect", (reason) => {
+      console.log(`[Admin Chat Socket] Disconnected. Reason: ${reason}`);
+    });
+
     s.on("message:new", (payload: { conversationId?: string; message?: Msg }) => {
-      if (!payload?.conversationId || !payload?.message) return;
+      console.log("[Admin Chat Socket] Received message:new event payload:", payload);
+      if (!payload?.conversationId || !payload?.message) {
+        console.warn("[Admin Chat Socket] Received invalid message payload");
+        return;
+      }
       const openId = selectedRef.current?.id;
       if (openId === payload.conversationId) {
+        console.log(`[Admin Chat Socket] Message belongs to active conversation ${openId}. Adding to messages.`);
         setMessages((prev) => {
           const id = payload.message!.id;
           if (prev.some((m) => m.id === id)) return prev;
           return [...prev, payload.message!];
         });
+      } else {
+        console.log(`[Admin Chat Socket] Message belongs to other conversation ${payload.conversationId} (active is ${openId})`);
       }
       void loadConversations();
     });
+
     return () => {
+      console.log("[Admin Chat Socket] Cleaning up socket connection");
       s.disconnect();
       socketRef.current = null;
       joinedConvRef.current = null;
@@ -350,15 +373,22 @@ export default function ChatAdminPage() {
     const leavePrevAndJoin = () => {
       const previous = joinedConvRef.current;
       if (previous && previous !== convId) {
+        console.log(`[Admin Chat Socket] Leaving previous conversation room: ${previous}`);
         socket.emit("leave", { conversationId: previous });
       }
       joinedConvRef.current = convId;
       if (!convId) return;
+      console.log(`[Admin Chat Socket] Joining conversation room asAdmin: ${convId}`);
       socket.emit(
         "join",
         { conversationId: convId, asAdmin: true },
         (err: Error | null) => {
-          if (err) setError(err.message);
+          if (err) {
+            console.error(`[Admin Chat Socket] Join failed:`, err);
+            setError(err.message);
+          } else {
+            console.log(`[Admin Chat Socket] Successfully joined conversation room: ${convId}`);
+          }
         },
       );
     };
