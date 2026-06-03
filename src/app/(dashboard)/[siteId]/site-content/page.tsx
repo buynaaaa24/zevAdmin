@@ -173,7 +173,7 @@ type ParkEaseState = {
     label: string;
     title: string;
     desc: string;
-    items: { title: string; desc: string }[];
+    items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[];
   };
   pricing: {
     label: string;
@@ -630,7 +630,12 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       ...EMPTY_PARKEASE.features,
       ...asRecord(root.features),
       items: Array.isArray(asRecord(root.features).items)
-        ? (asRecord(root.features).items as any)
+        ? (asRecord(root.features).items as any[]).map((item) => ({
+            title: item.title || "",
+            desc: item.desc || "",
+            size: item.size || "medium",
+            image: item.image || "",
+          }))
         : [],
     },
     pricing: {
@@ -3290,6 +3295,24 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Хэсгийн гарчиг
+                        </label>
+                        <input
+                          className={scInput}
+                          value={parkEase.features.title}
+                          onChange={(e) =>
+                            setParkEase({
+                              ...parkEase,
+                              features: {
+                                ...parkEase.features,
+                                title: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Хэсгийн тайлбар
                         </label>
                         <textarea
@@ -3307,15 +3330,15 @@ export default function SiteContentPage() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {parkEase.features.items.map((item, i) => (
                         <div
                           key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-2"
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
                         >
-                          <div className="flex gap-3">
+                          <div className="flex gap-4">
                             <input
-                              className={`${scInput} flex-1`}
+                              className={scInput}
                               placeholder="Гарчиг"
                               value={item.title}
                               onChange={(e) => {
@@ -3330,22 +3353,53 @@ export default function SiteContentPage() {
                                 });
                               }}
                             />
-                            <DangerMini
-                              onClick={() =>
+                            <select
+                              className={scInput}
+                              value={item.size || "medium"}
+                              onChange={(e) => {
+                                const items = [...parkEase.features.items];
+                                items[i] = {
+                                  ...items[i],
+                                  size: e.target.value as
+                                    | "small"
+                                    | "medium"
+                                    | "large",
+                                };
                                 setParkEase({
                                   ...parkEase,
-                                  features: {
-                                    ...parkEase.features,
-                                    items: parkEase.features.items.filter(
-                                      (_, j) => j !== i,
-                                    ),
-                                  },
-                                })
-                              }
+                                  features: { ...parkEase.features, items },
+                                });
+                              }}
+                            >
+                              <option value="small">Жижиг</option>
+                              <option value="medium">Дунд</option>
+                              <option value="large">Том</option>
+                            </select>
+                            <DangerMini
+                              onClick={() => {
+                                const items = parkEase.features.items.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setParkEase({
+                                  ...parkEase,
+                                  features: { ...parkEase.features, items },
+                                });
+                              }}
                             >
                               Устгах
                             </DangerMini>
                           </div>
+                          <ImageUploadField
+                            value={item.image || ""}
+                            onChange={(next) => {
+                              const items = [...parkEase.features.items];
+                              items[i] = { ...items[i], image: next };
+                              setParkEase({
+                                ...parkEase,
+                                features: { ...parkEase.features, items },
+                              });
+                            }}
+                          />
                           <textarea
                             className={scTextarea("min-h-[60px]")}
                             placeholder="Тайлбар"
@@ -3369,7 +3423,7 @@ export default function SiteContentPage() {
                               ...parkEase.features,
                               items: [
                                 ...parkEase.features.items,
-                                { title: "", desc: "" },
+                                { title: "", desc: "", size: "medium", image: "" },
                               ],
                             },
                           })
