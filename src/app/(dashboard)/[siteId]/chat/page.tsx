@@ -204,8 +204,62 @@ function ChatChoiceEditor({
 
 type ChatTab = "chats" | "chatbot";
 
+function playNotificationSound() {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const audioCtx = new AudioContextClass();
+    const now = audioCtx.currentTime;
+    
+    // Tone 1
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    osc1.frequency.exponentialRampToValueAtTime(880.00, now + 0.12); // A5
+    gain1.gain.setValueAtTime(0.15, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.6);
+    
+    // Tone 2 (harmony)
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = "triangle";
+    osc2.frequency.setValueAtTime(1174.66, now); // D6
+    gain2.gain.setValueAtTime(0.04, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(now);
+    osc2.stop(now + 0.4);
+  } catch (err) {
+    console.warn("Failed to play notification sound:", err);
+  }
+}
+
+function triggerDesktopNotification(messageText: string, lang = "mn") {
+  if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+    try {
+      const title = lang === "mn" ? "Шинэ чат ирлээ" : "New chat received";
+      const n = new Notification(title, {
+        body: messageText,
+        icon: "/favicon.ico",
+      });
+      n.onclick = () => {
+        window.focus();
+      };
+    } catch (e) {
+      console.warn("Desktop notification failed:", e);
+    }
+  }
+}
+
 export default function ChatAdminPage() {
-  const { t } = useAdminLanguage();
+  const { lang, t } = useAdminLanguage();
   const [tab, setTab] = useState<ChatTab>("chats");
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [selected, setSelected] = useState<Conv | null>(null);
@@ -301,6 +355,16 @@ export default function ChatAdminPage() {
   }, [t, normalizeChatbotConfig]);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().catch((err) => {
+          console.warn("Notification permission request error:", err);
+        });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     void loadConversations();
     const t = setInterval(() => void loadConversations(), 60000);
     return () => clearInterval(t);
@@ -343,6 +407,12 @@ export default function ChatAdminPage() {
         console.warn("[Admin Chat Socket] Received invalid message payload");
         return;
       }
+
+      if (payload.message.role === "user") {
+        playNotificationSound();
+        triggerDesktopNotification(payload.message.text, lang);
+      }
+
       const openId = selectedRef.current?.id;
       if (openId === payload.conversationId) {
         console.log(`[Admin Chat Socket] Message belongs to active conversation ${openId}. Adding to messages.`);
@@ -363,7 +433,7 @@ export default function ChatAdminPage() {
       socketRef.current = null;
       joinedConvRef.current = null;
     };
-  }, [loadConversations]);
+  }, [loadConversations, lang]);
 
   useEffect(() => {
     const socket = socketRef.current;
