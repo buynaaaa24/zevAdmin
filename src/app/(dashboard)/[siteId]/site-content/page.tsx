@@ -228,8 +228,14 @@ type PosEaseState = {
     items: { name: string; desc: string; label: string; image?: string }[];
   };
   pricing: {
+    label: string;
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    desc: string;
+    mostPopular: string;
+    ctaBtn: string;
+    note: string;
+    quoteBtn: string;
+    tiers: { name: string; price: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type AmarHomeState = {
@@ -257,8 +263,14 @@ type AmarHomeState = {
     items: { name: string; desc: string; label: string; image?: string }[];
   };
   pricing: {
+    label: string;
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    desc: string;
+    mostPopular: string;
+    ctaBtn: string;
+    note: string;
+    quoteBtn: string;
+    tiers: { name: string; price: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type RentlyState = {
@@ -286,8 +298,14 @@ type RentlyState = {
   penalties: { title: string; desc: string; label?: string; image?: string };
   costs: { title: string; desc: string; label?: string; image?: string };
   pricing: {
+    label: string;
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    desc: string;
+    mostPopular: string;
+    ctaBtn: string;
+    note: string;
+    quoteBtn: string;
+    tiers: { name: string; price: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
   };
   cta?: {
     title: string;
@@ -368,17 +386,18 @@ const EMPTY_PARKEASE: ParkEaseState = {
     location: "",
   },
 };
+const EMPTY_PRODUCT_PRICING = { label: "", title: "", desc: "", mostPopular: "", ctaBtn: "", note: "", quoteBtn: "", tiers: [] };
 const EMPTY_POSEASE: PosEaseState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
-  pricing: { title: "", tiers: [] },
+  pricing: { ...EMPTY_PRODUCT_PRICING },
 };
 const EMPTY_AMARHOME: AmarHomeState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "" },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
-  pricing: { title: "", tiers: [] },
+  pricing: { ...EMPTY_PRODUCT_PRICING },
 };
 const EMPTY_RENTLY: RentlyState = {
   hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
@@ -386,7 +405,7 @@ const EMPTY_RENTLY: RentlyState = {
   notifications: { title: "", desc: "", label: "", image: "" },
   penalties: { title: "", desc: "", label: "", image: "" },
   costs: { title: "", desc: "", label: "", image: "" },
-  pricing: { title: "", tiers: [] },
+  pricing: { ...EMPTY_PRODUCT_PRICING },
   cta: { title: "", subtitle: "", desc: "" },
 };
 const EMPTY_GLOBAL_CONTACT: GlobalContactState = {
@@ -680,7 +699,7 @@ function normalizePosEase(v: unknown): PosEaseState {
         ? (asRecord(root.pricing).tiers as any[]).map((t: any) => ({
             name: t.name ?? "",
             price: t.price ?? "",
-            desc: t.desc ?? "",
+            features: Array.isArray(t.features) ? t.features : [],
             discounts: Array.isArray(t.discounts) ? t.discounts : [],
           }))
         : [],
@@ -713,6 +732,7 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
       tiers: Array.isArray(asRecord(root.pricing).tiers)
         ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
             ...tier,
+            features: Array.isArray(tier.features) ? tier.features : [],
             discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
           }))
         : [],
@@ -744,6 +764,7 @@ function normalizeRently(v: unknown): RentlyState {
       tiers: Array.isArray(asRecord(root.pricing).tiers)
         ? (asRecord(root.pricing).tiers as any[]).map((tier) => ({
             ...tier,
+            features: Array.isArray(tier.features) ? tier.features : [],
             discounts: Array.isArray(tier.discounts) ? tier.discounts : [],
           }))
         : [],
@@ -4355,199 +4376,65 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="pe-pricing" title="Үнэ тариф">
-                    <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                        Хэсгийн гарчиг
-                      </label>
-                      <input
-                        className={scInput}
-                        value={posEase.pricing.title}
-                        onChange={(e) =>
-                          setPosEase({
-                            ...posEase,
-                            pricing: {
-                              ...posEase.pricing,
-                              title: e.target.value,
-                            },
-                          })
-                        }
-                      />
+                  <EditorSection id="pe-pricing" title="Үнэ тариф" subtitle="Үнийн багцууд болон товчны текст">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
+                        <input className={scInput} value={posEase.pricing.label} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, label: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={posEase.pricing.title} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={posEase.pricing.desc} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хамгийн алдартай шошго</label>
+                        <input className={scInput} placeholder="жш: Хамгийн алдартай" value={posEase.pricing.mostPopular} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, mostPopular: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товч текст</label>
+                        <input className={scInput} placeholder="жш: Эхлэх →" value={posEase.pricing.ctaBtn} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, ctaBtn: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
+                        <input className={scInput} value={posEase.pricing.note} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, note: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үнийн санал товч</label>
+                        <input className={scInput} placeholder="жш: Холбоо барих →" value={posEase.pricing.quoteBtn} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, quoteBtn: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-4">
                       {posEase.pricing.tiers.map((tier, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
-                        >
-                          <div className="flex gap-4">
-                            <input
-                              className={scInput}
-                              placeholder="Багцын нэр"
-                              value={tier.name}
-                              onChange={(e) => {
-                                const tiers = [...posEase.pricing.tiers];
-                                tiers[i].name = e.target.value;
-                                setPosEase({
-                                  ...posEase,
-                                  pricing: { ...posEase.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <input
-                              className={scInput}
-                              placeholder="Үнэ"
-                              value={tier.price}
-                              onChange={(e) => {
-                                const tiers = [...posEase.pricing.tiers];
-                                tiers[i].price = e.target.value;
-                                setPosEase({
-                                  ...posEase,
-                                  pricing: { ...posEase.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <DangerMini
-                              onClick={() => {
-                                const tiers = posEase.pricing.tiers.filter(
-                                  (_, j) => j !== i,
-                                );
-                                setPosEase({
-                                  ...posEase,
-                                  pricing: { ...posEase.pricing, tiers },
-                                });
-                              }}
-                            >
-                              Устгах
-                            </DangerMini>
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                          <div className="flex gap-3">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                            <DangerMini onClick={() => setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers: posEase.pricing.tiers.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
                           </div>
-                          <textarea
-                            className={scTextarea("min-h-[60px]")}
-                            placeholder="Тайлбар"
-                            value={tier.desc}
-                            onChange={(e) => {
-                              const tiers = [...posEase.pricing.tiers];
-                              tiers[i] = { ...tiers[i], desc: e.target.value };
-                              setPosEase({
-                                ...posEase,
-                                pricing: { ...posEase.pricing, tiers },
-                              });
-                            }}
-                          />
-                          {/* Discount badges */}
-                          <div className="pt-2 border-t border-slate-200">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
-                              Хөнгөлөлт
-                            </p>
+                          <div className="space-y-1">
+                            <label className="text-xs text-zinc-500">Боломжуудын жагсаалт (мөр бүр нэг боломж)</label>
+                            <textarea className={scTextarea("min-h-[80px]")} value={(tier.features || []).join("\n")} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], features: e.target.value.split("\n") }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                          </div>
+                          <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc, di) => (
-                                <div
-                                  key={di}
-                                  className="flex items-center gap-2"
-                                >
-                                  <input
-                                    className={scInput}
-                                    placeholder="6 mth /5% OFF"
-                                    value={disc.label}
-                                    onChange={(e) => {
-                                      const tiers = [...posEase.pricing.tiers];
-                                      const discounts = [
-                                        ...(tiers[i].discounts || []),
-                                      ];
-                                      discounts[di] = {
-                                        ...discounts[di],
-                                        label: e.target.value,
-                                      };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setPosEase({
-                                        ...posEase,
-                                        pricing: { ...posEase.pricing, tiers },
-                                      });
-                                    }}
-                                  />
-                                  <input
-                                    type="color"
-                                    title="Дэвсгэр өнгө"
-                                    value={disc.color || "#e11d48"}
-                                    onChange={(e) => {
-                                      const tiers = [...posEase.pricing.tiers];
-                                      const discounts = [
-                                        ...(tiers[i].discounts || []),
-                                      ];
-                                      discounts[di] = {
-                                        ...discounts[di],
-                                        color: e.target.value,
-                                      };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setPosEase({
-                                        ...posEase,
-                                        pricing: { ...posEase.pricing, tiers },
-                                      });
-                                    }}
-                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
-                                  />
-                                  <DangerMini
-                                    onClick={() => {
-                                      const tiers = [...posEase.pricing.tiers];
-                                      tiers[i] = {
-                                        ...tiers[i],
-                                        discounts: (tiers[i].discounts || []).filter(
-                                          (_, k) => k !== di,
-                                        ),
-                                      };
-                                      setPosEase({
-                                        ...posEase,
-                                        pricing: { ...posEase.pricing, tiers },
-                                      });
-                                    }}
-                                  >
-                                    ✕
-                                  </DangerMini>
+                                <div key={di} className="flex gap-2 items-center">
+                                  <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                                  <DangerMini onClick={() => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], discounts: (tiers[i].discounts || []).filter((_, k) => k !== di) }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
-                              <GhostButton
-                                onClick={() => {
-                                  const tiers = [...posEase.pricing.tiers];
-                                  tiers[i] = {
-                                    ...tiers[i],
-                                    discounts: [
-                                      ...(tiers[i].discounts || []),
-                                      { label: "", color: "#e11d48" },
-                                    ],
-                                  };
-                                  setPosEase({
-                                    ...posEase,
-                                    pricing: { ...posEase.pricing, tiers },
-                                  });
-                                }}
-                              >
-                                + Хөнгөлөлт нэмэх
-                              </GhostButton>
+                              <GhostButton className="text-[10px] py-1" onClick={() => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }]; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton
-                        onClick={() =>
-                          setPosEase({
-                            ...posEase,
-                            pricing: {
-                              ...posEase.pricing,
-                              tiers: [
-                                ...posEase.pricing.tiers,
-                                {
-                                  name: "",
-                                  price: "",
-                                  desc: "",
-                                  discounts: [],
-                                },
-                              ],
-                            },
-                          })
-                        }
-                      >
-                        + Багц нэмэх
-                      </GhostButton>
+                      <GhostButton onClick={() => setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers: [...posEase.pricing.tiers, { name: "", price: "", features: [], discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
@@ -4948,159 +4835,65 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="ah-pricing" title="Үнэ тариф">
-                    <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                        Хэсгийн гарчиг
-                      </label>
-                      <input
-                        className={scInput}
-                        value={amarHome.pricing.title}
-                        onChange={(e) =>
-                          setAmarHome({
-                            ...amarHome,
-                            pricing: {
-                              ...amarHome.pricing,
-                              title: e.target.value,
-                            },
-                          })
-                        }
-                      />
+                  <EditorSection id="ah-pricing" title="Үнэ тариф" subtitle="Үнийн багцууд болон товчны текст">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
+                        <input className={scInput} value={amarHome.pricing.label} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, label: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={amarHome.pricing.title} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={amarHome.pricing.desc} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хамгийн алдартай шошго</label>
+                        <input className={scInput} placeholder="жш: Хамгийн алдартай" value={amarHome.pricing.mostPopular} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, mostPopular: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товч текст</label>
+                        <input className={scInput} placeholder="жш: Эхлэх →" value={amarHome.pricing.ctaBtn} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, ctaBtn: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
+                        <input className={scInput} value={amarHome.pricing.note} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, note: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үнийн санал товч</label>
+                        <input className={scInput} placeholder="жш: Үнийн санал авах →" value={amarHome.pricing.quoteBtn} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, quoteBtn: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-4">
                       {amarHome.pricing.tiers.map((tier, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
-                        >
-                          <div className="flex gap-4">
-                            <input
-                              className={scInput}
-                              placeholder="Багцын нэр"
-                              value={tier.name}
-                              onChange={(e) => {
-                                const tiers = [...amarHome.pricing.tiers];
-                                tiers[i].name = e.target.value;
-                                setAmarHome({
-                                  ...amarHome,
-                                  pricing: { ...amarHome.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <input
-                              className={scInput}
-                              placeholder="Үнэ"
-                              value={tier.price}
-                              onChange={(e) => {
-                                const tiers = [...amarHome.pricing.tiers];
-                                tiers[i].price = e.target.value;
-                                setAmarHome({
-                                  ...amarHome,
-                                  pricing: { ...amarHome.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <DangerMini
-                              onClick={() => {
-                                const tiers = amarHome.pricing.tiers.filter(
-                                  (_, j) => j !== i,
-                                );
-                                setAmarHome({
-                                  ...amarHome,
-                                  pricing: { ...amarHome.pricing, tiers },
-                                });
-                              }}
-                            >
-                              Устгах
-                            </DangerMini>
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                          <div className="flex gap-3">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                            <DangerMini onClick={() => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers: amarHome.pricing.tiers.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
                           </div>
-                          <textarea
-                            className={scTextarea("min-h-[60px]")}
-                            placeholder="Тайлбар"
-                            value={tier.desc}
-                            onChange={(e) => {
-                              const tiers = [...amarHome.pricing.tiers];
-                              tiers[i].desc = e.target.value;
-                              setAmarHome({
-                                ...amarHome,
-                                pricing: { ...amarHome.pricing, tiers },
-                              });
-                            }}
-                          />
+                          <div className="space-y-1">
+                            <label className="text-xs text-zinc-500">Боломжуудын жагсаалт (мөр бүр нэг боломж)</label>
+                            <textarea className={scTextarea("min-h-[80px]")} value={(tier.features || []).join("\n")} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], features: e.target.value.split("\n") }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                          </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт
-                            </label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc: any, k: number) => (
                                 <div key={k} className="flex gap-2 items-center">
-                                  <input
-                                    className={`${scInput} text-xs py-1.5`}
-                                    placeholder="6 mth /5% OFF"
-                                    value={disc.label}
-                                    onChange={(e) => {
-                                      const tiers = [...amarHome.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], label: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
-                                    }}
-                                  />
-                                  <input
-                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
-                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
-                                    value={disc.color || ""}
-                                    onChange={(e) => {
-                                      const tiers = [...amarHome.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], color: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
-                                    }}
-                                  />
-                                  <DangerMini
-                                    onClick={() => {
-                                      const tiers = [...amarHome.pricing.tiers];
-                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
-                                    }}
-                                  >
-                                    ✕
-                                  </DangerMini>
+                                  <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                                  <DangerMini onClick={() => { const tiers = [...amarHome.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
-                              <GhostButton
-                                className="text-[10px] py-1"
-                                onClick={() => {
-                                  const tiers = [...amarHome.pricing.tiers];
-                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
-                                  tiers[i] = { ...tiers[i], discounts };
-                                  setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } });
-                                }}
-                              >
-                                + Хөнгөлөлт нэмэх
-                              </GhostButton>
+                              <GhostButton className="text-[10px] py-1" onClick={() => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }]; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton
-                        onClick={() =>
-                          setAmarHome({
-                            ...amarHome,
-                            pricing: {
-                              ...amarHome.pricing,
-                              tiers: [
-                                ...amarHome.pricing.tiers,
-                                { name: "", price: "", desc: "", discounts: [] },
-                              ],
-                            },
-                          })
-                        }
-                      >
-                        + Багц нэмэх
-                      </GhostButton>
+                      <GhostButton onClick={() => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers: [...amarHome.pricing.tiers, { name: "", price: "", features: [], discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
@@ -5915,165 +5708,65 @@ export default function SiteContentPage() {
                     </div>
                   </EditorSection>
 
-                  <EditorSection id="re-pricing" title="Үнэ тариф">
-                    <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                        Хэсгийн гарчиг
-                      </label>
-                      <input
-                        className={scInput}
-                        value={rently.pricing.title}
-                        onChange={(e) =>
-                          setRently({
-                            ...rently,
-                            pricing: {
-                              ...rently.pricing,
-                              title: e.target.value,
-                            },
-                          })
-                        }
-                      />
+                  <EditorSection id="re-pricing" title="Үнэ тариф" subtitle="Үнийн багцууд болон товчны текст">
+                    <div className="grid gap-4 mb-4 sm:grid-cols-2">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Шошго (label)</label>
+                        <input className={scInput} value={rently.pricing.label} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, label: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Гарчиг</label>
+                        <input className={scInput} value={rently.pricing.title} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, title: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тайлбар</label>
+                        <input className={scInput} value={rently.pricing.desc} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, desc: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хамгийн алдартай шошго</label>
+                        <input className={scInput} placeholder="жш: Хамгийн алдартай" value={rently.pricing.mostPopular} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, mostPopular: e.target.value } })} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Товч текст</label>
+                        <input className={scInput} placeholder="жш: Эхлэх →" value={rently.pricing.ctaBtn} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, ctaBtn: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Тэмдэглэл (доод хэсэгт)</label>
+                        <input className={scInput} value={rently.pricing.note} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, note: e.target.value } })} />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Үнийн санал товч</label>
+                        <input className={scInput} placeholder="жш: Холбоо барих →" value={rently.pricing.quoteBtn} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, quoteBtn: e.target.value } })} />
+                      </div>
                     </div>
                     <div className="space-y-4">
                       {rently.pricing.tiers.map((tier, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
-                        >
-                          <div className="flex gap-4">
-                            <input
-                              className={scInput}
-                              placeholder="Багцын нэр"
-                              value={tier.name}
-                              onChange={(e) => {
-                                const tiers = [...rently.pricing.tiers];
-                                tiers[i] = {
-                                  ...tiers[i],
-                                  name: e.target.value,
-                                };
-                                setRently({
-                                  ...rently,
-                                  pricing: { ...rently.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <input
-                              className={scInput}
-                              placeholder="Үнэ"
-                              value={tier.price}
-                              onChange={(e) => {
-                                const tiers = [...rently.pricing.tiers];
-                                tiers[i] = {
-                                  ...tiers[i],
-                                  price: e.target.value,
-                                };
-                                setRently({
-                                  ...rently,
-                                  pricing: { ...rently.pricing, tiers },
-                                });
-                              }}
-                            />
-                            <DangerMini
-                              onClick={() => {
-                                const tiers = rently.pricing.tiers.filter(
-                                  (_, j) => j !== i,
-                                );
-                                setRently({
-                                  ...rently,
-                                  pricing: { ...rently.pricing, tiers },
-                                });
-                              }}
-                            >
-                              Устгах
-                            </DangerMini>
+                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                          <div className="flex gap-3">
+                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                            <DangerMini onClick={() => setRently({ ...rently, pricing: { ...rently.pricing, tiers: rently.pricing.tiers.filter((_, j) => j !== i) } })}>Устгах</DangerMini>
                           </div>
-                          <textarea
-                            className={scTextarea("min-h-[60px]")}
-                            placeholder="Тайлбар"
-                            value={tier.desc}
-                            onChange={(e) => {
-                              const tiers = [...rently.pricing.tiers];
-                              tiers[i] = { ...tiers[i], desc: e.target.value };
-                              setRently({
-                                ...rently,
-                                pricing: { ...rently.pricing, tiers },
-                              });
-                            }}
-                          />
+                          <div className="space-y-1">
+                            <label className="text-xs text-zinc-500">Боломжуудын жагсаалт (мөр бүр нэг боломж)</label>
+                            <textarea className={scTextarea("min-h-[80px]")} value={(tier.features || []).join("\n")} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], features: e.target.value.split("\n") }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                          </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                              Хөнгөлөлт
-                            </label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc: any, k: number) => (
                                 <div key={k} className="flex gap-2 items-center">
-                                  <input
-                                    className={`${scInput} text-xs py-1.5`}
-                                    placeholder="6 mth /5% OFF"
-                                    value={disc.label}
-                                    onChange={(e) => {
-                                      const tiers = [...rently.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], label: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
-                                    }}
-                                  />
-                                  <input
-                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
-                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
-                                    value={disc.color || ""}
-                                    onChange={(e) => {
-                                      const tiers = [...rently.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], color: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
-                                    }}
-                                  />
-                                  <DangerMini
-                                    onClick={() => {
-                                      const tiers = [...rently.pricing.tiers];
-                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
-                                    }}
-                                  >
-                                    ✕
-                                  </DangerMini>
+                                  <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                                  <DangerMini onClick={() => { const tiers = [...rently.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>✕</DangerMini>
                                 </div>
                               ))}
-                              <GhostButton
-                                className="text-[10px] py-1"
-                                onClick={() => {
-                                  const tiers = [...rently.pricing.tiers];
-                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
-                                  tiers[i] = { ...tiers[i], discounts };
-                                  setRently({ ...rently, pricing: { ...rently.pricing, tiers } });
-                                }}
-                              >
-                                + Хөнгөлөлт нэмэх
-                              </GhostButton>
+                              <GhostButton className="text-[10px] py-1" onClick={() => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }]; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton
-                        onClick={() =>
-                          setRently({
-                            ...rently,
-                            pricing: {
-                              ...rently.pricing,
-                              tiers: [
-                                ...rently.pricing.tiers,
-                                { name: "", price: "", desc: "", discounts: [] },
-                              ],
-                            },
-                          })
-                        }
-                      >
-                        + Багц нэмэх
-                      </GhostButton>
+                      <GhostButton onClick={() => setRently({ ...rently, pricing: { ...rently.pricing, tiers: [...rently.pricing.tiers, { name: "", price: "", features: [], discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
                     </div>
                   </EditorSection>
 
