@@ -76,7 +76,8 @@ type FooterState = {
     items: { name: string; src: string; width: number; height: number }[];
   };
   brand: { desc: string };
-  bottomText?: string;
+  bottomLeftText?: string;
+  bottomRightText?: string;
 };
 
 type ContactState = {
@@ -457,7 +458,8 @@ const EMPTY_ABOUT: AboutState = {
 const EMPTY_FOOTER: FooterState = {
   partners: { partnersLabel: "", items: [] },
   brand: { desc: "" },
-  bottomText: "",
+  bottomLeftText: "",
+  bottomRightText: "",
 };
 const EMPTY_CONTACT: ContactState = {
   hero: { badge: "", h2Accent: "", intro: "" },
@@ -552,7 +554,8 @@ function normalizeFooter(v: unknown): FooterState {
         : [],
     },
     brand: { ...EMPTY_FOOTER.brand, ...brand },
-    bottomText: root.bottomText as string | undefined,
+    bottomLeftText: root.bottomLeftText as string | undefined,
+    bottomRightText: (root.bottomRightText ?? root.bottomText) as string | undefined,
   };
 }
 function normalizeContact(v: unknown): ContactState {
@@ -2105,10 +2108,11 @@ export default function SiteContentPage() {
                           />
                           <div>
                             <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                              Зураг (Image)
+                              Зураг (JPEG, PNG, WebP)
                             </label>
                             <ImageUploadField
                               value={f.image ?? ""}
+                              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                               onChange={(next) => {
                                 const features = [...services.features];
                                 features[i] = { ...features[i], image: next };
@@ -6470,16 +6474,32 @@ export default function SiteContentPage() {
                     <div className="grid gap-4">
                       <div className="w-full">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          Текст (жишээ: Бүтээгч: Zevtabs · © 2026)
+                          Зүүн доод текст
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="Жишээ: Privacy Policy · Terms"
+                          value={footer.bottomLeftText || ""}
+                          onChange={(e) =>
+                            setFooter({
+                              ...footer,
+                              bottomLeftText: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="w-full">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Баруун доод текст (жишээ: Бүтээгч: Zevtabs · © 2026)
                         </label>
                         <input
                           className={scInput}
                           placeholder="Бүтээгч: Zevtabs · © 2026"
-                          value={footer.bottomText || ""}
+                          value={footer.bottomRightText || ""}
                           onChange={(e) =>
                             setFooter({
                               ...footer,
-                              bottomText: e.target.value,
+                              bottomRightText: e.target.value,
                             })
                           }
                         />

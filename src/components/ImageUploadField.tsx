@@ -85,6 +85,12 @@ type Props = {
    * @default "cover"
    */
   previewFit?: "cover" | "contain";
+  /**
+   * Override the file input `accept` attribute.
+   * Use `"image/jpeg,image/png,image/gif,image/webp"` to block SVG/video.
+   * @default "image/*,video/*"
+   */
+  accept?: string;
 };
 
 export default function ImageUploadField({
@@ -93,6 +99,7 @@ export default function ImageUploadField({
   showRemove,
   onRemove,
   previewFit = "cover",
+  accept = "image/*,video/*",
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -209,7 +216,7 @@ export default function ImageUploadField({
         <input
           ref={fileRef}
           type="file"
-          accept="image/*,video/*"
+          accept={accept}
           className="hidden"
           onChange={onPick}
         />
