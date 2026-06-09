@@ -1758,54 +1758,15 @@ export default function SiteContentPage() {
                   >
                     <div className="space-y-3">
                       {about.main.stats.map((row, i) => (
-                        <div key={i} className="flex flex-wrap gap-2">
-                          <input
-                            className={`${scInput} max-w-[140px]`}
-                            placeholder="Гарчиг"
-                            value={row.value}
-                            onChange={(e) => {
-                              const stats = [...about.main.stats];
-                              stats[i] = { ...stats[i], value: e.target.value };
-                              setAbout({
-                                ...about,
-                                main: { ...about.main, stats },
-                              });
-                            }}
-                          />
-                          <input
-                            className={`${scInput} min-w-[140px] flex-1`}
-                            placeholder="Тайлбар"
-                            value={row.label}
-                            onChange={(e) => {
-                              const stats = [...about.main.stats];
-                              stats[i] = { ...stats[i], label: e.target.value };
-                              setAbout({
-                                ...about,
-                                main: { ...about.main, stats },
-                              });
-                            }}
-                          />
-                          <input
-                            className={`${scInput} w-[120px]`}
-                            placeholder="Icon SVG path"
-                            value={row.icon || ""}
-                            onChange={(e) => {
-                              const stats = [...about.main.stats];
-                              stats[i] = { ...stats[i], icon: e.target.value };
-                              setAbout({
-                                ...about,
-                                main: { ...about.main, stats },
-                              });
-                            }}
-                          />
-                          <div className="flex items-center gap-2">
+                        <div key={i} className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <div className="flex flex-wrap gap-2">
                             <input
-                              type="color"
-                              className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-900"
-                              value={row.color || "#3b82f6"}
+                              className={`${scInput} max-w-[140px]`}
+                              placeholder="Гарчиг"
+                              value={row.value}
                               onChange={(e) => {
                                 const stats = [...about.main.stats];
-                                stats[i] = { ...stats[i], color: e.target.value };
+                                stats[i] = { ...stats[i], value: e.target.value };
                                 setAbout({
                                   ...about,
                                   main: { ...about.main, stats },
@@ -1813,12 +1774,71 @@ export default function SiteContentPage() {
                               }}
                             />
                             <input
-                              className={`${scInput} w-[100px]`}
-                              placeholder="#3b82f6"
-                              value={row.color || ""}
+                              className={`${scInput} min-w-[140px] flex-1`}
+                              placeholder="Тайлбар"
+                              value={row.label}
                               onChange={(e) => {
                                 const stats = [...about.main.stats];
-                                stats[i] = { ...stats[i], color: e.target.value };
+                                stats[i] = { ...stats[i], label: e.target.value };
+                                setAbout({
+                                  ...about,
+                                  main: { ...about.main, stats },
+                                });
+                              }}
+                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-900"
+                                value={row.color || "#3b82f6"}
+                                onChange={(e) => {
+                                  const stats = [...about.main.stats];
+                                  stats[i] = { ...stats[i], color: e.target.value };
+                                  setAbout({
+                                    ...about,
+                                    main: { ...about.main, stats },
+                                  });
+                                }}
+                              />
+                              <input
+                                className={`${scInput} w-[100px]`}
+                                placeholder="#3b82f6"
+                                value={row.color || ""}
+                                onChange={(e) => {
+                                  const stats = [...about.main.stats];
+                                  stats[i] = { ...stats[i], color: e.target.value };
+                                  setAbout({
+                                    ...about,
+                                    main: { ...about.main, stats },
+                                  });
+                                }}
+                              />
+                            </div>
+                            <DangerMini
+                              onClick={() => {
+                                const stats = about.main.stats.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setAbout({
+                                  ...about,
+                                  main: { ...about.main, stats },
+                                });
+                              }}
+                            >
+                              Устгах
+                            </DangerMini>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Дүрс зураг (Icon)
+                            </label>
+                            <ImageUploadField
+                              value={row.icon || ""}
+                              previewFit="contain"
+                              accept="image/*"
+                              onChange={(next) => {
+                                const stats = [...about.main.stats];
+                                stats[i] = { ...stats[i], icon: next };
                                 setAbout({
                                   ...about,
                                   main: { ...about.main, stats },
@@ -1826,19 +1846,6 @@ export default function SiteContentPage() {
                               }}
                             />
                           </div>
-                          <DangerMini
-                            onClick={() => {
-                              const stats = about.main.stats.filter(
-                                (_, j) => j !== i,
-                              );
-                              setAbout({
-                                ...about,
-                                main: { ...about.main, stats },
-                              });
-                            }}
-                          >
-                            Устгах
-                          </DangerMini>
                         </div>
                       ))}
                       <GhostButton
