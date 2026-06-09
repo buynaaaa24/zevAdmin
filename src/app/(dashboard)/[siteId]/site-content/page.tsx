@@ -36,7 +36,7 @@ import {
   scTextarea,
 } from "./editorUi";
 
-type StatItem = { value: string; label: string };
+type StatItem = { value: string; label: string; icon?: string; color?: string };
 
 type HomeState = {
   hero: {
@@ -76,6 +76,7 @@ type FooterState = {
     items: { name: string; src: string; width: number; height: number }[];
   };
   brand: { desc: string };
+  bottomText?: string;
 };
 
 type ContactState = {
@@ -113,6 +114,7 @@ type PropertiesPageState = {
     redirectUrl?: string;
   }[];
   cta: { href: string; label: string };
+  footerText?: string;
 };
 type SalesPageState = {
   header: { eyebrow: string; title: string; intro: string };
@@ -455,6 +457,7 @@ const EMPTY_ABOUT: AboutState = {
 const EMPTY_FOOTER: FooterState = {
   partners: { partnersLabel: "", items: [] },
   brand: { desc: "" },
+  bottomText: "",
 };
 const EMPTY_CONTACT: ContactState = {
   hero: { badge: "", h2Accent: "", intro: "" },
@@ -549,6 +552,7 @@ function normalizeFooter(v: unknown): FooterState {
         : [],
     },
     brand: { ...EMPTY_FOOTER.brand, ...brand },
+    bottomText: root.bottomText as string | undefined,
   };
 }
 function normalizeContact(v: unknown): ContactState {
@@ -1754,6 +1758,7 @@ export default function SiteContentPage() {
                         <div key={i} className="flex flex-wrap gap-2">
                           <input
                             className={`${scInput} max-w-[140px]`}
+                            placeholder="Гарчиг"
                             value={row.value}
                             onChange={(e) => {
                               const stats = [...about.main.stats];
@@ -1765,7 +1770,8 @@ export default function SiteContentPage() {
                             }}
                           />
                           <input
-                            className={`${scInput} min-w-[200px] flex-1`}
+                            className={`${scInput} min-w-[140px] flex-1`}
+                            placeholder="Тайлбар"
                             value={row.label}
                             onChange={(e) => {
                               const stats = [...about.main.stats];
@@ -1776,6 +1782,47 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
+                          <input
+                            className={`${scInput} w-[120px]`}
+                            placeholder="Icon SVG path"
+                            value={row.icon || ""}
+                            onChange={(e) => {
+                              const stats = [...about.main.stats];
+                              stats[i] = { ...stats[i], icon: e.target.value };
+                              setAbout({
+                                ...about,
+                                main: { ...about.main, stats },
+                              });
+                            }}
+                          />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              className="h-9 w-12 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-900"
+                              value={row.color || "#3b82f6"}
+                              onChange={(e) => {
+                                const stats = [...about.main.stats];
+                                stats[i] = { ...stats[i], color: e.target.value };
+                                setAbout({
+                                  ...about,
+                                  main: { ...about.main, stats },
+                                });
+                              }}
+                            />
+                            <input
+                              className={`${scInput} w-[100px]`}
+                              placeholder="#3b82f6"
+                              value={row.color || ""}
+                              onChange={(e) => {
+                                const stats = [...about.main.stats];
+                                stats[i] = { ...stats[i], color: e.target.value };
+                                setAbout({
+                                  ...about,
+                                  main: { ...about.main, stats },
+                                });
+                              }}
+                            />
+                          </div>
                           <DangerMini
                             onClick={() => {
                               const stats = about.main.stats.filter(
@@ -1799,7 +1846,7 @@ export default function SiteContentPage() {
                               ...about.main,
                               stats: [
                                 ...about.main.stats,
-                                { value: "", label: "" },
+                                { value: "", label: "", icon: "", color: "#3b82f6" },
                               ],
                             },
                           })
@@ -2476,6 +2523,10 @@ export default function SiteContentPage() {
                       id: "properties-cta",
                       label: t.siteContent.propertiesPage.sections.cta,
                     },
+                    {
+                      id: "properties-footer",
+                      label: "Доод текст",
+                    },
                   ]}
                 >
                   <EditorSection
@@ -2815,6 +2866,31 @@ export default function SiteContentPage() {
                                 ...propertiesPage.cta,
                                 label: e.target.value,
                               },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </EditorSection>
+                  <EditorSection
+                    id="properties-footer"
+                    title="Доод текст"
+                    subtitle="Төслүүд хуудасны доод хэсэгт харагдах текст"
+                    defaultOpen={false}
+                  >
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Текст
+                        </label>
+                        <textarea
+                          className={scTextarea("min-h-[120px]")}
+                          placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
+                          value={propertiesPage.footerText || ""}
+                          onChange={(e) =>
+                            setPropertiesPage({
+                              ...propertiesPage,
+                              footerText: e.target.value,
                             })
                           }
                         />
@@ -6384,28 +6460,32 @@ export default function SiteContentPage() {
               ) : (
                 <EditorBody
                   sectionJumpKey={tab}
-                  sectionItems={[{ id: "footer-brand", label: "Брэнд" }]}
+                  sectionItems={[{ id: "footer-bottom", label: "Доод текст" }]}
                 >
                   <EditorSection
-                    id="footer-brand"
-                    title="Лого хэсэг & брэнд"
-                    subtitle="Хөлийн түншүүдийн гарчиг болон брэндийн танилцуулга"
+                    id="footer-bottom"
+                    title="Доод текст"
+                    subtitle="Хөлийн доод хэсэгт харагдах текст"
                   >
                     <div className="grid gap-4">
                       <div className="w-full">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          Танилцуулга (брэндийн текст)
+                          Текст (жишээ: Бүтээгч: Zevtabs · © 2026)
                         </label>
-                        <textarea
-                          className={scTextarea("min-h-[90px]")}
-                          value={footer.brand.desc}
+                        <input
+                          className={scInput}
+                          placeholder="Бүтээгч: Zevtabs · © 2026"
+                          value={footer.bottomText || ""}
                           onChange={(e) =>
                             setFooter({
                               ...footer,
-                              brand: { desc: e.target.value },
+                              bottomText: e.target.value,
                             })
                           }
                         />
+                        <p className="text-xs text-zinc-500 mt-1">
+                          Хэрэв хоосон бол: Бүтээгч: Zevtabs · © 2026
+                        </p>
                       </div>
                     </div>
                   </EditorSection>
