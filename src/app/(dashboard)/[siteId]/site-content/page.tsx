@@ -184,7 +184,7 @@ type ParkEaseState = {
     label: string;
     title: string;
     desc: string;
-    items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string }[];
+    items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string; icon?: string }[];
   };
   bolomjuud: {
     label: string;
@@ -692,6 +692,7 @@ function normalizeParkEase(v: unknown): ParkEaseState {
             desc: item.desc || "",
             size: item.size || "medium",
             image: item.image || "",
+            icon: item.icon || "",
           }))
         : [],
     },
@@ -3798,17 +3799,35 @@ export default function SiteContentPage() {
                               Устгах
                             </DangerMini>
                           </div>
-                          <ImageUploadField
-                            value={item.image || ""}
-                            onChange={(next) => {
-                              const items = [...parkEase.features.items];
-                              items[i] = { ...items[i], image: next };
-                              setParkEase({
-                                ...parkEase,
-                                features: { ...parkEase.features, items },
-                              });
-                            }}
-                          />
+                          <div className="space-y-1">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Дүрс зураг (Icon)</p>
+                            <ImageUploadField
+                              value={item.icon || ""}
+                              previewFit="contain"
+                              onChange={(next) => {
+                                const items = [...parkEase.features.items];
+                                items[i] = { ...items[i], icon: next };
+                                setParkEase({
+                                  ...parkEase,
+                                  features: { ...parkEase.features, items },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Background зураг</p>
+                            <ImageUploadField
+                              value={item.image || ""}
+                              onChange={(next) => {
+                                const items = [...parkEase.features.items];
+                                items[i] = { ...items[i], image: next };
+                                setParkEase({
+                                  ...parkEase,
+                                  features: { ...parkEase.features, items },
+                                });
+                              }}
+                            />
+                          </div>
                           <textarea
                             className={scTextarea("min-h-[60px]")}
                             placeholder="Тайлбар"
@@ -3832,7 +3851,7 @@ export default function SiteContentPage() {
                               ...parkEase.features,
                               items: [
                                 ...parkEase.features.items,
-                                { title: "", desc: "", size: "medium", image: "" },
+                                { title: "", desc: "", size: "medium", image: "", icon: "" },
                               ],
                             },
                           })
