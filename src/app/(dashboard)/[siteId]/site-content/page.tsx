@@ -3160,7 +3160,7 @@ export default function SiteContentPage() {
                       {parkEase.hero.stats.map((stat, i) => (
                         <div key={i} className="flex gap-2">
                           <input
-                            className={`${scInput} w-28`}
+                            className={`${scInput} w-[30%]`}
                             placeholder="Тоо (жш: 200+)"
                             value={stat.value}
                             onChange={(e) => {
@@ -3173,7 +3173,7 @@ export default function SiteContentPage() {
                             }}
                           />
                           <input
-                            className={`${scInput} flex-1`}
+                            className={`${scInput} w-[70%]`}
                             placeholder="Тайлбар (жш: Зогсоол)"
                             value={stat.label}
                             onChange={(e) => {
