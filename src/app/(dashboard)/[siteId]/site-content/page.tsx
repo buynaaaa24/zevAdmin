@@ -165,7 +165,7 @@ type ParkEaseState = {
     label: string;
     title: string[];
     desc: string;
-    steps: { title: string; desc: string }[];
+    steps: { title: string; desc: string; icon?: string }[];
   };
   payments: {
     label: string;
@@ -3354,6 +3354,18 @@ export default function SiteContentPage() {
                               });
                             }}
                           />
+                          <ImageUploadField
+                            value={step.icon || ""}
+                            accept="image/*"
+                            onChange={(url) => {
+                              const steps = [...parkEase.how.steps];
+                              steps[i] = { ...steps[i], icon: url };
+                              setParkEase({
+                                ...parkEase,
+                                how: { ...parkEase.how, steps },
+                              });
+                            }}
+                          />
                         </div>
                       ))}
                       <GhostButton
@@ -3364,7 +3376,7 @@ export default function SiteContentPage() {
                               ...parkEase.how,
                               steps: [
                                 ...parkEase.how.steps,
-                                { title: "", desc: "" },
+                                { title: "", desc: "", icon: "" },
                               ],
                             },
                           })
