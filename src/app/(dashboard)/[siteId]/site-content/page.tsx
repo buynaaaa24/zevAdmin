@@ -207,6 +207,7 @@ type ParkEaseState = {
     title: string;
     desc: string;
     cards: { label: string; sub: string }[];
+    hidden?: boolean;
   };
   cta: {
     title: string;
@@ -376,7 +377,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
     quoteLink: "",
     tiers: [],
   },
-  free: { title: "", desc: "", cards: [] },
+  free: { title: "", desc: "", cards: [], hidden: false },
   cta: {
     title: "",
     desc: "",
@@ -723,6 +724,7 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       cards: Array.isArray(asRecord(root.free).cards)
         ? (asRecord(root.free).cards as any)
         : [],
+      hidden: !!asRecord(root.free).hidden,
     },
     cta: { ...EMPTY_PARKEASE.cta, ...asRecord(root.cta) },
   };
@@ -4302,6 +4304,32 @@ export default function SiteContentPage() {
                     title="Үнэгүй жолооч"
                     subtitle="Жолооч үнэгүй зогсоолдох нөхцөлийн карт хэсэг"
                   >
+                    <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Нуух</p>
+                        <p className="text-xs text-zinc-400">Идэвхжүүлбэл frontend-д харагдахгүй</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setParkEase({
+                            ...parkEase,
+                            free: { ...parkEase.free, hidden: !parkEase.free.hidden },
+                          })
+                        }
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                          parkEase.free.hidden
+                            ? "bg-red-500"
+                            : "bg-zinc-300 dark:bg-zinc-600"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
+                            parkEase.free.hidden ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
                     <div className="grid gap-4 mb-4">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
