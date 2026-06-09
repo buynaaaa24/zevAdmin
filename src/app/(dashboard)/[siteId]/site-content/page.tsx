@@ -950,7 +950,7 @@ export function useTabs(siteId: string) {
   ];
 
   if (siteId === "parkease") {
-    return tabs.filter((t) => t.id === "parkease" || t.id === "global-contact");
+    return tabs.filter((t) => t.id === "parkease" || t.id === "footer" || t.id === "global-contact");
   }
   if (siteId === "posease") {
     return tabs.filter((t) => t.id === "posease" || t.id === "footer" || t.id === "global-contact");
