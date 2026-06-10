@@ -231,6 +231,8 @@ type PosEaseState = {
     cta: string;
     secondary: string;
     image?: string;
+    tabImage?: string;
+    mobileImage?: string;
   };
   features: {
     title: string;
@@ -391,7 +393,7 @@ const EMPTY_PARKEASE: ParkEaseState = {
   },
 };
 const EMPTY_POSEASE: PosEaseState = {
-  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
+  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "", image: "", tabImage: "", mobileImage: "" },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
   pricing: { title: "", tiers: [] },
@@ -4750,9 +4752,9 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
-                      <div className="sm:col-span-2">
+                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          Hero Image
+                          Hero Image (PC) (1440x900)
                         </label>
                         <ImageUploadField
                           value={posEase.hero.image || ""}
@@ -4760,6 +4762,34 @@ export default function SiteContentPage() {
                             setPosEase({
                               ...posEase,
                               hero: { ...posEase.hero, image: next },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Hero Image (Tablet) (1280x800)
+                        </label>
+                        <ImageUploadField
+                          value={posEase.hero.tabImage || ""}
+                          onChange={(next) =>
+                            setPosEase({
+                              ...posEase,
+                              hero: { ...posEase.hero, tabImage: next },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Hero Image (Mobile) (1080x2340)
+                        </label>
+                        <ImageUploadField
+                          value={posEase.hero.mobileImage || ""}
+                          onChange={(next) =>
+                            setPosEase({
+                              ...posEase,
+                              hero: { ...posEase.hero, mobileImage: next },
                             })
                           }
                         />
