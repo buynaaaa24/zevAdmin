@@ -201,7 +201,7 @@ type ParkEaseState = {
     note: string;
     quoteBtn: string;
     quoteLink?: string;
-    tiers: { name: string; slots: string; features: string[]; discounts?: { label: string; color?: string }[] }[];
+    tiers: { name: string; slots: string; features: string[]; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
   };
   free: {
     title: string;
