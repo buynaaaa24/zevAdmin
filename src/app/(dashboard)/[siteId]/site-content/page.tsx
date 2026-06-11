@@ -250,7 +250,7 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type AmarHomeState = {
@@ -279,7 +279,7 @@ type AmarHomeState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
   };
 };
 type RentlyState = {
@@ -309,7 +309,7 @@ type RentlyState = {
   costs: { title: string; desc: string; label?: string; image?: string };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; discounts?: { label: string; color?: string }[] }[];
+    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
   };
   cta?: {
     title: string;
