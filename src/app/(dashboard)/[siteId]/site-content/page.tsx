@@ -288,6 +288,7 @@ type RentlyState = {
   hero: {
     title: string;
     titleAccent: string;
+    titleAccent2: string;
     desc: string;
     cta: string;
     secondary: string;
@@ -405,7 +406,7 @@ const EMPTY_AMARHOME: AmarHomeState = {
   pricing: { title: "", tiers: [] },
 };
 const EMPTY_RENTLY: RentlyState = {
-  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "" },
+  hero: { title: "", titleAccent: "", titleAccent2: "", desc: "", cta: "", secondary: "" },
   features: { title: "", desc: "", items: [] },
   notifications: { title: "", desc: "", label: "", image: "" },
   penalties: { title: "", desc: "", label: "", image: "" },
@@ -4211,6 +4212,10 @@ export default function SiteContentPage() {
                               }}
                             />
                           </div>
+                          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...parkEase.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } }); }} />
+                            Товч нуух
+                          </label>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                               Хөнгөлөлт
@@ -5056,6 +5061,10 @@ export default function SiteContentPage() {
                             <DangerMini onClick={() => { const tiers = posEase.pricing.tiers.filter((_, j) => j !== i); setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>Устгах</DangerMini>
                           </div>
                           <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                            Товч нуух
+                          </label>
                           <div className="pt-2 border-t border-slate-200">
                             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">Хөнгөлөлт</p>
                             <div className="space-y-2">
@@ -5487,6 +5496,10 @@ export default function SiteContentPage() {
                             <DangerMini onClick={() => { const tiers = amarHome.pricing.tiers.filter((_, j) => j !== i); setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>Устгах</DangerMini>
                           </div>
                           <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                            Товч нуух
+                          </label>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
                             <div className="space-y-2">
@@ -5871,6 +5884,24 @@ export default function SiteContentPage() {
                               hero: {
                                 ...rently.hero,
                                 titleAccent: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Гарчиг (онцлох 2)
+                        </label>
+                        <input
+                          className={scInput}
+                          value={rently.hero.titleAccent2}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              hero: {
+                                ...rently.hero,
+                                titleAccent2: e.target.value,
                               },
                             })
                           }
@@ -6332,6 +6363,10 @@ export default function SiteContentPage() {
                             <DangerMini onClick={() => { const tiers = rently.pricing.tiers.filter((_, j) => j !== i); setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>Устгах</DangerMini>
                           </div>
                           <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                            Товч нуух
+                          </label>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
                             <div className="space-y-2">
