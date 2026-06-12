@@ -213,6 +213,7 @@ type ParkEaseState = {
       features: string[];
       hideButton?: boolean;
       buttonUrl?: string;
+      buttonLabel?: string;
       discounts?: { label: string; color?: string }[];
     }[];
   };
@@ -268,6 +269,8 @@ type PosEaseState = {
       price: string;
       desc: string;
       hideButton?: boolean;
+      buttonUrl?: string;
+      buttonLabel?: string;
       discounts?: { label: string; color?: string }[];
     }[];
   };
@@ -303,6 +306,8 @@ type AmarHomeState = {
       price: string;
       desc: string;
       hideButton?: boolean;
+      buttonUrl?: string;
+      buttonLabel?: string;
       discounts?: { label: string; color?: string }[];
     }[];
   };
@@ -317,6 +322,7 @@ type RentlyState = {
     desc: string;
     cta: string;
     secondary: string;
+    secondaryUrl?: string;
     image?: string;
   };
   features: {
@@ -344,6 +350,8 @@ type RentlyState = {
       price: string;
       desc: string;
       hideButton?: boolean;
+      buttonUrl?: string;
+      buttonLabel?: string;
       discounts?: { label: string; color?: string }[];
     }[];
   };
@@ -4465,6 +4473,27 @@ export default function SiteContentPage() {
                           </label>
                           <div>
                             <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны текст
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: Эхлэх →"
+                              value={tier.buttonLabel || ""}
+                              onChange={(e) => {
+                                const tiers = [...parkEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonLabel: e.target.value,
+                                };
+                                setParkEase({
+                                  ...parkEase,
+                                  pricing: { ...parkEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                               Товчны холбоос (URL)
                             </label>
                             <input
@@ -5493,6 +5522,48 @@ export default function SiteContentPage() {
                             />
                             Товч нуух
                           </label>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны текст
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: Эхлэх →"
+                              value={tier.buttonLabel || ""}
+                              onChange={(e) => {
+                                const tiers = [...posEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonLabel: e.target.value,
+                                };
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны холбоос (URL)
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="https://..."
+                              value={tier.buttonUrl || ""}
+                              onChange={(e) => {
+                                const tiers = [...posEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonUrl: e.target.value,
+                                };
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
                           <div className="pt-2 border-t border-slate-200">
                             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
                               Хөнгөлөлт
@@ -6135,6 +6206,48 @@ export default function SiteContentPage() {
                             />
                             Товч нуух
                           </label>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны текст
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: Эхлэх →"
+                              value={tier.buttonLabel || ""}
+                              onChange={(e) => {
+                                const tiers = [...amarHome.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonLabel: e.target.value,
+                                };
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны холбоос (URL)
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="https://..."
+                              value={tier.buttonUrl || ""}
+                              onChange={(e) => {
+                                const tiers = [...amarHome.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonUrl: e.target.value,
+                                };
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                               Хөнгөлөлт
@@ -6716,6 +6829,25 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Туслах товчны холбоос (URL)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="https://..."
+                          value={rently.hero.secondaryUrl || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              hero: {
+                                ...rently.hero,
+                                secondaryUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                           Тайлбар
@@ -7228,6 +7360,48 @@ export default function SiteContentPage() {
                             />
                             Товч нуух
                           </label>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны текст
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: Эхлэх →"
+                              value={tier.buttonLabel || ""}
+                              onChange={(e) => {
+                                const tiers = [...rently.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonLabel: e.target.value,
+                                };
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны холбоос (URL)
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="https://..."
+                              value={tier.buttonUrl || ""}
+                              onChange={(e) => {
+                                const tiers = [...rently.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonUrl: e.target.value,
+                                };
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                               Хөнгөлөлт
