@@ -184,7 +184,13 @@ type ParkEaseState = {
     label: string;
     title: string;
     desc: string;
-    items: { title: string; desc: string; size: "small" | "medium" | "large"; image?: string; icon?: string }[];
+    items: {
+      title: string;
+      desc: string;
+      size: "small" | "medium" | "large";
+      image?: string;
+      icon?: string;
+    }[];
   };
   bolomjuud: {
     label: string;
@@ -201,7 +207,14 @@ type ParkEaseState = {
     note: string;
     quoteBtn: string;
     quoteLink?: string;
-    tiers: { name: string; slots: string; features: string[]; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
+    tiers: {
+      name: string;
+      slots: string;
+      features: string[];
+      hideButton?: boolean;
+      buttonUrl?: string;
+      discounts?: { label: string; color?: string }[];
+    }[];
   };
   free: {
     title: string;
@@ -250,7 +263,13 @@ type PosEaseState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
+    tiers: {
+      name: string;
+      price: string;
+      desc: string;
+      hideButton?: boolean;
+      discounts?: { label: string; color?: string }[];
+    }[];
   };
 };
 type AmarHomeState = {
@@ -279,7 +298,13 @@ type AmarHomeState = {
   };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
+    tiers: {
+      name: string;
+      price: string;
+      desc: string;
+      hideButton?: boolean;
+      discounts?: { label: string; color?: string }[];
+    }[];
   };
 };
 type RentlyState = {
@@ -304,12 +329,23 @@ type RentlyState = {
       image?: string;
     }[];
   };
-  notifications: { title: string; desc: string; label?: string; image?: string };
+  notifications: {
+    title: string;
+    desc: string;
+    label?: string;
+    image?: string;
+  };
   penalties: { title: string; desc: string; label?: string; image?: string };
   costs: { title: string; desc: string; label?: string; image?: string };
   pricing: {
     title: string;
-    tiers: { name: string; price: string; desc: string; hideButton?: boolean; discounts?: { label: string; color?: string }[] }[];
+    tiers: {
+      name: string;
+      price: string;
+      desc: string;
+      hideButton?: boolean;
+      discounts?: { label: string; color?: string }[];
+    }[];
   };
   cta?: {
     title: string;
@@ -394,7 +430,16 @@ const EMPTY_PARKEASE: ParkEaseState = {
   },
 };
 const EMPTY_POSEASE: PosEaseState = {
-  hero: { title: "", titleAccent: "", desc: "", cta: "", secondary: "", image: "", tabImage: "", mobileImage: "" },
+  hero: {
+    title: "",
+    titleAccent: "",
+    desc: "",
+    cta: "",
+    secondary: "",
+    image: "",
+    tabImage: "",
+    mobileImage: "",
+  },
   features: { title: "", desc: "", items: [] },
   hardware: { title: "", items: [] },
   pricing: { title: "", tiers: [] },
@@ -406,7 +451,14 @@ const EMPTY_AMARHOME: AmarHomeState = {
   pricing: { title: "", tiers: [] },
 };
 const EMPTY_RENTLY: RentlyState = {
-  hero: { title: "", titleAccent: "", titleAccent2: "", desc: "", cta: "", secondary: "" },
+  hero: {
+    title: "",
+    titleAccent: "",
+    titleAccent2: "",
+    desc: "",
+    cta: "",
+    secondary: "",
+  },
   features: { title: "", desc: "", items: [] },
   notifications: { title: "", desc: "", label: "", image: "" },
   penalties: { title: "", desc: "", label: "", image: "" },
@@ -559,7 +611,9 @@ function normalizeFooter(v: unknown): FooterState {
     },
     brand: { ...EMPTY_FOOTER.brand, ...brand },
     bottomLeftText: root.bottomLeftText as string | undefined,
-    bottomRightText: (root.bottomRightText ?? root.bottomText) as string | undefined,
+    bottomRightText: (root.bottomRightText ?? root.bottomText) as
+      | string
+      | undefined,
   };
 }
 function normalizeContact(v: unknown): ContactState {
@@ -638,8 +692,10 @@ function normalizeZarPage(v: unknown): ZarPageState {
       intro: "",
       ...asRecord(root.salesHeader),
     },
-    jobsTabLabel: typeof root.jobsTabLabel === "string" ? root.jobsTabLabel : "",
-    salesTabLabel: typeof root.salesTabLabel === "string" ? root.salesTabLabel : "",
+    jobsTabLabel:
+      typeof root.jobsTabLabel === "string" ? root.jobsTabLabel : "",
+    salesTabLabel:
+      typeof root.salesTabLabel === "string" ? root.salesTabLabel : "",
   };
 }
 function normalizeTeamPage(v: unknown): TeamPageState {
@@ -944,7 +1000,10 @@ export function useTabs(siteId: string) {
     {
       id: "zar-page" as const,
       label: lang === "mn" ? "Зар хуудас" : "Zar Page",
-      hint: lang === "mn" ? "Зар хуудасны толгой, тайлбар" : "Zar page header and description",
+      hint:
+        lang === "mn"
+          ? "Зар хуудасны толгой, тайлбар"
+          : "Zar page header and description",
       icon: Newspaper,
     },
     {
@@ -956,16 +1015,28 @@ export function useTabs(siteId: string) {
   ];
 
   if (siteId === "parkease") {
-    return tabs.filter((t) => t.id === "parkease" || t.id === "footer" || t.id === "global-contact");
+    return tabs.filter(
+      (t) =>
+        t.id === "parkease" || t.id === "footer" || t.id === "global-contact",
+    );
   }
   if (siteId === "posease") {
-    return tabs.filter((t) => t.id === "posease" || t.id === "footer" || t.id === "global-contact");
+    return tabs.filter(
+      (t) =>
+        t.id === "posease" || t.id === "footer" || t.id === "global-contact",
+    );
   }
   if (siteId === "amarhome") {
-    return tabs.filter((t) => t.id === "amarhome" || t.id === "footer" || t.id === "global-contact");
+    return tabs.filter(
+      (t) =>
+        t.id === "amarhome" || t.id === "footer" || t.id === "global-contact",
+    );
   }
   if (siteId === "rently") {
-    return tabs.filter((t) => t.id === "rently" || t.id === "footer" || t.id === "global-contact");
+    return tabs.filter(
+      (t) =>
+        t.id === "rently" || t.id === "footer" || t.id === "global-contact",
+    );
   }
   return tabs.filter(
     (t) =>
@@ -1439,7 +1510,8 @@ export default function SiteContentPage() {
                   sectionItems={[
                     {
                       id: "zar-general",
-                      label: lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings",
+                      label:
+                        lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings",
                     },
                     {
                       id: "zar-jobs",
@@ -1447,26 +1519,38 @@ export default function SiteContentPage() {
                     },
                     {
                       id: "zar-sales",
-                      label: lang === "mn" ? "Борлуулалтын зар" : "Sales Header",
+                      label:
+                        lang === "mn" ? "Борлуулалтын зар" : "Sales Header",
                     },
                   ]}
                 >
                   {/* General settings */}
                   <EditorSection
                     id="zar-general"
-                    title={lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings"}
-                    subtitle={lang === "mn" ? "Хуудасны ерөнхий толгой (Fallback болгон ашиглагдана)" : "General page header used as fallback"}
+                    title={
+                      lang === "mn" ? "Ерөнхий тохиргоо" : "General Settings"
+                    }
+                    subtitle={
+                      lang === "mn"
+                        ? "Хуудасны ерөнхий толгой (Fallback болгон ашиглагдана)"
+                        : "General page header used as fallback"
+                    }
                   >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Ерөнхий дээд шошго (eyebrow)" : "General Eyebrow"}
+                          {lang === "mn"
+                            ? "Ерөнхий дээд шошго (eyebrow)"
+                            : "General Eyebrow"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.header.eyebrow}
                           onChange={(e) => {
-                            const header = { ...zarPage.header, eyebrow: e.target.value };
+                            const header = {
+                              ...zarPage.header,
+                              eyebrow: e.target.value,
+                            };
                             setZarPage({ ...zarPage, header });
                             debouncedSave("zar-page", { ...zarPage, header });
                           }}
@@ -1480,7 +1564,10 @@ export default function SiteContentPage() {
                           className={scInput}
                           value={zarPage.header.title}
                           onChange={(e) => {
-                            const header = { ...zarPage.header, title: e.target.value };
+                            const header = {
+                              ...zarPage.header,
+                              title: e.target.value,
+                            };
                             setZarPage({ ...zarPage, header });
                             debouncedSave("zar-page", { ...zarPage, header });
                           }}
@@ -1488,13 +1575,18 @@ export default function SiteContentPage() {
                       </div>
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Ерөнхий танилцуулга" : "General Introduction"}
+                          {lang === "mn"
+                            ? "Ерөнхий танилцуулга"
+                            : "General Introduction"}
                         </label>
                         <textarea
                           className={scTextarea("min-h-[100px]")}
                           value={zarPage.header.intro}
                           onChange={(e) => {
-                            const header = { ...zarPage.header, intro: e.target.value };
+                            const header = {
+                              ...zarPage.header,
+                              intro: e.target.value,
+                            };
                             setZarPage({ ...zarPage, header });
                             debouncedSave("zar-page", { ...zarPage, header });
                           }}
@@ -1506,20 +1598,33 @@ export default function SiteContentPage() {
                   {/* Jobs view settings */}
                   <EditorSection
                     id="zar-jobs"
-                    title={lang === "mn" ? "Ажлын зар тохиргоо" : "Jobs View Settings"}
-                    subtitle={lang === "mn" ? "Ажлын зарын таб болон толгой хэсэг" : "Jobs tab label and custom header"}
+                    title={
+                      lang === "mn"
+                        ? "Ажлын зар тохиргоо"
+                        : "Jobs View Settings"
+                    }
+                    subtitle={
+                      lang === "mn"
+                        ? "Ажлын зарын таб болон толгой хэсэг"
+                        : "Jobs tab label and custom header"
+                    }
                   >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Ажлын зарын табын нэр" : "Jobs Tab Label"}
+                          {lang === "mn"
+                            ? "Ажлын зарын табын нэр"
+                            : "Jobs Tab Label"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.jobsTabLabel ?? ""}
                           placeholder="Ажлын зар"
                           onChange={(e) => {
-                            const next = { ...zarPage, jobsTabLabel: e.target.value };
+                            const next = {
+                              ...zarPage,
+                              jobsTabLabel: e.target.value,
+                            };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
                           }}
@@ -1527,13 +1632,22 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Ажлын зарын дээд шошго (eyebrow)" : "Jobs Eyebrow"}
+                          {lang === "mn"
+                            ? "Ажлын зарын дээд шошго (eyebrow)"
+                            : "Jobs Eyebrow"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.jobsHeader?.eyebrow ?? ""}
                           onChange={(e) => {
-                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), eyebrow: e.target.value };
+                            const jobsHeader = {
+                              ...(zarPage.jobsHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              eyebrow: e.target.value,
+                            };
                             const next = { ...zarPage, jobsHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1548,7 +1662,14 @@ export default function SiteContentPage() {
                           className={scInput}
                           value={zarPage.jobsHeader?.title ?? ""}
                           onChange={(e) => {
-                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), title: e.target.value };
+                            const jobsHeader = {
+                              ...(zarPage.jobsHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              title: e.target.value,
+                            };
                             const next = { ...zarPage, jobsHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1557,13 +1678,22 @@ export default function SiteContentPage() {
                       </div>
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Ажлын зарын танилцуулга" : "Jobs Introduction"}
+                          {lang === "mn"
+                            ? "Ажлын зарын танилцуулга"
+                            : "Jobs Introduction"}
                         </label>
                         <textarea
                           className={scTextarea("min-h-[100px]")}
                           value={zarPage.jobsHeader?.intro ?? ""}
                           onChange={(e) => {
-                            const jobsHeader = { ...(zarPage.jobsHeader ?? { eyebrow: "", title: "", intro: "" }), intro: e.target.value };
+                            const jobsHeader = {
+                              ...(zarPage.jobsHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              intro: e.target.value,
+                            };
                             const next = { ...zarPage, jobsHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1576,20 +1706,33 @@ export default function SiteContentPage() {
                   {/* Sales view settings */}
                   <EditorSection
                     id="zar-sales"
-                    title={lang === "mn" ? "Борлуулалтын зар тохиргоо" : "Sales View Settings"}
-                    subtitle={lang === "mn" ? "Борлуулалтын зарын таб болон толгой хэсэг" : "Sales tab label and custom header"}
+                    title={
+                      lang === "mn"
+                        ? "Борлуулалтын зар тохиргоо"
+                        : "Sales View Settings"
+                    }
+                    subtitle={
+                      lang === "mn"
+                        ? "Борлуулалтын зарын таб болон толгой хэсэг"
+                        : "Sales tab label and custom header"
+                    }
                   >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Борлуулалтын зарын табын нэр" : "Sales Tab Label"}
+                          {lang === "mn"
+                            ? "Борлуулалтын зарын табын нэр"
+                            : "Sales Tab Label"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.salesTabLabel ?? ""}
                           placeholder="Борлуулалтын зар"
                           onChange={(e) => {
-                            const next = { ...zarPage, salesTabLabel: e.target.value };
+                            const next = {
+                              ...zarPage,
+                              salesTabLabel: e.target.value,
+                            };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
                           }}
@@ -1597,13 +1740,22 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Борлуулалтын зарын дээд шошго (eyebrow)" : "Sales Eyebrow"}
+                          {lang === "mn"
+                            ? "Борлуулалтын зарын дээд шошго (eyebrow)"
+                            : "Sales Eyebrow"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.salesHeader?.eyebrow ?? ""}
                           onChange={(e) => {
-                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), eyebrow: e.target.value };
+                            const salesHeader = {
+                              ...(zarPage.salesHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              eyebrow: e.target.value,
+                            };
                             const next = { ...zarPage, salesHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1612,13 +1764,22 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Борлуулалтын зарын гарчиг" : "Sales Title"}
+                          {lang === "mn"
+                            ? "Борлуулалтын зарын гарчиг"
+                            : "Sales Title"}
                         </label>
                         <input
                           className={scInput}
                           value={zarPage.salesHeader?.title ?? ""}
                           onChange={(e) => {
-                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), title: e.target.value };
+                            const salesHeader = {
+                              ...(zarPage.salesHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              title: e.target.value,
+                            };
                             const next = { ...zarPage, salesHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1627,13 +1788,22 @@ export default function SiteContentPage() {
                       </div>
                       <div className="sm:col-span-2">
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          {lang === "mn" ? "Борлуулалтын зарын танилцуулга" : "Sales Introduction"}
+                          {lang === "mn"
+                            ? "Борлуулалтын зарын танилцуулга"
+                            : "Sales Introduction"}
                         </label>
                         <textarea
                           className={scTextarea("min-h-[100px]")}
                           value={zarPage.salesHeader?.intro ?? ""}
                           onChange={(e) => {
-                            const salesHeader = { ...(zarPage.salesHeader ?? { eyebrow: "", title: "", intro: "" }), intro: e.target.value };
+                            const salesHeader = {
+                              ...(zarPage.salesHeader ?? {
+                                eyebrow: "",
+                                title: "",
+                                intro: "",
+                              }),
+                              intro: e.target.value,
+                            };
                             const next = { ...zarPage, salesHeader };
                             setZarPage(next);
                             debouncedSave("zar-page", next);
@@ -1764,7 +1934,10 @@ export default function SiteContentPage() {
                   >
                     <div className="space-y-3">
                       {about.main.stats.map((row, i) => (
-                        <div key={i} className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-3 dark:border-slate-700 dark:bg-slate-900/40">
+                        <div
+                          key={i}
+                          className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-3 dark:border-slate-700 dark:bg-slate-900/40"
+                        >
                           <div className="flex flex-wrap gap-2">
                             <input
                               className={`${scInput} max-w-[140px]`}
@@ -1772,7 +1945,10 @@ export default function SiteContentPage() {
                               value={row.value}
                               onChange={(e) => {
                                 const stats = [...about.main.stats];
-                                stats[i] = { ...stats[i], value: e.target.value };
+                                stats[i] = {
+                                  ...stats[i],
+                                  value: e.target.value,
+                                };
                                 setAbout({
                                   ...about,
                                   main: { ...about.main, stats },
@@ -1785,7 +1961,10 @@ export default function SiteContentPage() {
                               value={row.label}
                               onChange={(e) => {
                                 const stats = [...about.main.stats];
-                                stats[i] = { ...stats[i], label: e.target.value };
+                                stats[i] = {
+                                  ...stats[i],
+                                  label: e.target.value,
+                                };
                                 setAbout({
                                   ...about,
                                   main: { ...about.main, stats },
@@ -1799,7 +1978,10 @@ export default function SiteContentPage() {
                                 value={row.color || "#3b82f6"}
                                 onChange={(e) => {
                                   const stats = [...about.main.stats];
-                                  stats[i] = { ...stats[i], color: e.target.value };
+                                  stats[i] = {
+                                    ...stats[i],
+                                    color: e.target.value,
+                                  };
                                   setAbout({
                                     ...about,
                                     main: { ...about.main, stats },
@@ -1812,7 +1994,10 @@ export default function SiteContentPage() {
                                 value={row.color || ""}
                                 onChange={(e) => {
                                   const stats = [...about.main.stats];
-                                  stats[i] = { ...stats[i], color: e.target.value };
+                                  stats[i] = {
+                                    ...stats[i],
+                                    color: e.target.value,
+                                  };
                                   setAbout({
                                     ...about,
                                     main: { ...about.main, stats },
@@ -1862,7 +2047,12 @@ export default function SiteContentPage() {
                               ...about.main,
                               stats: [
                                 ...about.main.stats,
-                                { value: "", label: "", icon: "", color: "#3b82f6" },
+                                {
+                                  value: "",
+                                  label: "",
+                                  icon: "",
+                                  color: "#3b82f6",
+                                },
                               ],
                             },
                           })
@@ -3069,7 +3259,8 @@ export default function SiteContentPage() {
                       </div>
                       <div>
                         <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                          Хоёрдогч товчны холбоос — шинэ таб нээгдэнэ (хоосон бол доош гүйлгэнэ)
+                          Хоёрдогч товчны холбоос — шинэ таб нээгдэнэ (хоосон
+                          бол доош гүйлгэнэ)
                         </label>
                         <input
                           className={scInput}
@@ -3078,7 +3269,10 @@ export default function SiteContentPage() {
                           onChange={(e) =>
                             setParkEase({
                               ...parkEase,
-                              hero: { ...parkEase.hero, cta2Link: e.target.value },
+                              hero: {
+                                ...parkEase.hero,
+                                cta2Link: e.target.value,
+                              },
                             })
                           }
                         />
@@ -3805,7 +3999,9 @@ export default function SiteContentPage() {
                             </DangerMini>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Дүрс зураг (Icon)</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Дүрс зураг (Icon)
+                            </p>
                             <ImageUploadField
                               value={item.icon || ""}
                               previewFit="contain"
@@ -3820,7 +4016,9 @@ export default function SiteContentPage() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Background зураг</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              Background зураг
+                            </p>
                             <ImageUploadField
                               value={item.image || ""}
                               onChange={(next) => {
@@ -3856,7 +4054,13 @@ export default function SiteContentPage() {
                               ...parkEase.features,
                               items: [
                                 ...parkEase.features.items,
-                                { title: "", desc: "", size: "medium", image: "", icon: "" },
+                                {
+                                  title: "",
+                                  desc: "",
+                                  size: "medium",
+                                  image: "",
+                                  icon: "",
+                                },
                               ],
                             },
                           })
@@ -3884,7 +4088,10 @@ export default function SiteContentPage() {
                           onChange={(e) =>
                             setParkEase({
                               ...parkEase,
-                              bolomjuud: { ...parkEase.bolomjuud, label: e.target.value },
+                              bolomjuud: {
+                                ...parkEase.bolomjuud,
+                                label: e.target.value,
+                              },
                             })
                           }
                         />
@@ -3899,7 +4106,10 @@ export default function SiteContentPage() {
                           onChange={(e) =>
                             setParkEase({
                               ...parkEase,
-                              bolomjuud: { ...parkEase.bolomjuud, title: e.target.value },
+                              bolomjuud: {
+                                ...parkEase.bolomjuud,
+                                title: e.target.value,
+                              },
                             })
                           }
                         />
@@ -3914,7 +4124,10 @@ export default function SiteContentPage() {
                           onChange={(e) =>
                             setParkEase({
                               ...parkEase,
-                              bolomjuud: { ...parkEase.bolomjuud, desc: e.target.value },
+                              bolomjuud: {
+                                ...parkEase.bolomjuud,
+                                desc: e.target.value,
+                              },
                             })
                           }
                         />
@@ -3933,14 +4146,25 @@ export default function SiteContentPage() {
                               value={item.title}
                               onChange={(e) => {
                                 const items = [...parkEase.bolomjuud.items];
-                                items[i] = { ...items[i], title: e.target.value };
-                                setParkEase({ ...parkEase, bolomjuud: { ...parkEase.bolomjuud, items } });
+                                items[i] = {
+                                  ...items[i],
+                                  title: e.target.value,
+                                };
+                                setParkEase({
+                                  ...parkEase,
+                                  bolomjuud: { ...parkEase.bolomjuud, items },
+                                });
                               }}
                             />
                             <DangerMini
                               onClick={() => {
-                                const items = parkEase.bolomjuud.items.filter((_, j) => j !== i);
-                                setParkEase({ ...parkEase, bolomjuud: { ...parkEase.bolomjuud, items } });
+                                const items = parkEase.bolomjuud.items.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setParkEase({
+                                  ...parkEase,
+                                  bolomjuud: { ...parkEase.bolomjuud, items },
+                                });
                               }}
                             >
                               Устгах
@@ -3953,7 +4177,10 @@ export default function SiteContentPage() {
                             onChange={(e) => {
                               const items = [...parkEase.bolomjuud.items];
                               items[i] = { ...items[i], desc: e.target.value };
-                              setParkEase({ ...parkEase, bolomjuud: { ...parkEase.bolomjuud, items } });
+                              setParkEase({
+                                ...parkEase,
+                                bolomjuud: { ...parkEase.bolomjuud, items },
+                              });
                             }}
                           />
                           <ImageUploadField
@@ -3961,7 +4188,10 @@ export default function SiteContentPage() {
                             onChange={(next) => {
                               const items = [...parkEase.bolomjuud.items];
                               items[i] = { ...items[i], image: next };
-                              setParkEase({ ...parkEase, bolomjuud: { ...parkEase.bolomjuud, items } });
+                              setParkEase({
+                                ...parkEase,
+                                bolomjuud: { ...parkEase.bolomjuud, items },
+                              });
                             }}
                           />
                         </div>
@@ -3972,7 +4202,10 @@ export default function SiteContentPage() {
                             ...parkEase,
                             bolomjuud: {
                               ...parkEase.bolomjuud,
-                              items: [...parkEase.bolomjuud.items, { title: "", desc: "", image: "" }],
+                              items: [
+                                ...parkEase.bolomjuud.items,
+                                { title: "", desc: "", image: "" },
+                              ],
                             },
                           })
                         }
@@ -4213,72 +4446,173 @@ export default function SiteContentPage() {
                             />
                           </div>
                           <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
-                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...parkEase.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } }); }} />
+                            <input
+                              type="checkbox"
+                              checked={!!tier.hideButton}
+                              onChange={(e) => {
+                                const tiers = [...parkEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  hideButton: e.target.checked,
+                                };
+                                setParkEase({
+                                  ...parkEase,
+                                  pricing: { ...parkEase.pricing, tiers },
+                                });
+                              }}
+                            />
                             Товч нуух
                           </label>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Товчны холбоос (URL)
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="https://..."
+                              value={tier.buttonUrl || ""}
+                              onChange={(e) => {
+                                const tiers = [...parkEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  buttonUrl: e.target.value,
+                                };
+                                setParkEase({
+                                  ...parkEase,
+                                  pricing: { ...parkEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                          </div>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
                             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                               Хөнгөлөлт
                             </label>
                             <div className="space-y-2">
-                              {(tier.discounts || []).map((disc: any, k: number) => (
-                                <div key={k} className="flex gap-2 items-center">
-                                  <input
-                                    className={`${scInput} text-xs py-1.5`}
-                                    placeholder="6 mth /5% OFF"
-                                    value={disc.label}
-                                    onChange={(e) => {
-                                      const tiers = [...parkEase.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], label: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
-                                    }}
-                                  />
-                                  <input
-                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
-                                    placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
-                                    value={disc.color || ""}
-                                    onChange={(e) => {
-                                      const tiers = [...parkEase.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], color: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
-                                    }}
-                                  />
-                                  <input
-                                    type="color"
-                                    title="Дэвсгэр өнгө"
-                                    value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"}
-                                    onChange={(e) => {
-                                      const tiers = [...parkEase.pricing.tiers];
-                                      const discounts = [...(tiers[i].discounts || [])];
-                                      discounts[k] = { ...discounts[k], color: e.target.value };
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
-                                    }}
-                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
-                                  />
-                                  <DangerMini
-                                    onClick={() => {
-                                      const tiers = [...parkEase.pricing.tiers];
-                                      const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k);
-                                      tiers[i] = { ...tiers[i], discounts };
-                                      setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
-                                    }}
+                              {(tier.discounts || []).map(
+                                (disc: any, k: number) => (
+                                  <div
+                                    key={k}
+                                    className="flex gap-2 items-center"
                                   >
-                                    ✕
-                                  </DangerMini>
-                                </div>
-                              ))}
+                                    <input
+                                      className={`${scInput} text-xs py-1.5`}
+                                      placeholder="6 mth /5% OFF"
+                                      value={disc.label}
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...parkEase.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          label: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setParkEase({
+                                          ...parkEase,
+                                          pricing: {
+                                            ...parkEase.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                      placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                      value={disc.color || ""}
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...parkEase.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setParkEase({
+                                          ...parkEase,
+                                          pricing: {
+                                            ...parkEase.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      type="color"
+                                      title="Дэвсгэр өнгө"
+                                      value={
+                                        disc.color
+                                          ? disc.color.startsWith("#")
+                                            ? disc.color
+                                            : "#" + disc.color
+                                          : "#7c3aed"
+                                      }
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...parkEase.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setParkEase({
+                                          ...parkEase,
+                                          pricing: {
+                                            ...parkEase.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                      className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                    />
+                                    <DangerMini
+                                      onClick={() => {
+                                        const tiers = [
+                                          ...parkEase.pricing.tiers,
+                                        ];
+                                        const discounts = (
+                                          tiers[i].discounts || []
+                                        ).filter((_, l) => l !== k);
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setParkEase({
+                                          ...parkEase,
+                                          pricing: {
+                                            ...parkEase.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    >
+                                      ✕
+                                    </DangerMini>
+                                  </div>
+                                ),
+                              )}
                               <GhostButton
                                 className="text-[10px] py-1"
                                 onClick={() => {
                                   const tiers = [...parkEase.pricing.tiers];
-                                  const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }];
+                                  const discounts = [
+                                    ...(tiers[i].discounts || []),
+                                    { label: "", color: "" },
+                                  ];
                                   tiers[i] = { ...tiers[i], discounts };
-                                  setParkEase({ ...parkEase, pricing: { ...parkEase.pricing, tiers } });
+                                  setParkEase({
+                                    ...parkEase,
+                                    pricing: { ...parkEase.pricing, tiers },
+                                  });
                                 }}
                               >
                                 + Хөнгөлөлт нэмэх
@@ -4313,15 +4647,22 @@ export default function SiteContentPage() {
                   >
                     <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                       <div>
-                        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Нуух</p>
-                        <p className="text-xs text-zinc-400">Идэвхжүүлбэл frontend-д харагдахгүй</p>
+                        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          Нуух
+                        </p>
+                        <p className="text-xs text-zinc-400">
+                          Идэвхжүүлбэл frontend-д харагдахгүй
+                        </p>
                       </div>
                       <button
                         type="button"
                         onClick={() =>
                           setParkEase({
                             ...parkEase,
-                            free: { ...parkEase.free, hidden: !parkEase.free.hidden },
+                            free: {
+                              ...parkEase.free,
+                              hidden: !parkEase.free.hidden,
+                            },
                           })
                         }
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
@@ -4332,7 +4673,9 @@ export default function SiteContentPage() {
                       >
                         <span
                           className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${
-                            parkEase.free.hidden ? "translate-x-5" : "translate-x-0"
+                            parkEase.free.hidden
+                              ? "translate-x-5"
+                              : "translate-x-0"
                           }`}
                         />
                       </button>
@@ -5049,39 +5392,246 @@ export default function SiteContentPage() {
 
                   <EditorSection id="pe-pricing" title="Үнэ тариф">
                     <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                      <input className={scInput} value={posEase.pricing.title} onChange={(e) => setPosEase({ ...posEase, pricing: { ...posEase.pricing, title: e.target.value } })} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Хэсгийн гарчиг
+                      </label>
+                      <input
+                        className={scInput}
+                        value={posEase.pricing.title}
+                        onChange={(e) =>
+                          setPosEase({
+                            ...posEase,
+                            pricing: {
+                              ...posEase.pricing,
+                              title: e.target.value,
+                            },
+                          })
+                        }
+                      />
                     </div>
                     <div className="space-y-4">
                       {posEase.pricing.tiers.map((tier, i) => (
-                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                        <div
+                          key={i}
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
+                        >
                           <div className="flex gap-4">
-                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
-                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
-                            <DangerMini onClick={() => { const tiers = posEase.pricing.tiers.filter((_, j) => j !== i); setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>Устгах</DangerMini>
+                            <input
+                              className={scInput}
+                              placeholder="Багцын нэр"
+                              value={tier.name}
+                              onChange={(e) => {
+                                const tiers = [...posEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  name: e.target.value,
+                                };
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <input
+                              className={scInput}
+                              placeholder="Үнэ"
+                              value={tier.price}
+                              onChange={(e) => {
+                                const tiers = [...posEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  price: e.target.value,
+                                };
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <DangerMini
+                              onClick={() => {
+                                const tiers = posEase.pricing.tiers.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            >
+                              Устгах
+                            </DangerMini>
                           </div>
-                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                          <textarea
+                            className={scTextarea("min-h-[60px]")}
+                            placeholder="Тайлбар"
+                            value={tier.desc}
+                            onChange={(e) => {
+                              const tiers = [...posEase.pricing.tiers];
+                              tiers[i] = { ...tiers[i], desc: e.target.value };
+                              setPosEase({
+                                ...posEase,
+                                pricing: { ...posEase.pricing, tiers },
+                              });
+                            }}
+                          />
                           <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
-                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
+                            <input
+                              type="checkbox"
+                              checked={!!tier.hideButton}
+                              onChange={(e) => {
+                                const tiers = [...posEase.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  hideButton: e.target.checked,
+                                };
+                                setPosEase({
+                                  ...posEase,
+                                  pricing: { ...posEase.pricing, tiers },
+                                });
+                              }}
+                            />
                             Товч нуух
                           </label>
                           <div className="pt-2 border-t border-slate-200">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">Хөнгөлөлт</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2">
+                              Хөнгөлөлт
+                            </p>
                             <div className="space-y-2">
                               {(tier.discounts || []).map((disc, di) => (
-                                <div key={di} className="flex items-center gap-2">
-                                  <input className={scInput} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
-                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #e11d48)" value={disc.color || ""} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} />
-                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#e11d48"} onChange={(e) => { const tiers = [...posEase.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[di] = { ...discounts[di], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
-                                  <DangerMini onClick={() => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], discounts: (tiers[i].discounts || []).filter((_, k) => k !== di) }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>✕</DangerMini>
+                                <div
+                                  key={di}
+                                  className="flex items-center gap-2"
+                                >
+                                  <input
+                                    className={scInput}
+                                    placeholder="6 mth /5% OFF"
+                                    value={disc.label}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        label: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  />
+                                  <input
+                                    className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                    placeholder="Өнгө (Сонголттой, жш: #e11d48)"
+                                    value={disc.color || ""}
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        color: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  />
+                                  <input
+                                    type="color"
+                                    title="Дэвсгэр өнгө"
+                                    value={
+                                      disc.color
+                                        ? disc.color.startsWith("#")
+                                          ? disc.color
+                                          : "#" + disc.color
+                                        : "#e11d48"
+                                    }
+                                    onChange={(e) => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      const discounts = [
+                                        ...(tiers[i].discounts || []),
+                                      ];
+                                      discounts[di] = {
+                                        ...discounts[di],
+                                        color: e.target.value,
+                                      };
+                                      tiers[i] = { ...tiers[i], discounts };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                    className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                  />
+                                  <DangerMini
+                                    onClick={() => {
+                                      const tiers = [...posEase.pricing.tiers];
+                                      tiers[i] = {
+                                        ...tiers[i],
+                                        discounts: (
+                                          tiers[i].discounts || []
+                                        ).filter((_, k) => k !== di),
+                                      };
+                                      setPosEase({
+                                        ...posEase,
+                                        pricing: { ...posEase.pricing, tiers },
+                                      });
+                                    }}
+                                  >
+                                    ✕
+                                  </DangerMini>
                                 </div>
                               ))}
-                              <GhostButton onClick={() => { const tiers = [...posEase.pricing.tiers]; tiers[i] = { ...tiers[i], discounts: [...(tiers[i].discounts || []), { label: "", color: "#e11d48" }] }; setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
+                              <GhostButton
+                                onClick={() => {
+                                  const tiers = [...posEase.pricing.tiers];
+                                  tiers[i] = {
+                                    ...tiers[i],
+                                    discounts: [
+                                      ...(tiers[i].discounts || []),
+                                      { label: "", color: "#e11d48" },
+                                    ],
+                                  };
+                                  setPosEase({
+                                    ...posEase,
+                                    pricing: { ...posEase.pricing, tiers },
+                                  });
+                                }}
+                              >
+                                + Хөнгөлөлт нэмэх
+                              </GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton onClick={() => setPosEase({ ...posEase, pricing: { ...posEase.pricing, tiers: [...posEase.pricing.tiers, { name: "", price: "", desc: "", discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
+                      <GhostButton
+                        onClick={() =>
+                          setPosEase({
+                            ...posEase,
+                            pricing: {
+                              ...posEase.pricing,
+                              tiers: [
+                                ...posEase.pricing.tiers,
+                                {
+                                  name: "",
+                                  price: "",
+                                  desc: "",
+                                  discounts: [],
+                                },
+                              ],
+                            },
+                          })
+                        }
+                      >
+                        + Багц нэмэх
+                      </GhostButton>
                     </div>
                   </EditorSection>
 
@@ -5484,39 +6034,265 @@ export default function SiteContentPage() {
 
                   <EditorSection id="ah-pricing" title="Үнэ тариф">
                     <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                      <input className={scInput} value={amarHome.pricing.title} onChange={(e) => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, title: e.target.value } })} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Хэсгийн гарчиг
+                      </label>
+                      <input
+                        className={scInput}
+                        value={amarHome.pricing.title}
+                        onChange={(e) =>
+                          setAmarHome({
+                            ...amarHome,
+                            pricing: {
+                              ...amarHome.pricing,
+                              title: e.target.value,
+                            },
+                          })
+                        }
+                      />
                     </div>
                     <div className="space-y-4">
                       {amarHome.pricing.tiers.map((tier, i) => (
-                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                        <div
+                          key={i}
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
+                        >
                           <div className="flex gap-4">
-                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
-                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
-                            <DangerMini onClick={() => { const tiers = amarHome.pricing.tiers.filter((_, j) => j !== i); setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>Устгах</DangerMini>
+                            <input
+                              className={scInput}
+                              placeholder="Багцын нэр"
+                              value={tier.name}
+                              onChange={(e) => {
+                                const tiers = [...amarHome.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  name: e.target.value,
+                                };
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <input
+                              className={scInput}
+                              placeholder="Үнэ"
+                              value={tier.price}
+                              onChange={(e) => {
+                                const tiers = [...amarHome.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  price: e.target.value,
+                                };
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <DangerMini
+                              onClick={() => {
+                                const tiers = amarHome.pricing.tiers.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            >
+                              Устгах
+                            </DangerMini>
                           </div>
-                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                          <textarea
+                            className={scTextarea("min-h-[60px]")}
+                            placeholder="Тайлбар"
+                            value={tier.desc}
+                            onChange={(e) => {
+                              const tiers = [...amarHome.pricing.tiers];
+                              tiers[i] = { ...tiers[i], desc: e.target.value };
+                              setAmarHome({
+                                ...amarHome,
+                                pricing: { ...amarHome.pricing, tiers },
+                              });
+                            }}
+                          />
                           <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
-                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
+                            <input
+                              type="checkbox"
+                              checked={!!tier.hideButton}
+                              onChange={(e) => {
+                                const tiers = [...amarHome.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  hideButton: e.target.checked,
+                                };
+                                setAmarHome({
+                                  ...amarHome,
+                                  pricing: { ...amarHome.pricing, tiers },
+                                });
+                              }}
+                            />
                             Товч нуух
                           </label>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт
+                            </label>
                             <div className="space-y-2">
-                              {(tier.discounts || []).map((disc: any, k: number) => (
-                                <div key={k} className="flex gap-2 items-center">
-                                  <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
-                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} />
-                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"} onChange={(e) => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
-                                  <DangerMini onClick={() => { const tiers = [...amarHome.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>✕</DangerMini>
-                                </div>
-                              ))}
-                              <GhostButton className="text-[10px] py-1" onClick={() => { const tiers = [...amarHome.pricing.tiers]; const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }]; tiers[i] = { ...tiers[i], discounts }; setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
+                              {(tier.discounts || []).map(
+                                (disc: any, k: number) => (
+                                  <div
+                                    key={k}
+                                    className="flex gap-2 items-center"
+                                  >
+                                    <input
+                                      className={`${scInput} text-xs py-1.5`}
+                                      placeholder="6 mth /5% OFF"
+                                      value={disc.label}
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...amarHome.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          label: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setAmarHome({
+                                          ...amarHome,
+                                          pricing: {
+                                            ...amarHome.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                      placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                      value={disc.color || ""}
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...amarHome.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setAmarHome({
+                                          ...amarHome,
+                                          pricing: {
+                                            ...amarHome.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      type="color"
+                                      title="Дэвсгэр өнгө"
+                                      value={
+                                        disc.color
+                                          ? disc.color.startsWith("#")
+                                            ? disc.color
+                                            : "#" + disc.color
+                                          : "#7c3aed"
+                                      }
+                                      onChange={(e) => {
+                                        const tiers = [
+                                          ...amarHome.pricing.tiers,
+                                        ];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setAmarHome({
+                                          ...amarHome,
+                                          pricing: {
+                                            ...amarHome.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                      className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                    />
+                                    <DangerMini
+                                      onClick={() => {
+                                        const tiers = [
+                                          ...amarHome.pricing.tiers,
+                                        ];
+                                        const discounts = (
+                                          tiers[i].discounts || []
+                                        ).filter((_, l) => l !== k);
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setAmarHome({
+                                          ...amarHome,
+                                          pricing: {
+                                            ...amarHome.pricing,
+                                            tiers,
+                                          },
+                                        });
+                                      }}
+                                    >
+                                      ✕
+                                    </DangerMini>
+                                  </div>
+                                ),
+                              )}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...amarHome.pricing.tiers];
+                                  const discounts = [
+                                    ...(tiers[i].discounts || []),
+                                    { label: "", color: "" },
+                                  ];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setAmarHome({
+                                    ...amarHome,
+                                    pricing: { ...amarHome.pricing, tiers },
+                                  });
+                                }}
+                              >
+                                + Хөнгөлөлт нэмэх
+                              </GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton onClick={() => setAmarHome({ ...amarHome, pricing: { ...amarHome.pricing, tiers: [...amarHome.pricing.tiers, { name: "", price: "", desc: "", discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
+                      <GhostButton
+                        onClick={() =>
+                          setAmarHome({
+                            ...amarHome,
+                            pricing: {
+                              ...amarHome.pricing,
+                              tiers: [
+                                ...amarHome.pricing.tiers,
+                                {
+                                  name: "",
+                                  price: "",
+                                  desc: "",
+                                  discounts: [],
+                                },
+                              ],
+                            },
+                          })
+                        }
+                      >
+                        + Багц нэмэх
+                      </GhostButton>
                     </div>
                   </EditorSection>
 
@@ -6351,39 +7127,245 @@ export default function SiteContentPage() {
 
                   <EditorSection id="re-pricing" title="Үнэ тариф">
                     <div className="mb-6">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Хэсгийн гарчиг</label>
-                      <input className={scInput} value={rently.pricing.title} onChange={(e) => setRently({ ...rently, pricing: { ...rently.pricing, title: e.target.value } })} />
+                      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Хэсгийн гарчиг
+                      </label>
+                      <input
+                        className={scInput}
+                        value={rently.pricing.title}
+                        onChange={(e) =>
+                          setRently({
+                            ...rently,
+                            pricing: {
+                              ...rently.pricing,
+                              title: e.target.value,
+                            },
+                          })
+                        }
+                      />
                     </div>
                     <div className="space-y-4">
                       {rently.pricing.tiers.map((tier, i) => (
-                        <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3">
+                        <div
+                          key={i}
+                          className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/40 space-y-3"
+                        >
                           <div className="flex gap-4">
-                            <input className={scInput} placeholder="Багцын нэр" value={tier.name} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], name: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
-                            <input className={scInput} placeholder="Үнэ" value={tier.price} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], price: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
-                            <DangerMini onClick={() => { const tiers = rently.pricing.tiers.filter((_, j) => j !== i); setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>Устгах</DangerMini>
+                            <input
+                              className={scInput}
+                              placeholder="Багцын нэр"
+                              value={tier.name}
+                              onChange={(e) => {
+                                const tiers = [...rently.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  name: e.target.value,
+                                };
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <input
+                              className={scInput}
+                              placeholder="Үнэ"
+                              value={tier.price}
+                              onChange={(e) => {
+                                const tiers = [...rently.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  price: e.target.value,
+                                };
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            />
+                            <DangerMini
+                              onClick={() => {
+                                const tiers = rently.pricing.tiers.filter(
+                                  (_, j) => j !== i,
+                                );
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            >
+                              Устгах
+                            </DangerMini>
                           </div>
-                          <textarea className={scTextarea("min-h-[60px]")} placeholder="Тайлбар" value={tier.desc} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], desc: e.target.value }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                          <textarea
+                            className={scTextarea("min-h-[60px]")}
+                            placeholder="Тайлбар"
+                            value={tier.desc}
+                            onChange={(e) => {
+                              const tiers = [...rently.pricing.tiers];
+                              tiers[i] = { ...tiers[i], desc: e.target.value };
+                              setRently({
+                                ...rently,
+                                pricing: { ...rently.pricing, tiers },
+                              });
+                            }}
+                          />
                           <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
-                            <input type="checkbox" checked={!!tier.hideButton} onChange={(e) => { const tiers = [...rently.pricing.tiers]; tiers[i] = { ...tiers[i], hideButton: e.target.checked }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
+                            <input
+                              type="checkbox"
+                              checked={!!tier.hideButton}
+                              onChange={(e) => {
+                                const tiers = [...rently.pricing.tiers];
+                                tiers[i] = {
+                                  ...tiers[i],
+                                  hideButton: e.target.checked,
+                                };
+                                setRently({
+                                  ...rently,
+                                  pricing: { ...rently.pricing, tiers },
+                                });
+                              }}
+                            />
                             Товч нуух
                           </label>
                           <div className="space-y-2 pl-4 border-l-2 border-indigo-100 dark:border-indigo-950">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Хөнгөлөлт</label>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                              Хөнгөлөлт
+                            </label>
                             <div className="space-y-2">
-                              {(tier.discounts || []).map((disc: any, k: number) => (
-                                <div key={k} className="flex gap-2 items-center">
-                                  <input className={`${scInput} text-xs py-1.5`} placeholder="6 mth /5% OFF" value={disc.label} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], label: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
-                                  <input className={`${scInput} text-xs py-1.5 max-w-[120px]`} placeholder="Өнгө (Сонголттой, жш: #7c3aed)" value={disc.color || ""} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} />
-                                  <input type="color" title="Дэвсгэр өнгө" value={disc.color ? (disc.color.startsWith("#") ? disc.color : "#" + disc.color) : "#7c3aed"} onChange={(e) => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || [])]; discounts[k] = { ...discounts[k], color: e.target.value }; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }} className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0" />
-                                  <DangerMini onClick={() => { const tiers = [...rently.pricing.tiers]; const discounts = (tiers[i].discounts || []).filter((_, l) => l !== k); tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>✕</DangerMini>
-                                </div>
-                              ))}
-                              <GhostButton className="text-[10px] py-1" onClick={() => { const tiers = [...rently.pricing.tiers]; const discounts = [...(tiers[i].discounts || []), { label: "", color: "" }]; tiers[i] = { ...tiers[i], discounts }; setRently({ ...rently, pricing: { ...rently.pricing, tiers } }); }}>+ Хөнгөлөлт нэмэх</GhostButton>
+                              {(tier.discounts || []).map(
+                                (disc: any, k: number) => (
+                                  <div
+                                    key={k}
+                                    className="flex gap-2 items-center"
+                                  >
+                                    <input
+                                      className={`${scInput} text-xs py-1.5`}
+                                      placeholder="6 mth /5% OFF"
+                                      value={disc.label}
+                                      onChange={(e) => {
+                                        const tiers = [...rently.pricing.tiers];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          label: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setRently({
+                                          ...rently,
+                                          pricing: { ...rently.pricing, tiers },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      className={`${scInput} text-xs py-1.5 max-w-[120px]`}
+                                      placeholder="Өнгө (Сонголттой, жш: #7c3aed)"
+                                      value={disc.color || ""}
+                                      onChange={(e) => {
+                                        const tiers = [...rently.pricing.tiers];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setRently({
+                                          ...rently,
+                                          pricing: { ...rently.pricing, tiers },
+                                        });
+                                      }}
+                                    />
+                                    <input
+                                      type="color"
+                                      title="Дэвсгэр өнгө"
+                                      value={
+                                        disc.color
+                                          ? disc.color.startsWith("#")
+                                            ? disc.color
+                                            : "#" + disc.color
+                                          : "#7c3aed"
+                                      }
+                                      onChange={(e) => {
+                                        const tiers = [...rently.pricing.tiers];
+                                        const discounts = [
+                                          ...(tiers[i].discounts || []),
+                                        ];
+                                        discounts[k] = {
+                                          ...discounts[k],
+                                          color: e.target.value,
+                                        };
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setRently({
+                                          ...rently,
+                                          pricing: { ...rently.pricing, tiers },
+                                        });
+                                      }}
+                                      className="w-10 h-9 rounded cursor-pointer border border-slate-200 p-0.5 bg-white shrink-0"
+                                    />
+                                    <DangerMini
+                                      onClick={() => {
+                                        const tiers = [...rently.pricing.tiers];
+                                        const discounts = (
+                                          tiers[i].discounts || []
+                                        ).filter((_, l) => l !== k);
+                                        tiers[i] = { ...tiers[i], discounts };
+                                        setRently({
+                                          ...rently,
+                                          pricing: { ...rently.pricing, tiers },
+                                        });
+                                      }}
+                                    >
+                                      ✕
+                                    </DangerMini>
+                                  </div>
+                                ),
+                              )}
+                              <GhostButton
+                                className="text-[10px] py-1"
+                                onClick={() => {
+                                  const tiers = [...rently.pricing.tiers];
+                                  const discounts = [
+                                    ...(tiers[i].discounts || []),
+                                    { label: "", color: "" },
+                                  ];
+                                  tiers[i] = { ...tiers[i], discounts };
+                                  setRently({
+                                    ...rently,
+                                    pricing: { ...rently.pricing, tiers },
+                                  });
+                                }}
+                              >
+                                + Хөнгөлөлт нэмэх
+                              </GhostButton>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <GhostButton onClick={() => setRently({ ...rently, pricing: { ...rently.pricing, tiers: [...rently.pricing.tiers, { name: "", price: "", desc: "", discounts: [] }] } })}>+ Багц нэмэх</GhostButton>
+                      <GhostButton
+                        onClick={() =>
+                          setRently({
+                            ...rently,
+                            pricing: {
+                              ...rently.pricing,
+                              tiers: [
+                                ...rently.pricing.tiers,
+                                {
+                                  name: "",
+                                  price: "",
+                                  desc: "",
+                                  discounts: [],
+                                },
+                              ],
+                            },
+                          })
+                        }
+                      >
+                        + Багц нэмэх
+                      </GhostButton>
                     </div>
                   </EditorSection>
 
@@ -6404,7 +7386,11 @@ export default function SiteContentPage() {
                             setRently({
                               ...rently,
                               cta: {
-                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                ...(rently.cta || {
+                                  title: "",
+                                  subtitle: "",
+                                  desc: "",
+                                }),
                                 subtitle: e.target.value,
                               },
                             })
@@ -6422,7 +7408,11 @@ export default function SiteContentPage() {
                             setRently({
                               ...rently,
                               cta: {
-                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                ...(rently.cta || {
+                                  title: "",
+                                  subtitle: "",
+                                  desc: "",
+                                }),
                                 title: e.target.value,
                               },
                             })
@@ -6440,7 +7430,11 @@ export default function SiteContentPage() {
                             setRently({
                               ...rently,
                               cta: {
-                                ...(rently.cta || { title: "", subtitle: "", desc: "" }),
+                                ...(rently.cta || {
+                                  title: "",
+                                  subtitle: "",
+                                  desc: "",
+                                }),
                                 desc: e.target.value,
                               },
                             })
