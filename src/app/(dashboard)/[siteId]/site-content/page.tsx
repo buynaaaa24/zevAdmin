@@ -111,6 +111,7 @@ type PropertiesPageState = {
     name: string;
     image: string;
     category: string;
+    bio?: string;
     videoUrl?: string;
     redirectUrl?: string;
   }[];
@@ -159,6 +160,8 @@ type ParkEaseState = {
     cta2: string;
     cta2Link?: string;
     image?: string;
+    videoUrl?: string;
+    videos?: { url: string; bio?: string }[];
     stats: { value: string; label: string }[];
   };
   how: {
@@ -246,7 +249,9 @@ type PosEaseState = {
     secondary: string;
     image?: string;
     tabImage?: string;
+    videoUrl?: string;
     mobileImage?: string;
+    videos?: { url: string; bio?: string }[];
   };
   features: {
     title: string;
@@ -284,6 +289,8 @@ type AmarHomeState = {
     desc: string;
     cta: string;
     image?: string;
+    videoUrl?: string;
+    videos?: { url: string; bio?: string }[];
   };
   features: {
     title: string;
@@ -324,6 +331,8 @@ type RentlyState = {
     secondary: string;
     secondaryUrl?: string;
     image?: string;
+    videoUrl?: string;
+    videos?: { url: string; bio?: string }[];
   };
   features: {
     title: string;
@@ -340,9 +349,22 @@ type RentlyState = {
     desc: string;
     label?: string;
     image?: string;
+    videoUrl?: string;
   };
-  penalties: { title: string; desc: string; label?: string; image?: string };
-  costs: { title: string; desc: string; label?: string; image?: string };
+  penalties: {
+    title: string;
+    desc: string;
+    label?: string;
+    image?: string;
+    videoUrl?: string;
+  };
+  costs: {
+    title: string;
+    desc: string;
+    label?: string;
+    image?: string;
+    videoUrl?: string;
+  };
   pricing: {
     title: string;
     tiers: {
@@ -730,6 +752,7 @@ function normalizeParkEase(v: unknown): ParkEaseState {
       stats: Array.isArray(asRecord(root.hero).stats)
         ? (asRecord(root.hero).stats as any)
         : [],
+      videos: Array.isArray(asRecord(root.hero).videos) ? (asRecord(root.hero).videos as any) : undefined,
     },
     how: {
       ...EMPTY_PARKEASE.how,
@@ -801,7 +824,11 @@ function normalizePosEase(v: unknown): PosEaseState {
   return {
     hideDescription: !!root.hideDescription,
     hideAppLinks: !!root.hideAppLinks,
-    hero: { ...EMPTY_POSEASE.hero, ...asRecord(root.hero) },
+    hero: {
+      ...EMPTY_POSEASE.hero,
+      ...asRecord(root.hero),
+      videos: Array.isArray(asRecord(root.hero).videos) ? (asRecord(root.hero).videos as any) : undefined,
+    },
     features: {
       ...EMPTY_POSEASE.features,
       ...asRecord(root.features),
@@ -835,7 +862,11 @@ function normalizeAmarHome(v: unknown): AmarHomeState {
   return {
     hideDescription: !!root.hideDescription,
     hideAppLinks: !!root.hideAppLinks,
-    hero: { ...EMPTY_AMARHOME.hero, ...asRecord(root.hero) },
+    hero: {
+      ...EMPTY_AMARHOME.hero,
+      ...asRecord(root.hero),
+      videos: Array.isArray(asRecord(root.hero).videos) ? (asRecord(root.hero).videos as any) : undefined,
+    },
     features: {
       ...EMPTY_AMARHOME.features,
       ...asRecord(root.features),
@@ -2963,6 +2994,27 @@ export default function SiteContentPage() {
                                 }}
                               />
                             </div>
+                            <div className="sm:col-span-2">
+                              <label className="text-xs text-zinc-500">
+                                Товч тайлбар (bio)
+                              </label>
+                              <input
+                                className={scInput}
+                                placeholder="e.g. Next.js · TypeScript · Tailwind"
+                                value={item.bio ?? ""}
+                                onChange={(e) => {
+                                  const items = [...propertiesPage.items];
+                                  items[i] = {
+                                    ...items[i],
+                                    bio: e.target.value,
+                                  };
+                                  setPropertiesPage({
+                                    ...propertiesPage,
+                                    items,
+                                  });
+                                }}
+                              />
+                            </div>
                           </div>
                           <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <div className="sm:col-span-3">
@@ -3314,7 +3366,103 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Танилцуулга видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={parkEase.hero.videoUrl || ""}
+                          onChange={(e) =>
+                            setParkEase({
+                              ...parkEase,
+                              hero: {
+                                ...parkEase.hero,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
+
+                    {/* Multiple videos list */}
+                    <div className="mt-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Олон видео (9:16 хэлбэр)
+                        </label>
+                        <button
+                          type="button"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                          onClick={() =>
+                            setParkEase({
+                              ...parkEase,
+                              hero: {
+                                ...parkEase.hero,
+                                videos: [...(parkEase.hero.videos || []), { url: "", bio: "" }],
+                              },
+                            })
+                          }
+                        >
+                          + Видео нэмэх
+                        </button>
+                      </div>
+                      {(parkEase.hero.videos || []).map((v, i) => (
+                        <div key={i} className="rounded-xl border border-zinc-700 p-4 space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-zinc-400 font-medium">Видео {i + 1}</span>
+                            <button
+                              type="button"
+                              className="text-xs px-2 py-1 rounded bg-red-900/40 hover:bg-red-900/70 text-red-400 transition"
+                              onClick={() =>
+                                setParkEase({
+                                  ...parkEase,
+                                  hero: {
+                                    ...parkEase.hero,
+                                    videos: (parkEase.hero.videos || []).filter((_, j) => j !== i),
+                                  },
+                                })
+                              }
+                            >
+                              Устгах
+                            </button>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              URL
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: https://youtube.com/watch?v=..."
+                              value={v.url}
+                              onChange={(e) => {
+                                const videos = [...(parkEase.hero.videos || [])];
+                                videos[i] = { ...videos[i], url: e.target.value };
+                                setParkEase({ ...parkEase, hero: { ...parkEase.hero, videos } });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Тайлбар (bio)
+                            </label>
+                            <textarea
+                              className={scTextarea("min-h-[60px]")}
+                              placeholder="Видеоны товч тайлбар..."
+                              value={v.bio || ""}
+                              onChange={(e) => {
+                                const videos = [...(parkEase.hero.videos || [])];
+                                videos[i] = { ...videos[i], bio: e.target.value };
+                                setParkEase({ ...parkEase, hero: { ...parkEase.hero, videos } });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
                     <div className="mt-4 space-y-2">
                       <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                         Эргэлдэх үгс — гарчгийн доор ээлжлэн харагдах үгс
@@ -5171,6 +5319,101 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Танилцуулга видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={posEase.hero.videoUrl || ""}
+                          onChange={(e) =>
+                            setPosEase({
+                              ...posEase,
+                              hero: {
+                                ...posEase.hero,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Multiple videos list */}
+                    <div className="mt-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Олон видео (9:16 хэлбэр)
+                        </label>
+                        <button
+                          type="button"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                          onClick={() =>
+                            setPosEase({
+                              ...posEase,
+                              hero: {
+                                ...posEase.hero,
+                                videos: [...(posEase.hero.videos || []), { url: "", bio: "" }],
+                              },
+                            })
+                          }
+                        >
+                          + Видео нэмэх
+                        </button>
+                      </div>
+                      {(posEase.hero.videos || []).map((v, i) => (
+                        <div key={i} className="rounded-xl border border-zinc-700 p-4 space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-zinc-400 font-medium">Видео {i + 1}</span>
+                            <button
+                              type="button"
+                              className="text-xs px-2 py-1 rounded bg-red-900/40 hover:bg-red-900/70 text-red-400 transition"
+                              onClick={() =>
+                                setPosEase({
+                                  ...posEase,
+                                  hero: {
+                                    ...posEase.hero,
+                                    videos: (posEase.hero.videos || []).filter((_, j) => j !== i),
+                                  },
+                                })
+                              }
+                            >
+                              Устгах
+                            </button>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              URL
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: https://youtube.com/watch?v=..."
+                              value={v.url}
+                              onChange={(e) => {
+                                const videos = [...(posEase.hero.videos || [])];
+                                videos[i] = { ...videos[i], url: e.target.value };
+                                setPosEase({ ...posEase, hero: { ...posEase.hero, videos } });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Тайлбар (bio)
+                            </label>
+                            <textarea
+                              className={scTextarea("min-h-[60px]")}
+                              placeholder="Видеоны товч тайлбар..."
+                              value={v.bio || ""}
+                              onChange={(e) => {
+                                const videos = [...(posEase.hero.videos || [])];
+                                videos[i] = { ...videos[i], bio: e.target.value };
+                                setPosEase({ ...posEase, hero: { ...posEase.hero, videos } });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </EditorSection>
 
@@ -5855,6 +6098,101 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Танилцуулга видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={amarHome.hero.videoUrl || ""}
+                          onChange={(e) =>
+                            setAmarHome({
+                              ...amarHome,
+                              hero: {
+                                ...amarHome.hero,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Multiple videos list */}
+                    <div className="mt-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Олон видео (9:16 хэлбэр)
+                        </label>
+                        <button
+                          type="button"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                          onClick={() =>
+                            setAmarHome({
+                              ...amarHome,
+                              hero: {
+                                ...amarHome.hero,
+                                videos: [...(amarHome.hero.videos || []), { url: "", bio: "" }],
+                              },
+                            })
+                          }
+                        >
+                          + Видео нэмэх
+                        </button>
+                      </div>
+                      {(amarHome.hero.videos || []).map((v, i) => (
+                        <div key={i} className="rounded-xl border border-zinc-700 p-4 space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-zinc-400 font-medium">Видео {i + 1}</span>
+                            <button
+                              type="button"
+                              className="text-xs px-2 py-1 rounded bg-red-900/40 hover:bg-red-900/70 text-red-400 transition"
+                              onClick={() =>
+                                setAmarHome({
+                                  ...amarHome,
+                                  hero: {
+                                    ...amarHome.hero,
+                                    videos: (amarHome.hero.videos || []).filter((_, j) => j !== i),
+                                  },
+                                })
+                              }
+                            >
+                              Устгах
+                            </button>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              URL
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: https://youtube.com/watch?v=..."
+                              value={v.url}
+                              onChange={(e) => {
+                                const videos = [...(amarHome.hero.videos || [])];
+                                videos[i] = { ...videos[i], url: e.target.value };
+                                setAmarHome({ ...amarHome, hero: { ...amarHome.hero, videos } });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Тайлбар (bio)
+                            </label>
+                            <textarea
+                              className={scTextarea("min-h-[60px]")}
+                              placeholder="Видеоны товч тайлбар..."
+                              value={v.bio || ""}
+                              onChange={(e) => {
+                                const videos = [...(amarHome.hero.videos || [])];
+                                videos[i] = { ...videos[i], bio: e.target.value };
+                                setAmarHome({ ...amarHome, hero: { ...amarHome.hero, videos } });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </EditorSection>
 
@@ -6877,6 +7215,101 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Танилцуулга видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={rently.hero.videoUrl || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              hero: {
+                                ...rently.hero,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    {/* Multiple videos list */}
+                    <div className="mt-6 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Олон видео (9:16 хэлбэр)
+                        </label>
+                        <button
+                          type="button"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
+                          onClick={() =>
+                            setRently({
+                              ...rently,
+                              hero: {
+                                ...rently.hero,
+                                videos: [...(rently.hero.videos || []), { url: "", bio: "" }],
+                              },
+                            })
+                          }
+                        >
+                          + Видео нэмэх
+                        </button>
+                      </div>
+                      {(rently.hero.videos || []).map((v, i) => (
+                        <div key={i} className="rounded-xl border border-zinc-700 p-4 space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-zinc-400 font-medium">Видео {i + 1}</span>
+                            <button
+                              type="button"
+                              className="text-xs px-2 py-1 rounded bg-red-900/40 hover:bg-red-900/70 text-red-400 transition"
+                              onClick={() =>
+                                setRently({
+                                  ...rently,
+                                  hero: {
+                                    ...rently.hero,
+                                    videos: (rently.hero.videos || []).filter((_, j) => j !== i),
+                                  },
+                                })
+                              }
+                            >
+                              Устгах
+                            </button>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              URL
+                            </label>
+                            <input
+                              className={scInput}
+                              placeholder="жш: https://youtube.com/watch?v=..."
+                              value={v.url}
+                              onChange={(e) => {
+                                const videos = [...(rently.hero.videos || [])];
+                                videos[i] = { ...videos[i], url: e.target.value };
+                                setRently({ ...rently, hero: { ...rently.hero, videos } });
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                              Тайлбар (bio)
+                            </label>
+                            <textarea
+                              className={scTextarea("min-h-[60px]")}
+                              placeholder="Видеоны товч тайлбар..."
+                              value={v.bio || ""}
+                              onChange={(e) => {
+                                const videos = [...(rently.hero.videos || [])];
+                                videos[i] = { ...videos[i], bio: e.target.value };
+                                setRently({ ...rently, hero: { ...rently.hero, videos } });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </EditorSection>
 
@@ -7100,6 +7533,25 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={rently.notifications.videoUrl || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              notifications: {
+                                ...rently.notifications,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -7180,6 +7632,25 @@ export default function SiteContentPage() {
                           }
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={rently.penalties.videoUrl || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              penalties: {
+                                ...rently.penalties,
+                                videoUrl: e.target.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </EditorSection>
 
@@ -7249,6 +7720,25 @@ export default function SiteContentPage() {
                               costs: {
                                 ...rently.costs,
                                 image: next,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                          Видео URL (YouTube эсвэл шууд)
+                        </label>
+                        <input
+                          className={scInput}
+                          placeholder="жш: https://youtube.com/watch?v=..."
+                          value={rently.costs.videoUrl || ""}
+                          onChange={(e) =>
+                            setRently({
+                              ...rently,
+                              costs: {
+                                ...rently.costs,
+                                videoUrl: e.target.value,
                               },
                             })
                           }
